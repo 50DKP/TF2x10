@@ -1,0 +1,21 @@
+"Updater"
+{
+	"Information"
+	{
+		"Version"
+		{
+			"Latest"	"37"
+			"Previous"	"0.37"
+		}
+		
+		"Notes"	"Changes from 0.37 to 37:"
+		"Notes" "- Moved to using Bitbucket"
+	}
+	
+	"Files"
+	{
+		"Plugin"	"Path_SM/configs/x10.default.txt"
+		"Plugin"	"Path_SM/configs/x10.vshff2.txt"
+		"Plugin"	"Path_SM/plugins/tf2x10.smx"
+	}
+}

@@ -1,0 +1,951 @@
+#pragma semicolon 1
+
+// ======= Extensions =========
+
+#include <sourcemod>
+#include <sdktools>
+#include <sdkhooks>
+#include <tf2>
+#include <tf2_stocks>
+#include <tf2items>
+#include <tf2attributes>
+#undef REQUIRE_PLUGIN
+#tryinclude <updater>
+#tryinclude <freak_fortress_2>
+#tryinclude <saxtonhale>
+#define REQUIRE_PLUGIN
+#undef REQUIRE_EXTENSIONS
+#tryinclude <steamtools>
+#define REQUIRE_EXTENSIONS
+
+// ======== About =============
+
+#define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
+#define PLUGIN_AUTHOR	"Isatis, InvisGhost"
+#define PLUGIN_VERSION	"37"
+#define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
+#define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
+
+//========= Variables =========
+
+//Where to update from
+#define UPDATE_URL	"http://isatis.me/x10/updater.txt"
+
+new Handle:g_hSdkEquipWearable = INVALID_HANDLE; //For 10 Razorbacks stuff
+new Handle:g_hItemInfoTrie = INVALID_HANDLE; // Item Info Trie
+new Handle:g_hHudText = INVALID_HANDLE; //Caber/Razorback Remaining
+new bool:g_bIsEating[MAXPLAYERS + 1] = false; //is eating dalokoh's/fishcake
+new bool:g_bHasCaber[MAXPLAYERS + 1] = false; //does demoman have a caber?
+new bool:g_bTakesHeads[MAXPLAYERS + 1] = false; //can take heads (lowers processing on OnGameFrame)
+new bool:steamtools = false; //SteamTools to change description
+new bool:vshMode, bool:ff2Mode = false; //checks against saxton hale/ff2
+new g_iRazorbackCount[MAXPLAYERS + 1] = 10; //Number of Razorbacks for Sniper
+new g_iCabers[MAXPLAYERS + 1] = 10; //Number of Cabers for Demoman
+new _medPackTraceFilteredEnt = -1; //Candycane full Medipack spawning
+
+//========= Cvars/Handles ============
+
+new bool:enabled = true;
+new bool:gameDesc = true;
+new bool:includeBots = false;
+new bool:headScales = false;
+new Float:headScalesCap = 6.0;
+new healthCap = 2000;
+new blackBoxHealthCap = 2000;
+new Float:fishSlapAngle = 120.0;
+new candyCaneMedPackType = 2;
+new maxSpyHealth = 185;
+new spyKunaiHealth = 1800;
+new heavyDalokohOverheal = 500;
+new String:selectedMod[16] = "default";
+
+new Handle:cvarEnabled;
+new Handle:cvarGameDesc;
+new Handle:cvarAutoUpdate;
+new Handle:cvarHeadScales;
+new Handle:cvarHeadScalesCap;
+new Handle:cvarHealthCap;
+new Handle:cvarBlackBoxHealthCap;
+new Handle:cvarFishSlapAngle;
+new Handle:cvarCandyCaneMedPackType;
+new Handle:cvarMaxSpyHealth;
+new Handle:cvarSpyKunaiHealth;
+new Handle:cvarHeavyDalokohOverheal;
+new Handle:cvarIncludeBots;
+new Handle:fnGetMaxHealth; //thx psychonic
+
+public Plugin:myinfo =
+{
+	name = PLUGIN_NAME,
+	author = PLUGIN_AUTHOR,
+	description = PLUGIN_DESCRIPTION,
+	version = PLUGIN_VERSION,
+	url = PLUGIN_CONTACT
+}
+
+//===== Primary Functions =====
+
+public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
+{
+	decl String:gameDir[8];
+	GetGameFolderName(gameDir, sizeof(gameDir));
+	
+	if(!StrEqual(gameDir, "tf") && !StrEqual(gameDir, "tf_beta"))
+	{
+		Format(error, err_max, "This plugin runs on Team Fortress 2, hence why it's TF2x10!");
+		return APLRes_Failure;
+	}
+	
+	MarkNativeAsOptional("Steam_SetGameDescription");
+	MarkNativeAsOptional("VSH_GetSaxtonHaleUserId");
+	MarkNativeAsOptional("FF2_GetBossUserId");
+	return APLRes_Success;
+}
+
+public OnPluginStart()
+{
+	g_hHudText = CreateHudSynchronizer();
+	g_hItemInfoTrie = CreateTrie();
+	
+	new Handle:hConf = LoadGameConfigFile("sdkhooks.games");
+	if(hConf == INVALID_HANDLE)
+		SetFailState("Cannot find sdkhooks.games gamedata.");
+
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hConf, SDKConf_Virtual, "GetMaxHealth");
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	fnGetMaxHealth = EndPrepSDKCall();
+	CloseHandle(hConf);
+
+	if(fnGetMaxHealth == INVALID_HANDLE)
+		SetFailState("Failed to set up GetMaxHealth sdkcall. Try updating SourceMod?");
+	
+	hConf = LoadGameConfigFile("tf2items.randomizer");
+	if(hConf == INVALID_HANDLE)
+		SetFailState("Cannot find tf2items.randomizer gamedata, get the file from [TF2Items] GiveWeapon.");
+	
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(hConf, SDKConf_Virtual, "CTFPlayer::EquipWearable");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	g_hSdkEquipWearable = EndPrepSDKCall();
+	CloseHandle(hConf);
+	
+	if(g_hSdkEquipWearable == INVALID_HANDLE)
+		SetFailState("Failed to set up EquipWearable sdkcall.");
+	
+	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
+	RegAdminCmd("sm_tf2x10_loadmod", Command_LoadMod, ADMFLAG_GENERIC);
+	
+	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	
+	cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable. Needs SteamTools.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells updater.smx to automatically update this plugin. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarHeadScales = CreateConVar("tf2x10_headscales", "0", "Enable Resize Heads. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarHeadScalesCap = CreateConVar("tf2x10_headscalescap", "6.0", "Max Head Scale. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 100.0);
+	cvarHealthCap = CreateConVar("tf2x10_healthcap", "2000", "The max health a player can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
+	cvarBlackBoxHealthCap = CreateConVar("tf2x10_blackboxhealthcap", "2000", "The max health a soldier can have with the black box. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
+	cvarFishSlapAngle = CreateConVar("tf2x10_fishslapangle", "120", "Fish slap rotation angle. Change is instant so 360 is unnoticible.", FCVAR_PLUGIN);
+	cvarCandyCaneMedPackType = CreateConVar("tf2x10_candycanemedpacktype", "2.0", "The type of medpack that is dropped from killing someone while having a candy cane. -1 to disable, 0 small, 1 medium, 2 full.", FCVAR_PLUGIN, true, -1.0, true, 2.0);
+	cvarMaxSpyHealth = CreateConVar("tf2x10_maxspyhealth", "185", "Max health a spy can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 1000.0);
+	cvarSpyKunaiHealth = CreateConVar("tf2x10_spykunaihealth", "1800", "Health a spy gains when backstabbing with the kunai. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 1000.0);
+	cvarHeavyDalokohOverheal = CreateConVar("tf2x10_dalokohhealth", "500", "Health a Heavy gets after eating a Dalokoh's/Fishcake. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
+
+	HookConVarChange(cvarEnabled, CVarChange);
+	HookConVarChange(cvarGameDesc, CVarChange);
+	HookConVarChange(cvarIncludeBots, CVarChange);
+	HookConVarChange(cvarHeadScales, CVarChange);
+	HookConVarChange(cvarHeadScalesCap, CVarChange);
+	HookConVarChange(cvarHealthCap, CVarChange);
+	HookConVarChange(cvarBlackBoxHealthCap, CVarChange);
+	HookConVarChange(cvarFishSlapAngle, CVarChange);
+	HookConVarChange(cvarCandyCaneMedPackType, CVarChange);
+	HookConVarChange(cvarMaxSpyHealth, CVarChange);
+	HookConVarChange(cvarSpyKunaiHealth, CVarChange);
+	HookConVarChange(cvarHeavyDalokohOverheal, CVarChange);
+		
+	AutoExecConfig(true, "plugin.tf2x10");
+
+	HookEvent("player_death", Event_PlayerDeath,  EventHookMode_Post);
+	HookEvent("post_inventory_application", Event_PostInventoryApplication, EventHookMode_Post);
+	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), Event_PlayerShieldBlocked); 
+	HookEvent("teamplay_win_panel", Event_RoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("teamplay_restart_round", Event_RoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("arena_win_panel", Event_RoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("round_end", Event_RoundEnd, EventHookMode_PostNoCopy);
+	
+	steamtools = LibraryExists("SteamTools");
+	ff2Mode = LibraryExists("freak_fortress_2");
+	vshMode = LibraryExists("saxtonhale");
+
+	for(new i=1;i<=MaxClients;i++)
+	{
+        if(IsClientInGame(i))
+		{
+			ResetVariables(i);
+			UpdateVariables(i);
+		}
+    }
+	
+	if(LibraryExists("updater") && GetConVarBool(cvarAutoUpdate) == true)
+		Updater_AddPlugin(UPDATE_URL);
+
+	new loaded = LoadFileIntoTrie("default", "tf2x10_base_items");
+	if(loaded == 1)
+		CreateTimer(330.0, Timer_Ads, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	else if(loaded == -1)
+		SetFailState("Could not find the file x10.default.txt. Aborting.");
+	else if(loaded == -2)
+		SetFailState("Text file found, but it is the wrong one. Aborting.");
+	
+}
+
+public Action:Timer_Ads(Handle:hTimer)
+{
+	if(!enabled)
+		return Plugin_Continue;
+	
+	PrintToChatAll("\x05[TF2x10]\x01 Multiply By 10 mod by \x05UltiMario\x01 and \x05Mr. Blue\x01, coding done by \x05Isatis\x01 and \x05InvisGhost\x01. Like playing x10? Check out the group for more game mods x10:");
+	PrintToChatAll("\x05http://www.steamcommunity.com/groups/tf2x10\x01");
+	return Plugin_Continue;
+}
+
+public Action:Command_Recache(client, args)
+{
+	if(enabled && LoadFileIntoTrie("default", "tf2x10_base_items") == 1)
+		ReplyToCommand(client, "[TF2x10] Weapons recached.");
+
+	return Plugin_Handled;
+}
+
+public Action:Command_LoadMod(client, args)
+{
+	if(!enabled)
+		return Plugin_Handled;
+	
+	if(args != 1)
+	{
+		ReplyToCommand(client, "[TF2x10] Please specify a mod. Usage: sm_tf2x10_loadmod <modname>");
+		return Plugin_Handled;
+	}
+	
+	new i = 0;
+	GetCmdArg(1, selectedMod, sizeof(selectedMod));
+	
+	if(!StrEqual(selectedMod, "default") && !GetTrieValue(g_hItemInfoTrie, selectedMod, i))
+	{
+		new loaded = LoadFileIntoTrie(selectedMod);
+		if(loaded == -1)
+		{
+			ReplyToCommand(client, "[TF2x10] File not found: configs/x10.%s.txt, please try re-checking that it's there.", selectedMod);
+			return Plugin_Handled;
+		}
+		if(loaded == -2)
+		{
+			ReplyToCommand(client, "[TF2x10] Error: please check that the first line of configs/x10.%s.txt is \"%s\".", selectedMod);
+			return Plugin_Handled;
+		}
+	}
+	
+	ReplyToCommand(client, "[TF2x10] Now loading from the configs/x10.%s.txt file.", selectedMod);
+	return Plugin_Handled;
+}
+
+// ====== SourceMod Events ========
+
+public OnLibraryAdded(const String:name[])
+{
+	if (strcmp(name, "SteamTools", false) == 0)
+		steamtools = true;
+	else if (StrEqual(name, "updater") && GetConVarBool(cvarAutoUpdate) == true)
+		Updater_AddPlugin(UPDATE_URL);
+	else if(StrEqual(name, "freak_fortress_2"))
+		ff2Mode = true;
+	else if(StrEqual(name, "saxtonhale"))
+		vshMode = true;
+}
+
+public OnLibraryRemoved(const String:name[])
+{
+	if (strcmp(name, "SteamTools", false) == 0)
+		steamtools = false;
+	else if(StrEqual(name, "freak_fortress_2"))
+		ff2Mode = false;
+	else if(StrEqual(name, "saxtonhale"))
+		vshMode = false;
+}
+
+public OnMapStart()
+{
+	if (enabled && steamtools && gameDesc)
+	{
+		decl String:locDesc[16];
+		Format(locDesc, sizeof(locDesc), "TF2x10 r%s", PLUGIN_VERSION);
+		Steam_SetGameDescription(locDesc);
+	}
+}
+
+public OnMapEnd()
+{
+	if (steamtools && gameDesc)
+	{
+		decl String:locDesc[16];
+		Format(locDesc, sizeof(locDesc), "Team Fortress");
+		Steam_SetGameDescription(locDesc);
+	}
+}
+
+public OnClientPutInServer(client)
+{
+	if(enabled)
+	{
+		ResetVariables(client);
+	}
+	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+	SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+}
+
+public OnClientDisconnect(client)
+{
+	if(enabled)
+	{
+		ResetVariables(client);
+	}
+	SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+	SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+}
+
+// ====== CVar Changing ========
+
+public CVarChange(Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	enabled = GetConVarBool(cvarEnabled);
+	gameDesc = GetConVarBool(cvarGameDesc);
+	includeBots = GetConVarBool(cvarIncludeBots);
+	headScales = GetConVarBool(cvarHeadScales);
+	headScalesCap = GetConVarFloat(cvarHeadScalesCap);
+	healthCap = GetConVarInt(cvarHealthCap);
+	blackBoxHealthCap = GetConVarInt(cvarBlackBoxHealthCap);
+	fishSlapAngle = GetConVarFloat(cvarFishSlapAngle);
+	candyCaneMedPackType = GetConVarInt(cvarCandyCaneMedPackType);
+	maxSpyHealth = GetConVarInt(cvarMaxSpyHealth);
+	spyKunaiHealth = GetConVarInt(cvarSpyKunaiHealth);
+	heavyDalokohOverheal = GetConVarInt(cvarHeavyDalokohOverheal);
+}
+
+// ======= Event Hooks ===========
+
+public OnGameFrame()
+{
+	for(new client=1; client <= MaxClients; client++)
+	{
+		if(headScales && IsValidClient(client) && IsPlayerAlive(client) && g_bTakesHeads[client])
+		{
+			new Float:playerHeads = 1.0 + (TF2_GetCTFPlayerInfo(client, "m_iDecapitations") / 4.0);
+			
+			if(playerHeads <= headScalesCap)
+				SetEntPropFloat(client, Prop_Send, "m_flHeadScale", playerHeads);
+			else
+				SetEntPropFloat(client, Prop_Send, "m_flHeadScale", headScalesCap);
+		}
+	}
+}
+
+public Action:Event_RoundEnd(Handle:event,const String:name[],bool:dontBroadcast)
+{
+	if(!enabled)
+		return Plugin_Continue;
+	
+	for(new i=1;i<=MaxClients;i++)
+	{
+		ResetVariables(i);
+    }
+	return Plugin_Continue;
+}
+
+public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
+{
+	if (!enabled)
+		return Plugin_Continue;
+	
+	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+	new attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	new attackerWep = GetActiveWeaponID(attacker);
+	new customKill = GetEventInt(event, "customkill");
+
+	if (candyCaneMedPackType != -1 && attackerWep == 317)
+	{
+		TF2_SpawnMedipack(client, candyCaneMedPackType, false);
+	}
+	else if (spyKunaiHealth != -1 && attackerWep == 356 && customKill == TF_CUSTOM_BACKSTAB)
+	{
+		TF2_SetHealth(attacker, spyKunaiHealth);
+	}
+
+	ResetVariables(client);
+	
+	return Plugin_Continue;
+}
+
+public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damagetype, &weapon, Float:damageForce[3], Float:damagePosition[3], damagecustom)
+{
+	if (enabled && damagecustom == TF_CUSTOM_BOOTS_STOMP) 
+	{
+		damage *= 10;
+		return Plugin_Changed;
+	}
+				
+	return Plugin_Continue;
+}
+
+public OnTakeDamagePost(client, attacker, inflictor, Float:damage, damagetype)
+{
+	if (!enabled || !IsValidClient(client) || !IsValidClient(attacker))
+		return;
+		
+	new weaponID = GetActiveWeaponID(attacker);
+
+	if ((weaponID == 221 || weaponID == 999) && attacker != client && IsPlayerAlive(client))
+	{
+		decl Float:ang[3];
+		GetClientEyeAngles(client, ang);
+		ang[1] = ang[1] + fishSlapAngle;
+		
+		TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
+	}
+		
+	if(IsPlayerAlive(client) && !ShouldDisableWeapons(client))
+		CheckHealthCaps(client);
+	
+	if(attacker != client && !ShouldDisableWeapons(attacker) && IsPlayerAlive(attacker))
+		CheckHealthCaps(attacker);
+}
+
+public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionIndex, itemLevel, itemQuality, entityIndex)
+{
+	if(!enabled || (includeBots == false && IsFakeClient(client))
+	   || ShouldDisableWeapons(client)
+	   || !isCompatibleItem(classname, itemDefinitionIndex)
+	   || itemDefinitionIndex > 2000 || itemQuality == 5
+	   || itemQuality == 8 || itemQuality == 10)
+		return;
+	
+	new bool:usingdefault = false;
+	new size;
+	decl String:attribName[64];
+	decl String:attribValue[8];
+	decl String:tmpID[32];
+	
+	Format(tmpID, sizeof(tmpID), "%s__%d_size", selectedMod, itemDefinitionIndex);
+	if (!GetTrieValue(g_hItemInfoTrie, tmpID, size))
+	{
+		Format(tmpID, sizeof(tmpID), "default__%d_size", itemDefinitionIndex);
+		if(!GetTrieValue(g_hItemInfoTrie, tmpID, size))
+			return;
+		else
+			usingdefault = true;
+	}
+
+	if(!StrEqual(classname, "tf_weapon_flaregun"))
+		TF2Attrib_RemoveAll(entityIndex);
+
+	for(new i=0; i < size; i++)
+	{
+		if(usingdefault)
+		{
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", "default", itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", "default", itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+		}
+		else
+		{
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", selectedMod, itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", selectedMod, itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+		}
+
+		if(!StrEqual(attribName, "hidden secondary max ammo penalty"))
+		{
+			TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
+		}
+	}
+	
+	//TF2Attrib apparently doesn't affect clip size penalties, so manually checking here.
+	Format(tmpID, sizeof(tmpID), "%s__%d_chkclip1", selectedMod, itemDefinitionIndex);
+	if(GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
+	{
+		new ammoCount = 0;
+		if(itemDefinitionIndex != 19 && itemDefinitionIndex != 206 && itemDefinitionIndex != 1007)
+		{
+			new Float:clipSize = StringToFloat(attribValue);
+			ammoCount = RoundToCeil(float(GetEntProp(entityIndex, Prop_Data, "m_iClip1")) * clipSize);
+		}
+		SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), ammoCount, 4, true);
+	}
+	else
+	{
+		Format(tmpID, sizeof(tmpID), "%s__%d_chkclip2", selectedMod, itemDefinitionIndex);
+		if(GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
+		{
+			SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), StringToInt(attribValue), 4, true);
+		}
+	}
+}
+
+public Action:Event_PostInventoryApplication(Handle:event, const String:name[], bool:dontBroadcast)
+{
+	if (!enabled)
+		return Plugin_Continue;
+	
+	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+	
+	UpdateVariables(client);
+	TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01); //recalc their speed after tf2attrib -- thx sarge
+	
+	return Plugin_Continue;
+}
+
+public Action:Event_PlayerShieldBlocked(UserMsg:msg_id, Handle:bf, const players[], playersNum, bool:reliable, bool:init) 
+{
+	if (!enabled || playersNum < 2)
+		return Plugin_Continue;
+		
+	new victim = players[0];
+	
+	if (g_iRazorbackCount[victim] > 1)
+	{
+		g_iRazorbackCount[victim]--;
+		
+		new loopBreak = 0;
+		new slotEntity = -1;
+		while ((slotEntity = GetPlayerWeaponSlot_Wearable(victim, TFWeaponSlot_Secondary)) != -1 && loopBreak < 20)
+		{
+			RemoveEdict(slotEntity);
+			loopBreak++;
+		}
+		RemovePlayerBack(victim);
+		
+		new Handle:hWeapon = TF2Items_CreateItem(OVERRIDE_CLASSNAME | OVERRIDE_ITEM_DEF | OVERRIDE_ITEM_LEVEL | OVERRIDE_ITEM_QUALITY | OVERRIDE_ATTRIBUTES);
+		TF2Items_SetClassname(hWeapon, "tf_wearable");
+		TF2Items_SetItemIndex(hWeapon, 57);
+		TF2Items_SetLevel(hWeapon, 10);
+		TF2Items_SetQuality(hWeapon, 6);
+		TF2Items_SetAttribute(hWeapon, 0, 52, 1.0);
+		TF2Items_SetAttribute(hWeapon, 1, 292, 5.0);
+		TF2Items_SetNumAttributes(hWeapon, 2);
+		
+		new entity = TF2Items_GiveNamedItem(victim, hWeapon);
+		CloseHandle(hWeapon);
+		SDKCall(g_hSdkEquipWearable, victim, entity);
+	}
+	return Plugin_Continue; 
+}
+
+public Action:Command_Taunt(client, args)
+{
+	if (enabled && (IsValidClient(client) && IsPlayerAlive(client)) &&
+	   (GetActiveWeaponID(client) == 159 ||
+	    GetActiveWeaponID(client) == 433) &&
+		!g_bIsEating[client] && heavyDalokohOverheal >= 50)
+	{
+		CreateTimer(4.1, Timer_Dalokoh, any:client);
+		g_bIsEating[client] = true;
+	}
+	return Plugin_Continue;
+}
+
+public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:angles[3], &weapon) 
+{
+	if (!enabled || !IsValidClient(client) || !IsPlayerAlive(client))
+		return Plugin_Continue;
+	
+	if (g_bHasCaber[client])
+	{
+		new meleeweapon = GetPlayerWeaponSlot(client, 2);
+		new detonated = GetEntProp(meleeweapon, Prop_Send, "m_iDetonated");
+		
+		if (detonated == 0)
+		{
+			SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
+			ShowSyncHudText(client, g_hHudText, "Cabers: %d", g_iCabers[client]);
+		}
+		
+		if (g_iCabers[client] > 1 && detonated == 1)
+		{
+			SetEntProp(meleeweapon, Prop_Send, "m_iDetonated", 0);
+			g_iCabers[client]--;
+		}
+	}
+	
+	if (g_iRazorbackCount[client] > 1)
+	{
+		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
+		ShowSyncHudText(client, g_hHudText, "Razorbacks: %d", g_iRazorbackCount[client]);
+	}
+
+	if ((buttons & IN_ATTACK) && (GetActiveWeaponID(client) == 159 || GetActiveWeaponID(client) == 433) &&
+	    (GetEntityFlags(client) & FL_ONGROUND) && !g_bIsEating[client] && heavyDalokohOverheal >= 50)
+	{
+		CreateTimer(4.1, Timer_Dalokoh, any:client);
+		g_bIsEating[client] = true;
+	}
+	return Plugin_Continue;
+}
+
+public Action:Timer_Dalokoh(Handle:timer, any:client)
+{
+	if (GetClientHealth(client) == SDKCall(fnGetMaxHealth, client) && TF2_IsPlayerInCondition(client, TFCond_Taunting)
+	   && g_bIsEating[client] == true && (GetActiveWeaponID(client) == 159 || GetActiveWeaponID(client) == 433))
+	{
+		TF2_SetHealth(client, (GetClientHealth(client)+heavyDalokohOverheal-50));
+	}
+	g_bIsEating[client] = false;
+}
+
+// ==== Required Libraries ====
+
+stock bool:IsValidClient(client)
+{
+	return client > 0 && client <= MaxClients && IsClientConnected(client)
+	    && !IsFakeClient(client) && IsClientInGame(client)
+		&& !GetEntProp(client, Prop_Send, "m_bIsCoaching")
+		&& !IsClientSourceTV(client) && !IsClientReplay(client);
+}
+
+stock LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
+{
+	decl String:strBuffer[64];
+	decl String:strBuffer2[64];
+	decl String:strBuffer3[64];
+	BuildPath(Path_SM, strBuffer, sizeof(strBuffer), "configs/x10.%s.txt", rawname);
+	decl String:tmpID[32];
+	decl String:finalbasename[32];
+	new i;
+	
+	if(StrEqual(basename, ""))
+		strcopy(finalbasename, sizeof(finalbasename), rawname);
+	else
+		strcopy(finalbasename, sizeof(finalbasename), basename);
+		
+	new Handle:hKeyValues = CreateKeyValues(finalbasename);
+	if(FileToKeyValues(hKeyValues, strBuffer) == true)
+	{
+		KvGetSectionName(hKeyValues, strBuffer, sizeof(strBuffer));
+		if(StrEqual(strBuffer, finalbasename) == true)
+		{
+			if(KvGotoFirstSubKey(hKeyValues))
+			{
+				do {
+					i = 0;
+					
+					KvGetSectionName(hKeyValues, strBuffer, sizeof(strBuffer));
+					KvGotoFirstSubKey(hKeyValues, false);
+					
+					do
+					{
+						KvGetSectionName(hKeyValues, strBuffer2, sizeof(strBuffer2));
+						Format(tmpID, sizeof(tmpID), "%s__%s_%d_name", rawname, strBuffer, i);
+						SetTrieString(g_hItemInfoTrie, tmpID, strBuffer2);
+						
+						KvGetString(hKeyValues, NULL_STRING, strBuffer3, sizeof(strBuffer3));
+						Format(tmpID, sizeof(tmpID), "%s__%s_%d_val", rawname, strBuffer, i);
+						SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
+						
+						if(StrContains(strBuffer2, "clip size p") != -1)
+						{
+							Format(tmpID, sizeof(tmpID), "%s__%s_chkclip1", rawname, strBuffer);
+							SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
+						}
+						else if(StrContains(strBuffer2, "mod max primary clip override") != -1 && !StrEqual(strBuffer3, "-1"))
+						{
+							Format(tmpID, sizeof(tmpID), "%s__%s_chkclip2", rawname, strBuffer);
+							SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
+						}
+						i++;
+					}
+					while(KvGotoNextKey(hKeyValues, false));
+					KvGoBack(hKeyValues);
+					
+					Format(tmpID, sizeof(tmpID), "%s__%s_size", rawname, strBuffer);
+					SetTrieValue(g_hItemInfoTrie, tmpID, i);
+				}
+				while(KvGotoNextKey(hKeyValues));
+				KvGoBack(hKeyValues);
+			
+				SetTrieValue(g_hItemInfoTrie, strBuffer, 1);
+			}
+		}
+		else
+		{
+			return -2;
+		}
+	}
+	else
+	{
+		return -1;
+	}
+	CloseHandle(hKeyValues);
+	
+	return 1;
+}
+
+stock ResetVariables(client)
+{
+	g_iRazorbackCount[client] = 0;
+	g_iCabers[client] = 0;
+	g_bHasCaber[client] = false;
+	g_bTakesHeads[client] = false;
+}
+
+stock UpdateVariables(client)
+{
+	new secndWep = GetPlayerWeaponSlot_Wearable(client, TFWeaponSlot_Secondary);
+	new secndWepID = IsValidEntity(secndWep) ? GetEntProp(secndWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
+	new meleeWep = TF2_GetWeaponSlotID(client, TFWeaponSlot_Melee);
+	
+	g_iRazorbackCount[client] = secndWepID == 57 ? 10 : 0;
+	g_bHasCaber[client] = meleeWep == 307;
+	g_iCabers[client] = g_bHasCaber[client] ? 10 : 0;
+	g_bTakesHeads[client] = meleeWep == 132 || meleeWep == 266 || meleeWep == 482;
+}
+
+stock CheckHealthCaps(client)
+{
+	new currentHealth = GetClientHealth(client);
+	new TFClassType:currentClass = TF2_GetPlayerClass(client);
+	
+	if (blackBoxHealthCap != -1 && TF2_GetWeaponSlotID(client, TFWeaponSlot_Primary) == 228 && currentHealth > blackBoxHealthCap)
+		TF2_SetHealth(client, blackBoxHealthCap);
+			
+	if (maxSpyHealth != -1 && currentClass == TFClass_Spy && TF2_GetWeaponSlotID(client, TFWeaponSlot_Melee) != 356 && currentHealth > maxSpyHealth)
+		TF2_SetHealth(client, maxSpyHealth);
+	
+	if (healthCap != -1 && currentHealth > healthCap)
+		TF2_SetHealth(client, healthCap);
+}
+
+stock bool:IsEntLimitReached()
+{
+	if (enabled)
+	{
+		if (GetEntityCount() >= (GetMaxEntities()-64))
+		{
+			PrintToChatAll("Warning: Entity limit is nearly reached! Please change the map!");
+			LogError("Entity limit is nearly reached: current: %d/max: %d", GetEntityCount(), GetMaxEntities());
+			return true;
+		}
+		else
+			return false;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+stock TF2_GetCTFPlayerInfo(client, const String:prop[])
+{
+	if (!IsValidClient(client)) return 0;
+	
+	new iOffset = FindSendPropInfo("CTFPlayer", prop);
+	return GetEntData(client, iOffset);
+}
+
+stock TF2_SetHealth(client, NewHealth)
+{
+	if (!IsValidClient(client)) return;
+	SetEntProp(client, Prop_Send, "m_iHealth", NewHealth);
+	SetEntProp(client, Prop_Data, "m_iHealth", NewHealth);
+}
+
+stock TF2_GetWeaponSlotID(client, slot)
+{
+	if (!IsValidClient(client)) return 0;
+	new weapon = GetPlayerWeaponSlot(client, slot);
+	
+	if (weapon == -1)
+		return -1;
+	
+	return GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+}
+
+stock TF2_SpawnMedipack(client, type, bool:cmd)
+{
+	if (!IsValidClient(client)) return;
+	new Float:PlayerPosition[3];
+	GetClientAbsOrigin(client, PlayerPosition);
+	decl String:name[32];
+	
+	switch (type)
+	{
+		case 0:
+		{
+			name = "item_healthkit_small";
+		}
+		case 1:
+		{
+			name = "item_healthkit_medium";
+		}
+		case 2:
+		{
+			name = "item_healthkit_full";
+		}
+		default:
+		{
+			return;
+		}
+	}
+	
+	if (PlayerPosition[0] != 0.0 && PlayerPosition[1] != 0.0 && PlayerPosition[2] != 0.0 && IsEntLimitReached() == false)
+	{
+		PlayerPosition[2] += 4;
+		
+		if (cmd)
+		{
+			new Float:PlayerPosEx[3], Float:PlayerAngle[3], Float:PlayerPosAway[3];
+			GetClientEyeAngles(client, PlayerAngle);
+			PlayerPosEx[0] = Cosine((PlayerAngle[1]/180)*FLOAT_PI);
+			PlayerPosEx[1] = Sine((PlayerAngle[1]/180)*FLOAT_PI);
+			PlayerPosEx[2] = 0.0;
+			ScaleVector(PlayerPosEx, 75.0);
+			AddVectors(PlayerPosition, PlayerPosEx, PlayerPosAway);
+
+			_medPackTraceFilteredEnt = client;
+			new Handle:TraceEx = TR_TraceRayFilterEx(PlayerPosition, PlayerPosAway, MASK_SOLID, RayType_EndPoint, MedipackTraceFilter);
+			TR_GetEndPosition(PlayerPosition, TraceEx);
+			CloseHandle(TraceEx);
+		}
+
+		new Float:Direction[3];
+		Direction[0] = PlayerPosition[0];
+		Direction[1] = PlayerPosition[1];
+		Direction[2] = PlayerPosition[2]-1024;
+		new Handle:Trace = TR_TraceRayFilterEx(PlayerPosition, Direction, MASK_SOLID, RayType_EndPoint, MedipackTraceFilter);
+
+		new Float:MediPos[3];
+		TR_GetEndPosition(MediPos, Trace);
+		CloseHandle(Trace);
+		MediPos[2] += 4;
+
+		new Medipack = CreateEntityByName(name);
+		DispatchKeyValue(Medipack, "OnPlayerTouch", "!self,Kill,,0,-1");
+		if (DispatchSpawn(Medipack))
+		{
+			SetEntProp(Medipack, Prop_Send, "m_iTeamNum", 0, 4);
+			TeleportEntity(Medipack, MediPos, NULL_VECTOR, NULL_VECTOR);
+			EmitSoundToAll("items/spawn_item.wav", Medipack, _, _, _, 0.75);
+		}
+	}
+}
+
+public bool:MedipackTraceFilter(ent, contentMask)
+{
+    return (ent != _medPackTraceFilteredEnt);
+}
+
+stock GetActiveWeaponID(client)
+{
+	if (!IsValidClient(client))
+		return -1;
+	
+	new weaponEnt = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if (weaponEnt < 0)
+		return -1;
+	
+	return GetEntProp(weaponEnt, Prop_Send, "m_iItemDefinitionIndex");
+}
+
+stock bool:isCompatibleItem(String:classname[], iItemDefinitionIndex)
+{
+	 return StrContains(classname, "tf_weapon") != -1 ||
+			StrEqual(classname, "saxxy") ||
+			StrEqual(classname, "tf_wearable_demoshield") ||
+			(StrEqual(classname, "tf_wearable") &&
+				(iItemDefinitionIndex == 133 ||
+				 iItemDefinitionIndex == 444 ||
+				 iItemDefinitionIndex == 405 ||
+				 iItemDefinitionIndex == 608 ||
+				 iItemDefinitionIndex == 57 ||
+				 iItemDefinitionIndex == 231 ||
+				 iItemDefinitionIndex == 642));
+}
+
+stock ShouldDisableWeapons(client)
+{
+	//in case vsh/ff2 and other mods are running, disable x10 effects and checks
+	//this list may get extended as I check out more game mods
+	
+	return (ff2Mode && FF2_GetBossTeam() == GetClientTeam(client)) ||
+		   (vshMode && VSH_GetSaxtonHaleUserId() == GetClientUserId(client));
+}
+
+stock GetPlayerWeaponSlot_Wearable(client, slot)
+{
+	new edict = MaxClients+1;
+	if (slot == TFWeaponSlot_Secondary)
+	{
+		while((edict = FindEntityByClassname2(edict, "tf_wearable_demoshield")) != -1)
+		{
+			new idx = GetEntProp(edict, Prop_Send, "m_iItemDefinitionIndex");
+			if ((idx == 131 || idx == 406) && GetEntPropEnt(edict, Prop_Send, "m_hOwnerEntity") == client && !GetEntProp(edict, Prop_Send, "m_bDisguiseWearable"))
+			{
+				return edict;
+			}
+		}
+	}
+	edict = MaxClients+1;
+	while((edict = FindEntityByClassname2(edict, "tf_wearable")) != -1)
+	{
+		decl String:netclass[32];
+		if (GetEntityNetClass(edict, netclass, sizeof(netclass)) && StrEqual(netclass, "CTFWearable"))
+		{
+			new idx = GetEntProp(edict, Prop_Send, "m_iItemDefinitionIndex");
+			if (((slot == TFWeaponSlot_Primary && (idx == 405 || idx == 608)) || (slot == TFWeaponSlot_Secondary && (idx == 57 || idx == 133 || idx == 231 || idx == 444 || idx == 642))) && GetEntPropEnt(edict, Prop_Send, "m_hOwnerEntity") == client && !GetEntProp(edict, Prop_Send, "m_bDisguiseWearable"))
+			{
+				return edict;
+			}
+		}
+	}
+	return -1;
+}
+
+stock FindEntityByClassname2(startEnt, const String:classname[])
+{
+	/* If startEnt isn't valid shifting it back to the nearest valid one */
+	while (startEnt > -1 && !IsValidEntity(startEnt)) startEnt--;
+	return FindEntityByClassname(startEnt, classname);
+}
+
+stock RemovePlayerBack(client)
+{
+	new edict = MaxClients+1;
+	while((edict = FindEntityByClassname2(edict, "tf_wearable")) != -1)
+	{
+		decl String:netclass[32];
+		if (GetEntityNetClass(edict, netclass, sizeof(netclass)) && StrEqual(netclass, "CTFWearable"))
+		{
+			new idx = GetEntProp(edict, Prop_Send, "m_iItemDefinitionIndex");
+			if ((idx == 57 || idx == 133 || idx == 231 || idx == 444 || idx == 642) && GetEntPropEnt(edict, Prop_Send, "m_hOwnerEntity") == client && !GetEntProp(edict, Prop_Send, "m_bDisguiseWearable"))
+			{
+				AcceptEntityInput(edict, "Kill");
+			}
+		}
+	}
+}
+
+stock SetSpeshulAmmo(client, wepslot, newAmmo)
+{
+	if (IsValidClient(client) && IsPlayerAlive(client))
+	{
+		new weapon = GetPlayerWeaponSlot(client, wepslot);
+		if (IsValidEntity(weapon))
+		{
+			new iOffset = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType", 1)*4;
+			new iAmmoTable = FindSendPropInfo("CTFPlayer", "m_iAmmo");
+			SetEntData(client, iAmmoTable+iOffset, newAmmo, 4, true);
+		}
+	}
+}
