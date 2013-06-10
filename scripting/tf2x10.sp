@@ -5,6 +5,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <sdkhooks>
+#include <adminmenu>
 #include <tf2>
 #include <tf2_stocks>
 #include <tf2items>
@@ -22,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"37"
+#define PLUGIN_VERSION	"38"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -31,6 +32,8 @@
 //Where to update from
 #define UPDATE_URL	"http://isatis.me/x10/updater.txt"
 
+//TF2x10-specific variables
+new Handle:g_hTopMenu = INVALID_HANDLE; //Admin Menu Recaching (Mr. Blue)
 new Handle:g_hSdkEquipWearable = INVALID_HANDLE; //For 10 Razorbacks stuff
 new Handle:g_hItemInfoTrie = INVALID_HANDLE; // Item Info Trie
 new Handle:g_hHudText = INVALID_HANDLE; //Caber/Razorback Remaining
@@ -38,10 +41,15 @@ new bool:g_bIsEating[MAXPLAYERS + 1] = false; //is eating dalokoh's/fishcake
 new bool:g_bHasCaber[MAXPLAYERS + 1] = false; //does demoman have a caber?
 new bool:g_bTakesHeads[MAXPLAYERS + 1] = false; //can take heads (lowers processing on OnGameFrame)
 new bool:steamtools = false; //SteamTools to change description
-new bool:vshMode, bool:ff2Mode = false; //checks against saxton hale/ff2
 new g_iRazorbackCount[MAXPLAYERS + 1] = 10; //Number of Razorbacks for Sniper
 new g_iCabers[MAXPLAYERS + 1] = 10; //Number of Cabers for Demoman
 new _medPackTraceFilteredEnt = -1; //Candycane full Medipack spawning
+
+//Mod compatibility variables
+new bool:vshRunning = false; //is VS Saxton Hale running?
+new bool:ff2Running = false; //is Freak Fortress 2 running?
+new bool:rndmRunning = false; //is Randomizer running?
+new bool:hiddenRunning = false; //is The Hidden running?
 
 //========= Cvars/Handles ============
 
@@ -98,7 +106,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 	
 	MarkNativeAsOptional("Steam_SetGameDescription");
 	MarkNativeAsOptional("VSH_GetSaxtonHaleUserId");
-	MarkNativeAsOptional("FF2_GetBossUserId");
+	MarkNativeAsOptional("FF2_GetBossTeam");
 	return APLRes_Success;
 }
 
@@ -108,7 +116,7 @@ public OnPluginStart()
 	g_hItemInfoTrie = CreateTrie();
 	
 	new Handle:hConf = LoadGameConfigFile("sdkhooks.games");
-	if(hConf == INVALID_HANDLE)
+	if (hConf == INVALID_HANDLE)
 		SetFailState("Cannot find sdkhooks.games gamedata.");
 
 	StartPrepSDKCall(SDKCall_Entity);
@@ -117,11 +125,11 @@ public OnPluginStart()
 	fnGetMaxHealth = EndPrepSDKCall();
 	CloseHandle(hConf);
 
-	if(fnGetMaxHealth == INVALID_HANDLE)
+	if (fnGetMaxHealth == INVALID_HANDLE)
 		SetFailState("Failed to set up GetMaxHealth sdkcall. Try updating SourceMod?");
 	
 	hConf = LoadGameConfigFile("tf2items.randomizer");
-	if(hConf == INVALID_HANDLE)
+	if (hConf == INVALID_HANDLE)
 		SetFailState("Cannot find tf2items.randomizer gamedata, get the file from [TF2Items] GiveWeapon.");
 	
 	StartPrepSDKCall(SDKCall_Player);
@@ -130,7 +138,7 @@ public OnPluginStart()
 	g_hSdkEquipWearable = EndPrepSDKCall();
 	CloseHandle(hConf);
 	
-	if(g_hSdkEquipWearable == INVALID_HANDLE)
+	if (g_hSdkEquipWearable == INVALID_HANDLE)
 		SetFailState("Failed to set up EquipWearable sdkcall.");
 	
 	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
@@ -176,34 +184,36 @@ public OnPluginStart()
 	HookEvent("round_end", Event_RoundEnd, EventHookMode_PostNoCopy);
 	
 	steamtools = LibraryExists("SteamTools");
-	ff2Mode = LibraryExists("freak_fortress_2");
-	vshMode = LibraryExists("saxtonhale");
 
 	for(new i=1;i<=MaxClients;i++)
 	{
-        if(IsClientInGame(i))
+        if (IsClientInGame(i))
 		{
 			ResetVariables(i);
 			UpdateVariables(i);
 		}
     }
 	
-	if(LibraryExists("updater") && GetConVarBool(cvarAutoUpdate) == true)
+	if (LibraryExists("updater") && GetConVarBool(cvarAutoUpdate) == true)
 		Updater_AddPlugin(UPDATE_URL);
+	
+	new Handle:topmenu;
+	if (LibraryExists("adminmenu") && ((topmenu = GetAdminTopMenu()) != INVALID_HANDLE))
+		OnAdminMenuReady(topmenu);
 
 	new loaded = LoadFileIntoTrie("default", "tf2x10_base_items");
-	if(loaded == 1)
+	if (loaded == 1)
 		CreateTimer(330.0, Timer_Ads, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-	else if(loaded == -1)
+	else if (loaded == -1)
 		SetFailState("Could not find the file x10.default.txt. Aborting.");
-	else if(loaded == -2)
+	else if (loaded == -2)
 		SetFailState("Text file found, but it is the wrong one. Aborting.");
 	
 }
 
 public Action:Timer_Ads(Handle:hTimer)
 {
-	if(!enabled)
+	if (!enabled)
 		return Plugin_Continue;
 	
 	PrintToChatAll("\x05[TF2x10]\x01 Multiply By 10 mod by \x05UltiMario\x01 and \x05Mr. Blue\x01, coding done by \x05Isatis\x01 and \x05InvisGhost\x01. Like playing x10? Check out the group for more game mods x10:");
@@ -213,18 +223,36 @@ public Action:Timer_Ads(Handle:hTimer)
 
 public Action:Command_Recache(client, args)
 {
-	if(enabled && LoadFileIntoTrie("default", "tf2x10_base_items") == 1)
+	if (enabled && LoadFileIntoTrie("default", "tf2x10_base_items") == 1)
 		ReplyToCommand(client, "[TF2x10] Weapons recached.");
 
 	return Plugin_Handled;
 }
 
+public AdminMenu_Recache(Handle:topmenu,
+						TopMenuAction:action,
+						TopMenuObject:object_id,
+						param,
+						String:buffer[],
+						maxlength)
+{
+	if (action == TopMenuAction_DisplayOption)
+	{
+		Format(buffer, maxlength, "%T", "TF2x10 Recache Weapons", param);
+	}
+	else if (action == TopMenuAction_SelectOption)
+	{
+		if (enabled && LoadFileIntoTrie("default", "tf2x10_base_items") == 1)
+			PrintToChat(param, "[TF2x10] Weapons recached.");
+	}
+}
+
 public Action:Command_LoadMod(client, args)
 {
-	if(!enabled)
+	if (!enabled)
 		return Plugin_Handled;
 	
-	if(args != 1)
+	if (args != 1)
 	{
 		ReplyToCommand(client, "[TF2x10] Please specify a mod. Usage: sm_tf2x10_loadmod <modname>");
 		return Plugin_Handled;
@@ -233,15 +261,15 @@ public Action:Command_LoadMod(client, args)
 	new i = 0;
 	GetCmdArg(1, selectedMod, sizeof(selectedMod));
 	
-	if(!StrEqual(selectedMod, "default") && !GetTrieValue(g_hItemInfoTrie, selectedMod, i))
+	if (!StrEqual(selectedMod, "default") && !GetTrieValue(g_hItemInfoTrie, selectedMod, i))
 	{
 		new loaded = LoadFileIntoTrie(selectedMod);
-		if(loaded == -1)
+		if (loaded == -1)
 		{
 			ReplyToCommand(client, "[TF2x10] File not found: configs/x10.%s.txt, please try re-checking that it's there.", selectedMod);
 			return Plugin_Handled;
 		}
-		if(loaded == -2)
+		if (loaded == -2)
 		{
 			ReplyToCommand(client, "[TF2x10] Error: please check that the first line of configs/x10.%s.txt is \"%s\".", selectedMod);
 			return Plugin_Handled;
@@ -260,45 +288,47 @@ public OnLibraryAdded(const String:name[])
 		steamtools = true;
 	else if (StrEqual(name, "updater") && GetConVarBool(cvarAutoUpdate) == true)
 		Updater_AddPlugin(UPDATE_URL);
-	else if(StrEqual(name, "freak_fortress_2"))
-		ff2Mode = true;
-	else if(StrEqual(name, "saxtonhale"))
-		vshMode = true;
 }
 
 public OnLibraryRemoved(const String:name[])
 {
 	if (strcmp(name, "SteamTools", false) == 0)
 		steamtools = false;
-	else if(StrEqual(name, "freak_fortress_2"))
-		ff2Mode = false;
-	else if(StrEqual(name, "saxtonhale"))
-		vshMode = false;
 }
 
 public OnMapStart()
 {
-	if (enabled && steamtools && gameDesc)
+	if (enabled)
 	{
-		decl String:locDesc[16];
-		Format(locDesc, sizeof(locDesc), "TF2x10 r%s", PLUGIN_VERSION);
-		Steam_SetGameDescription(locDesc);
+		vshRunning = CheckConVar("hale_enabled") == 1;
+		ff2Running = CheckConVar("ff2_enabled") == 1;
+		rndmRunning = CheckConVar("tf2items_rnd_enabled") == 1;
+		hiddenRunning = CheckConVar("sm_hidden_enabled") == 1;
+		
+		if (vshRunning || ff2Running)
+		{
+			strcopy(selectedMod, sizeof(selectedMod), "vshff2");
+			LoadFileIntoTrie("vshff2");
+		}
+		
+		if (steamtools && gameDesc)
+		{
+			decl String:locDesc[16];
+			Format(locDesc, sizeof(locDesc), "TF2x10 (r%s)", PLUGIN_VERSION);
+			Steam_SetGameDescription(locDesc);
+		}
 	}
 }
 
 public OnMapEnd()
 {
-	if (steamtools && gameDesc)
-	{
-		decl String:locDesc[16];
-		Format(locDesc, sizeof(locDesc), "Team Fortress");
-		Steam_SetGameDescription(locDesc);
-	}
+	if (enabled && steamtools && gameDesc)
+		Steam_SetGameDescription("Team Fortress");
 }
 
 public OnClientPutInServer(client)
 {
-	if(enabled)
+	if (enabled)
 	{
 		ResetVariables(client);
 	}
@@ -308,12 +338,31 @@ public OnClientPutInServer(client)
 
 public OnClientDisconnect(client)
 {
-	if(enabled)
+	if (enabled)
 	{
 		ResetVariables(client);
 	}
 	SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+}
+
+public OnAdminMenuReady(Handle:topmenu)
+{
+	if (topmenu == g_hTopMenu)
+		return;
+	
+	g_hTopMenu = topmenu;
+	
+	new TopMenuObject:player_commands = FindTopMenuCategory(g_hTopMenu, ADMINMENU_SERVERCOMMANDS);
+	
+	if (player_commands != INVALID_TOPMENUOBJECT)
+		AddToTopMenu(g_hTopMenu,
+			"sm_tf2x10_recache",
+			TopMenuObject_Item,
+			AdminMenu_Recache,
+			player_commands,
+			"sm_tf2x10_recache",
+			ADMFLAG_GENERIC);
 }
 
 // ====== CVar Changing ========
@@ -340,11 +389,11 @@ public OnGameFrame()
 {
 	for(new client=1; client <= MaxClients; client++)
 	{
-		if(headScales && IsValidClient(client) && IsPlayerAlive(client) && g_bTakesHeads[client])
+		if (headScales && IsValidClient(client) && IsPlayerAlive(client) && g_bTakesHeads[client])
 		{
 			new Float:playerHeads = 1.0 + (TF2_GetCTFPlayerInfo(client, "m_iDecapitations") / 4.0);
 			
-			if(playerHeads <= headScalesCap)
+			if (playerHeads <= headScalesCap)
 				SetEntPropFloat(client, Prop_Send, "m_flHeadScale", playerHeads);
 			else
 				SetEntPropFloat(client, Prop_Send, "m_flHeadScale", headScalesCap);
@@ -354,7 +403,7 @@ public OnGameFrame()
 
 public Action:Event_RoundEnd(Handle:event,const String:name[],bool:dontBroadcast)
 {
-	if(!enabled)
+	if (!enabled)
 		return Plugin_Continue;
 	
 	for(new i=1;i<=MaxClients;i++)
@@ -415,84 +464,72 @@ public OnTakeDamagePost(client, attacker, inflictor, Float:damage, damagetype)
 		TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
 	}
 		
-	if(IsPlayerAlive(client) && !ShouldDisableWeapons(client))
+	if (IsPlayerAlive(client) && !ShouldDisableWeapons(client))
 		CheckHealthCaps(client);
 	
-	if(attacker != client && !ShouldDisableWeapons(attacker) && IsPlayerAlive(attacker))
+	if (attacker != client && !ShouldDisableWeapons(attacker) && IsPlayerAlive(attacker))
 		CheckHealthCaps(attacker);
 }
 
 public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionIndex, itemLevel, itemQuality, entityIndex)
 {
-	if(!enabled || (includeBots == false && IsFakeClient(client))
+	if (!enabled || (includeBots == false && IsFakeClient(client))
 	   || ShouldDisableWeapons(client)
 	   || !isCompatibleItem(classname, itemDefinitionIndex)
-	   || itemDefinitionIndex > 2000 || itemQuality == 5
-	   || itemQuality == 8 || itemQuality == 10)
+	   || itemDefinitionIndex > 2000
+	   || (itemQuality == 5 && itemDefinitionIndex != 266)
+	   || itemQuality == 8 || itemQuality == 10 || rndmRunning)
 		return;
 	
-	new bool:usingdefault = false;
-	new size;
-	decl String:attribName[64];
-	decl String:attribValue[8];
-	decl String:tmpID[32];
+	ModifyAttribs(client, classname, itemDefinitionIndex, entityIndex);
+	CheckClips(entityIndex, itemDefinitionIndex);
+}
+
+public Action:Event_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
+{
+	if (!enabled)
+		return Plugin_Continue;
+
+	new userid = GetEventInt(event, "userid");
 	
-	Format(tmpID, sizeof(tmpID), "%s__%d_size", selectedMod, itemDefinitionIndex);
-	if (!GetTrieValue(g_hItemInfoTrie, tmpID, size))
+	TF2_AddCondition(GetClientOfUserId(userid), TFCond_SpeedBuffAlly, 0.01);
+	CreateTimer(0.2, Timer_ClipRndmFix, userid, TIMER_FLAG_NO_MAPCHANGE);
+
+	return Plugin_Continue;
+}
+
+public Action:Timer_ClipRndmFix(Handle:hTimer, any:userid)
+{
+	new client = GetClientOfUserId(userid);
+	
+	UpdateVariables(client);
+	
+	decl String:classname[32];
+	new weapon, slot, wepid;
+		
+	for(slot=0; slot < 5; slot++)
 	{
-		Format(tmpID, sizeof(tmpID), "default__%d_size", itemDefinitionIndex);
-		if(!GetTrieValue(g_hItemInfoTrie, tmpID, size))
-			return;
-		else
-			usingdefault = true;
-	}
-
-	if(!StrEqual(classname, "tf_weapon_flaregun"))
-		TF2Attrib_RemoveAll(entityIndex);
-
-	for(new i=0; i < size; i++)
-	{
-		if(usingdefault)
+		weapon = GetPlayerWeaponSlot(client, slot);
+		if (!IsValidEntity(weapon))
+			continue;
+			
+		wepid = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+		if (wepid < 0)
+			continue;
+		
+		if (isCompatibleItem(classname, wepid))
 		{
-			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", "default", itemDefinitionIndex, i);
-			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
-			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", "default", itemDefinitionIndex, i);
-			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
-		}
-		else
-		{
-			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", selectedMod, itemDefinitionIndex, i);
-			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
-			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", selectedMod, itemDefinitionIndex, i);
-			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
-		}
-
-		if(!StrEqual(attribName, "hidden secondary max ammo penalty"))
-		{
-			TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
+			if (rndmRunning)
+			{
+				GetEdictClassname(weapon, classname, sizeof(classname));
+				ModifyAttribs(client, classname, wepid, weapon);
+				CheckClips(weapon, wepid);
+			}
 		}
 	}
 	
-	//TF2Attrib apparently doesn't affect clip size penalties, so manually checking here.
-	Format(tmpID, sizeof(tmpID), "%s__%d_chkclip1", selectedMod, itemDefinitionIndex);
-	if(GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
-	{
-		new ammoCount = 0;
-		if(itemDefinitionIndex != 19 && itemDefinitionIndex != 206 && itemDefinitionIndex != 1007)
-		{
-			new Float:clipSize = StringToFloat(attribValue);
-			ammoCount = RoundToCeil(float(GetEntProp(entityIndex, Prop_Data, "m_iClip1")) * clipSize);
-		}
-		SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), ammoCount, 4, true);
-	}
-	else
-	{
-		Format(tmpID, sizeof(tmpID), "%s__%d_chkclip2", selectedMod, itemDefinitionIndex);
-		if(GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
-		{
-			SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), StringToInt(attribValue), 4, true);
-		}
-	}
+	TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01); //recalc their speed after tf2attrib -- thx sarge
+	return Plugin_Continue;
 }
 
 public Action:Event_PostInventoryApplication(Handle:event, const String:name[], bool:dontBroadcast)
@@ -501,10 +538,8 @@ public Action:Event_PostInventoryApplication(Handle:event, const String:name[], 
 		return Plugin_Continue;
 	
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
-	
 	UpdateVariables(client);
-	TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01); //recalc their speed after tf2attrib -- thx sarge
-	
+
 	return Plugin_Continue;
 }
 
@@ -597,7 +632,7 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 
 public Action:Timer_Dalokoh(Handle:timer, any:client)
 {
-	if (GetClientHealth(client) == SDKCall(fnGetMaxHealth, client) && TF2_IsPlayerInCondition(client, TFCond_Taunting)
+	if (GetClientHealth(client) <= SDKCall(fnGetMaxHealth, client) && TF2_IsPlayerInCondition(client, TFCond_Taunting)
 	   && g_bIsEating[client] == true && (GetActiveWeaponID(client) == 159 || GetActiveWeaponID(client) == 433))
 	{
 		TF2_SetHealth(client, (GetClientHealth(client)+heavyDalokohOverheal-50));
@@ -625,18 +660,18 @@ stock LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
 	decl String:finalbasename[32];
 	new i;
 	
-	if(StrEqual(basename, ""))
+	if (StrEqual(basename, ""))
 		strcopy(finalbasename, sizeof(finalbasename), rawname);
 	else
 		strcopy(finalbasename, sizeof(finalbasename), basename);
 		
 	new Handle:hKeyValues = CreateKeyValues(finalbasename);
-	if(FileToKeyValues(hKeyValues, strBuffer) == true)
+	if (FileToKeyValues(hKeyValues, strBuffer) == true)
 	{
 		KvGetSectionName(hKeyValues, strBuffer, sizeof(strBuffer));
-		if(StrEqual(strBuffer, finalbasename) == true)
+		if (StrEqual(strBuffer, finalbasename) == true)
 		{
-			if(KvGotoFirstSubKey(hKeyValues))
+			if (KvGotoFirstSubKey(hKeyValues))
 			{
 				do {
 					i = 0;
@@ -654,12 +689,12 @@ stock LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
 						Format(tmpID, sizeof(tmpID), "%s__%s_%d_val", rawname, strBuffer, i);
 						SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
 						
-						if(StrContains(strBuffer2, "clip size p") != -1)
+						if (StrContains(strBuffer2, "clip size ") != -1 && !StrEqual(strBuffer3, "remove"))
 						{
 							Format(tmpID, sizeof(tmpID), "%s__%s_chkclip1", rawname, strBuffer);
 							SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
 						}
-						else if(StrContains(strBuffer2, "mod max primary clip override") != -1 && !StrEqual(strBuffer3, "-1"))
+						else if (StrContains(strBuffer2, "mod max primary clip override") != -1 && !StrEqual(strBuffer3, "-1") && !StrEqual(strBuffer3, "remove"))
 						{
 							Format(tmpID, sizeof(tmpID), "%s__%s_chkclip2", rawname, strBuffer);
 							SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
@@ -878,8 +913,82 @@ stock ShouldDisableWeapons(client)
 	//in case vsh/ff2 and other mods are running, disable x10 effects and checks
 	//this list may get extended as I check out more game mods
 	
-	return (ff2Mode && FF2_GetBossTeam() == GetClientTeam(client)) ||
-		   (vshMode && VSH_GetSaxtonHaleUserId() == GetClientUserId(client));
+	return (ff2Running && FF2_GetBossTeam() == GetClientTeam(client)) ||
+		   (vshRunning && VSH_GetSaxtonHaleUserId() == GetClientUserId(client)) ||
+		   (hiddenRunning && GetClientTeam(client) == _:TFTeam_Blue);
+}
+
+stock ModifyAttribs(client, const String:classname[], itemDefinitionIndex, entityIndex)
+{
+	new bool:usingdefault = false;
+	new size;
+	decl String:attribName[64];
+	decl String:attribValue[8];
+	decl String:tmpID[32];
+	
+	Format(tmpID, sizeof(tmpID), "%s__%d_size", selectedMod, itemDefinitionIndex);
+	if (!GetTrieValue(g_hItemInfoTrie, tmpID, size))
+	{
+		Format(tmpID, sizeof(tmpID), "default__%d_size", itemDefinitionIndex);
+		if (!GetTrieValue(g_hItemInfoTrie, tmpID, size))
+			return;
+		else
+			usingdefault = true;
+	}
+
+	for(new i=0; i < size; i++)
+	{
+		if (usingdefault)
+		{
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", "default", itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", "default", itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+		}
+		else
+		{
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", selectedMod, itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", selectedMod, itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+		}
+
+		if(StrEqual(attribValue, "remove"))
+		{
+			TF2Attrib_RemoveByName(entityIndex, attribName);
+		}
+		else
+		{
+			TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
+		}
+	}
+}
+
+stock CheckClips(entityIndex, itemDefinitionIndex)
+{
+	//TF2Attrib apparently doesn't affect clip size penalties, so manually checking here.
+	decl String:tmpID[32];
+	decl String:attribValue[8];
+	
+	Format(tmpID, sizeof(tmpID), "%s__%d_chkclip1", selectedMod, itemDefinitionIndex);
+	if (GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
+	{
+		new ammoCount = 0;
+		if (itemDefinitionIndex != 19 && itemDefinitionIndex != 206 && itemDefinitionIndex != 1007)
+		{
+			new Float:clipSize = StringToFloat(attribValue);
+			ammoCount = RoundToCeil(float(GetEntProp(entityIndex, Prop_Data, "m_iClip1")) * clipSize);
+		}
+		SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), ammoCount, 4, true);
+	}
+	else
+	{
+		Format(tmpID, sizeof(tmpID), "%s__%d_chkclip2", selectedMod, itemDefinitionIndex);
+		if (GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
+		{
+			SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), StringToInt(attribValue), 4, true);
+		}
+	}
 }
 
 stock GetPlayerWeaponSlot_Wearable(client, slot)
@@ -936,16 +1045,16 @@ stock RemovePlayerBack(client)
 	}
 }
 
-stock SetSpeshulAmmo(client, wepslot, newAmmo)
+stock CheckConVar(const String:cvarname[])
 {
-	if (IsValidClient(client) && IsPlayerAlive(client))
-	{
-		new weapon = GetPlayerWeaponSlot(client, wepslot);
-		if (IsValidEntity(weapon))
-		{
-			new iOffset = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType", 1)*4;
-			new iAmmoTable = FindSendPropInfo("CTFPlayer", "m_iAmmo");
-			SetEntData(client, iAmmoTable+iOffset, newAmmo, 4, true);
-		}
-	}
+	new Handle:p_enabled = FindConVar(cvarname);
+	new isenabled = -1;
+	
+	if(p_enabled == INVALID_HANDLE)
+		return -1;
+
+	isenabled = GetConVarInt(p_enabled);
+	CloseHandle(p_enabled);
+	
+	return isenabled;
 }

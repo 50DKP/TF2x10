@@ -648,7 +648,6 @@
 	}
 	"35" //Kritzkrieg
 	{
-		"medigun charge is crit boost" "1" //Uber Type: Crits
 		"ubercharge rate bonus" "3.5" //+250% Healing Rate
 	}
 	"36" //Blutsauger
@@ -658,36 +657,30 @@
 	}
 	"37" //Ubersaw
 	{
-		"add uber charge on hit" "100" //100% Uber on hit
+		"add uber charge on hit" "25" //100% Uber on hit
 		"fire rate penalty" "3" //200% slower firing speed
 	}
 	"38" //Axtinguisher
 	{
-		"crit vs burning players" "1" //Crits on Burning Targets
 		"dmg penalty vs nonburning" "0" //%Damage vs Nonburning Targets
 		"no crit vs nonburning" "1" //No Crits vs Nonburning Targets
 		"damage bonus" "2" //100% Damage Boost on crits.
 	}
 	"39" //Flare Gun
 	{
-		"hidden secondary max ammo penalty" "0.5" //Hidden 50% Max secondary ammo penalty
 		"damage bonus" "2" //+100% Damage
 		"dmg penalty vs nonburning" "0.5" //-50% Damage on nonburning targets
 	}
 	"40" //Backburner
 	{
 		"airblast cost increased" "10" //10x Airblas cost (200 Amm)
-		"mod flamethrower back crit" "1" //Crits from behind
-		"crit mod disabled hidden" "0" //No random crits
 		"airblast vertical pushback scale" "10" //10X Airblast vertical pushback
 		"airblast pushback scale" "10" //10X airblast horizontal pushback
 	}
 	"41" //Natascha + Ludmila
 	{
-		"slow enemy on hit" "1" //Slowdown on hit
 		"damage penalty" "0.50" //50% less damage
 		"minigun spinup time increased" "1.6" //60% slower rev-up
-		"lunchbox adds minicrits" "1" //???
 		"heal on hit for rapidfire" "30" //+30 Health on Hit
 		"fire rate penalty" "1.50" //25% slower firing rate
 	}
@@ -702,19 +695,15 @@
 	}
 	"44" //Sandman
 	{
-		"mod bat launches balls" "1" //Fires Balls
 		"max health additive penalty" "-150" //-150 HP
 		"maxammo grenades1 increased" "10" //10 Balls
 	}
 	"45" //Force-a-Nature FaN
 	{
-		"scattergun has knockback" "1" //Has Knockback
 		"fire rate bonus" "0" //100% faster firing speed
 		"bullets per shot bonus" "3" //200% more pellets
 		"damage penalty" "0.5" //50% less damage (compensation for having 2 shots)
 		"clip size penalty" "0.2" //1 Shot
-		"scattergun no reload single" "1" //Whole clip reload
-		"disable fancy class select anim" "1" //Disables certain class animations
 		"apply z velocity on damage" "300" //Bonus vertical knockback
 		"apply look velocity on damage" "300" //Bonus horizontal knockback
 	}
@@ -730,32 +719,23 @@
 	}
 	"57" //Razorback
 	{
-		"backstab shield" "1" //Backstab Shield
-		"kill eater score type" "5" //I dont know
 		"jarate backstabber" "10" //Jarate Backstabber for 10 seconds
-
 	}
 	"58" //Jarate
 	{
-		"jarate description" "1" //Is Jarate
-		"kill eater score type" "4" //???
 		"maxammo grenades1 increased" "10" //10 Jarates
 	}
 	"59" //Dead Ringer
 	{
-		"set cloak is feign death" "1" //Feign Death Watch Type
 		"mult cloak meter consume rate" "7" //+600% Drain
 		"mult cloak meter regen rate" "9" //+800% Regen
-		"kill eater score type" "9" //???
 	}
 	"60" //Cloak and Dagger
 	{
-		"set cloak is movement based" "2" //Motion sensitive
 		"mult cloak meter regen rate" "11" //+1000% Regen
 	}
 	"61" //Ambassador
 	{
-		"revolver use hit locations" "1" //Headshots
 		"damage bonus" "2" //+100% Damage on Headshot
 		"damage penalty on bodyshot" "0.35" //-30% damage on bodyshot
 		"fire rate penalty" "1.4" //-40% firing rate
@@ -765,25 +745,18 @@
 		"Blast radius decreased" "0.01" //-99% Explosive Radius
 		"Projectile speed increased" "2.6" //+160% Projectile Speed
 		"damage bonus" "3.5" //+250% Damage
-		"mod mini-crit airborne" "1" //???
-		"disable fancy class select anim" "1" //Disables certain class animations
 	}
 	"128" //Equalizer
 	{
-		"mod shovel damage boost" "1" //Usual Damage formula
-		"mod weapon blocks healing" "1" //Blocks Healing while in use
 		"damage bonus" "1.5" //+50% Damage
 	}
 	"129" //Buff Banner
 	{
-		"mod soldier buff type" "1" //Banner Type: Minicrits
 		"increase buff duration HIDDEN" "10" //10x longer banner time
 	}
 	"130" //Scottish Resistance
 	{
 		"fire rate bonus" ".05" //+95% Firing Rate
-		"sticky detonate mode" "1" //Detonate stickies you're looking at and under your feet
-		"stickies detonate stickies" "1" //Destroy enemy stickybombs
 		"maxammo secondary increased" "6" //+500% Max secondary Ammo
 		"max pipebombs increased" "60" //+60 Stickybombs out
 		"sticky arm time penalty" "8" //+8 Second arm time
@@ -795,11 +768,7 @@
 	}
 	"132" //Eyelander
 	{
-		"crit mod disabled" "0" //No Crits
 		"max health additive penalty" "-50" //-50 Health
-		"decapitate type" "1" //Decapitates
-		"kill eater score type" "6" //???
-		"kill eater kill type" "6" //???
 		"melee range multiplier" "2.87" //10x range bonus
 	}
 	"133" //Gunboats
@@ -813,8 +782,7 @@
 	}
 	"141" //Frontier Justice + Texas Ten-shot
 	{
-		"mod sentry killed revenge" "1" //Crits on sentry destroyed
-		"crit mod disabled" "0" //No Random Crits
+		"clip size penalty" "remove" //Remove the penalty
 		"clip size bonus" "2.67" //+166% clip size
 		"maxammo primary increased" "3.5" //+250% max primary ammo
 		"tmp dmgbuff on hit" "2.5" //+150% Temporary Damage Buff on hit
@@ -822,17 +790,12 @@
 	}	
 	"142" //Gunslinger
 	{
-		"mod wrench builds minisentry" "1" //Builds Minisentries
 		"max health additive bonus" "250" //+250 Health
-		"crit mod disabled" "0" //No Crits
-		"kill eater score type" "3" //???
-		"kill eater score type 2" "0" //???
 	}
 	"153" //Homewrecker
 	{
 		"dmg bonus vs buildings" "11" //+1000% Damage vs Buildings
 		"dmg penalty vs players" "0" //-100% Damage vs players
-		"damage applies to sappers" "1" //Destroys sappers
 		"provide on active" "1" //Effects only present while active
 		"dmg from sentry reduced" "0" //-100% Damage from sentries
 	}
@@ -843,13 +806,11 @@
 	}
 	"155" //Southern Hospitality
 	{
-		"crit mod disabled" "0" //No Crits
 		"bleeding duration" "50" //50 Seconds of Bleed
 		"dmg taken from fire increased" "3" //+200% Fire 
 	}
 	"159" //Dalokohs Bar
 	{
-		"lunchbox adds maxhealth bonus" "1" //Sandvich Type: +50 Non-overheal health
 		"max health additive bonus" "50" //+50 Health
 	}
 	"160" //Vintage Lugermorph
@@ -864,13 +825,11 @@
 	}
 	"163" //Crit-a-Cola
 	{
-		"lunchbox adds minicrits" "2" //Drink Type: Minicrits and +25% Speed
 		"effect bar recharge rate increased" "0.38" //-62% Recharge Rate (Results in 2.2 seconds of cooldown rather than 22)
 	}
 	"169" //Golden Wrench
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
-		"turn to gold" "1" //Turn to Gold
 	}
 	"171" //Tribalman's Shiv
 	{
@@ -887,7 +846,6 @@
 	{
 		"preserve ubercharge" "100" //Keep 100% Uber on Death
 		"max health additive penalty" "-100" //-100 Health
-		"lunchbox adds minicrits" "2" //???
 	}
 	"214" //Powerjack
 	{
@@ -905,12 +863,10 @@
 	"220" //Shortstop
 	{
 		"reload time increased hidden" "1" //Old Reload speed
-		"disable fancy class select anim" "1" //Disables certain class animations
 		"max health additive bonus" "250" //+250 Health
 	}
 	"222" //Mad Milk
 	{
-		"kill eater score type" "4" //???
 		"effect bar recharge rate increased" "0.1" //10x Faster recharge speed
 	}
 	"224" //L'tranger
@@ -920,30 +876,22 @@
 	}
 	"225" //Your Eternal Reward
 	{
-		"disguise on backstab" "1" //Disguise On Backstab
-		"silent killer" "1" //Silent Killer
-		"cannot disguise" "1" //Cannot Disguise
-		"lunchbox adds minicrits" "1" //????
 		"quiet unstealth" "1" //Quiet Unstealth
 		"cloak blink time penalty" "0.5" //Cloak blink time penalty
 	}
 	"226" //Battalion's Backup
 	{
-		"mod soldier buff type" "2" //Buff Type: Defensive Boost
 		"increase buff duration HIDDEN" "10" //10x Buff Duration
 	}
 	"228" //Black Box
 	{
 		"heal on hit for rapidfire" "150" //+150 Health on hit
 		"clip size penalty" "0.25" //-75% Clip Size
-		"disable fancy class select anim" "1" //???
 		"dmg from sentry reduced" "-1" //-200% Damage from sentries
 	}
 	"230" //Sydney Sleeper
 	{
-		"sniper no headshots" "1" //No Headshots
 		"jarate duration" "80" //80 Seconds of Jarate on full charge hit
-		"crit mod disabled" "0" //No Crits
 		"sniper charge per sec" "3.5" //+250% Charge rate
 	}
 	"231" //Darwin's Danger Shield
@@ -952,27 +900,19 @@
 	}
 	"232" //Bushwacka
 	{
-		"minicrits become crits" "1" //Crits when it should Minicrit
 		"damage bonus" "1.35" //+35% Damage (aka 
 		"dmg taken from fire increased" "3" //+200% Fire Vulnerability
 		"crit mod disabled" "0" //No Random Crits
 	}
 	"237" //Rocket Jumper
 	{
-		"damage penalty" "0" //-100% Damage
-		"crit mod disabled" "0" //No Random Crits
-		"no self blast dmg" "2" //No Self Damage
 		"clip size bonus" "10" //10x Loaded Ammo
 		"maxammo primary increased" "21" //+2000% max primary ammo
-		"cannot pick up intelligence" "1" //Cannot Carry Intelligence
 	}
 	"239" //Gloves of Running Urgently GRU
 	{
 		"move speed bonus" "4" //+300% Walk Speed
 		"damage penalty" "0" //-100% Damage
-		"provide on active" "1" //Effects only active when weapon is active
-		"lunchbox adds maxhealth bonus" "2" //???
-		"self mark for death" "1" //Self-Mark for death
 		"attach particle effect static" "2" //Flaming bits
 	}
 	"264" //Frying Pan
@@ -983,22 +923,14 @@
 	}
 	"265" //Sticky Jumper
 	{
-		"damage penalty" "0" //-100% Damage
-		"crit mod disabled" "0" //No Random Crits
 		"no self blast dmg" "2" //No Self Damage (including Nades/Caber)
 		"clip size bonus" "10" //10x loaded ammo
 		"maxammo secondary increased" "21" //+2000% Max secondary ammo
 		"max pipebombs increased" "72" //+72 Stickybombs out
-		"override projectile type" "14" //Use Sticky Jumper Stickies
-		"cannot pick up intelligence" "1" //Cannot Cary intelligence
 	}
 	"266" //Headtaker
 	{
-		"crit mod disabled" "0" //No Random Crits
 		"max health additive penalty" "-50" //-50 Health
-		"decapitate type" "1" //Decapitate
-		"kill eater score type" "6" //???
-		"kill eater kill type" "6" //???
 		"melee range multiplier" "2.87" //10x range bonus
 		"attach particle effect static" "44" //Particle: Misty Skull
 	}
@@ -1017,20 +949,14 @@
 	}
 	"304" //Amputator
 	{
-		"enables aoe heal" "1"
-		"lunchbox adds minicrits" "3"
 		"health regen" "10" //+10HP Per second
 	}	
 	"305" //Crusader's Crossbow
 	{
-		"fires healing bolts" "1" //Use Healing Bolts
-		"sniper no headshots" "1" //No Headshots
-		"maxammo primary reduced" "0.25" //-75% Max Primary Ammo
 		"Reload time decreased" "0" //-100% Reload speed
 	}
 	"307" //Ullapool Caber
 	{
-		"crit mod disabled" "0" //No Random Crits
 		"dmg taken from fire reduced" "0" //-100% Fire Vulnerability
 	}	
 	"308" //Loch n' Load
@@ -1039,7 +965,6 @@
 		"damage bonus" "3" //+200% Damage Bonus
 		"Projectile speed increased" "3.5" //+250% projectile speed
 		"blast dmg to self increased" "3.5" //+250% self damage
-		"sticky air burst mode" "2" //Shatter on surfaces
 	}
 	"310" //Warrior's Spirit
 	{
@@ -1049,7 +974,6 @@
 	}
 	"311" //Buffalo Steak Sandvich
 	{
-		"lunchbox adds minicrits" "2" //Sandvich Type: Minicrits
 		"move speed bonus" "1.35" //35% Steak Speed Bonus is passive
 	}
 	"312" //Brass Beast
@@ -1060,12 +984,12 @@
 	}
 	"317" //Candy Cane
 	{
+		"drop health pack on kill" "remove" //Remove attribute
 		"dmg taken from blast increased" "3.5" //+250% explosive vulnerability
 	}
 	"325" //Boston Basher
 	{
 		"bleeding duration" "50" //50 Seconds of bleed
-		"hit self on miss" "1" //Hit Yourself on miss
 	}
 	"326" //Backscratcher
 	{
@@ -1075,7 +999,6 @@
 	}
 	"327" //Claidheamh Mor
 	{
-		"crit mod disabled" "0" //No random crits
 		"charge time increased" "5" //+5 seconds of charge time
 		"max health additive penalty" "-30" //-30 HP
 	}
@@ -1083,8 +1006,6 @@
 	{
 		"Construction rate increased" "4" //+300% Build Speed
 		"damage penalty" "0" //-100% Damage
-		"kill eater score type" "3" //???
-		"kill eater score type 2" "0" //???
 	}
 	"331" //Fists of Steel
 	{
@@ -1094,31 +1015,26 @@
 	}
 	"348" //Sharpened Volcano Fragment
 	{
-		"Set DamageType Ignite" "1" //Ignite players on hit
 		"damage penalty" "0.02" //-98% Damage
 		"weapon burn dmg increased" "10" //10x Afterburn damage
 	}
 	"349" //Sun-on-a-stick
 	{
-		"crit vs burning players" "1" //Crits vs Burning Targets
 		"damage bonus" "11" //+1000% damage
 		"dmg penalty vs nonburning" "0" //0% damage vs nonburning targets
 		"crit mod disabled" "0" //No Random Critical Hits
 	}
 	"351" //Detonator
 	{
-		"hidden secondary max ammo penalty" "0.5" //Hidden -50% clip penalty
-		"lunchbox adds minicrits" "1" //???
+		"blast dmg to self increased" "remove"
 		"self dmg push force increased" "10" //+100% Self Knockback
 	}
 	"354" //Concheror
 	{
-		"mod soldier buff type" "3" //Banner Type: Health Regain
 		"increase buff duration HIDDEN" "10" //10x Banner duration
 	}
 	"355" //Fan-o-War
 	{
-		"mark for death" "1" //Marks targets for death
 		"damage penalty" "0.04" //-96% damage
 		"deploy time decreased" "0.7" //30% faster weapon switch
 	}
@@ -1128,9 +1044,7 @@
 	}
 	"357" //Half-Zatoichi
 	{
-		"decapitate type" "1" //Decapitate
 		"restore health on kill" "200" //200% Health on kill
-		"honorbound" "1" //Honorbound
 	}
 	"401" //Shahanshah
 	{
@@ -1140,8 +1054,6 @@
 	"404" //Persian Persuader
 	{
 		"charge recharge rate increased" "3" //+200% Charge rate on user
-		"ammo becomes health" "1" //Pick up ammo as health
-		"crit mod disabled" "0" //No random crits
 	}
 	"405" //Ali Baba's Wee Booties
 	{
@@ -1150,23 +1062,17 @@
 	}
 	"406" //Splendid Screen
 	{
-		"no charge impact range" "1" //Always shield bashes on hit
 		"charge impact damage increased" "8" //+700% damage
 		"dmg taken from fire reduced" "0.7" //-30% Explosive Damage
 		"dmg taken from blast reduced" "0.6" //-40% Fire Damage
 	}
 	"411" //Quick-Fix
 	{
-		"lunchbox adds minicrits" "2" //???
 		"heal rate bonus" "5" //+400% Heal Rate
-		"medigun charge is megaheal" "2" //Ubercharge type: Megaheal
 		"ubercharge rate bonus" "3.5" //+250% Ubercharge rate
-		"kill eater score type" "1" //???
-		"kill eater score type 2" "2" //???
 	}
 	"412" //Overdose
 	{
-		"lunchbox adds minicrits" "1" //Speed increases with Uber
 		"move speed bonus" "2" //10% speed bonus
 		"damage penalty" "0" //-20% damage
 		"provide on active" "1" //Effects only present while active
@@ -1188,19 +1094,15 @@
 	}
 	"416" //Market Gardener
 	{
-		"mod crit while airborne" "1" //Crits when rocket Jumping
-		"crit mod disabled" "0" //No Random Crits
 		"melee range multiplier" "2" //+100% range bonus
 	}
 	"423" //Saxxy
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
-		"turn to gold" "1" //Turn to Gold
 	}
 	"424" //Tomislav
 	{
 		"minigun spinup time decreased" "0" //-100% Spin-up time
-		"minigun no spin sounds" "1" //Silent Spin-up
 		"fire rate penalty" "3" //-200% Firing Rate
 	}
 	"425" //Family Business
@@ -1215,47 +1117,29 @@
 	}
 	"433" //Fishcake
 	{
-		"lunchbox adds maxhealth bonus" "1" //Sandvich Type: +50 Non-overheal health
 		"max health additive bonus" "50" //+50 Health
 	}
 	"441" //Cow Mangler 5000
 	{
-		"energy weapon no ammo" "1" //No Ammo
-		"energy weapon charged shot" "1" //Charged Shot
 		"weapon burn dmg increased" "3" //Crit Afterburn damage
 		"damage penalty" "0.8" //-20% Damage
-		"crit mod disabled" "0" //No Random Crits
 	}
-	"442" //Righteous Bison
-	{
-		"energy weapon no ammo" "1" //No Ammo
-		"energy weapon penetration" "1" //Penetrates
-		"energy weapon no deflect" "1" //Can't be deflected
-		"energy weapon no hurt building" "1" //Doesn't hurt buildings
-	}	
 	"444" //Mantreads
 	{
 		"damage force reduction" "0" //-100% pushback
-		"boots falling stomp" "1" //Stomping
-		"kill eater score type" "26" //???
-		"kill eater kill type" "26" //???
 		"dmg taken from blast reduced" "0.25" //-75% explosive damage
 		"damage bonus" "10" //+900% Damage
 	}
 	"447" //Disciplinary Action
 	{
 		"damage penalty" "0" //-100% Damage
-		"speed buff ally" "1" //Speeds up allies
 		"melee range multiplier" "8" //+700% range
-		"melee bounds multiplier" "1.55" //???
 	}
 	"448" //Soda Popper
 	{	
 		"Reload time decreased" "0.5" //+50% reload speed
 		"fire rate bonus" "0" //+100% firing speed
 		"clip size penalty" "0.2" //-80% clip size
-		"scattergun no reload single" "1" //Clip reload
-		"crit mod disabled" "0" //No random crits
 	}
 	"449" //Winger
 	{
@@ -1271,18 +1155,14 @@
 	"452" //Three-Rune Blade
 	{
 		"bleeding duration" "50" //50 Seconds of bleed
-		"hit self on miss" "1" //Hit yourself on miss
 	}
 	"457" //Postal Pummeler
 	{
-		"crit vs burning players" "1" //Crits vs burning players
 		"dmg penalty vs nonburning" "0" //-100% damage vs non burning players
-		"no crit vs nonburning" "1" //No crits vs burning players
 		"damage bonus" "2" //+100% damage on crit
 	}
 	"460" //Enforcer
 	{
-		"crit mod disabled" "0" //No Random Crits
 		"fire rate penalty" "3" //-200% Firing Rate
 		"damage bonus while undisguised" "3" //+200% Damage while undisguised
 	}
@@ -1309,46 +1189,29 @@
 		"apply look velocity on damage" "1250" //Horizontal Swing
 		"apply z velocity on damage" "900" //Vertical Swing
 		"fire rate penalty" "1.8" //-80% firing rate
-		"crit mod disabled" "0" //No Random Crits
 	}
 	"513" //The Original
 	{
 		"rocket jump damage reduction" "0.5" //-50% Self Damage while rocket jumping
 		"maxammo primary increased" "10" //10x ammo
-		"centerfire projectile" "1" //Centerfile Projectile
-		"disable fancy class select anim" "1" //Disable Fancy Class Select Animation
 	}
 	"525" //Diamondback
 	{
-		"sapper kills collect crits" "1" //Get crits on building sap
 		"damage penalty" "0.7" //-30% damage
-		"crit mod disabled" "0" //No random crits
 		"dmg from sentry reduced" "0.7" //-30% damage from sentries
 	}
 	"526" //Machina
 	{
-		"sniper penetrate players when charged" "1" //Penetrates at full charge
-		"sniper only fire zoomed" "1" //No firing unless scoped
 		"sniper full charge damage bonus" "2.5" //+150% Damage at full charge
-		"sniper fires tracer DISPLAY ONLY" "1" //Fires Tracer Rounds
 	}
 	"527" //Widowmaker
 	{
 		"mod ammo per shot" "15" //30 Ammo Per Shot (15)
-		"mod use metal ammo type" "1" //Metal For Ammo
-		"mod no reload DISPLAY ONLY" "1" //No Reload
-		"mod max primary clip override" "-1" //Override the clip size to use the full metal count
 		"add onhit addammo" "75" //Add a maximum of 100 ammo on hit (75)
 	}
 	"528" //Short Circuit
 	{
 		"mod ammo per shot" "3" //3 Ammo per use
-		"electrical airblast DISPLAY ONLY" "1" //Short circuit projectile effect
-		"mod use metal ammo type" "1" //use metal for ammo
-		"mod no reload DISPLAY ONLY" "1" //Don't reload
-		"mod max primary clip override" "-1" //Override clip
-		"crit mod disabled" "0" //No random crits
-		"disable weapon hiding for animations" "1" //Disable certain animations
 	}
 	"572" //Unarmed Combat
 	{
@@ -1359,47 +1222,28 @@
 	{
 		"apply look velocity on damage" "600" //Horizontal Swing
 		"apply z velocity on damage" "400" //Vertical Swing
-		"crit kill will gib" "1" //Crit Kill Will Gib
 	}
 	"588" //Pomson 6000
 	{
-		"energy weapon no ammo" "1" //No Ammo
-		"energy weapon no deflect" "1" //Can't be deflected
 		"subtract victim medigun charge on hit" "100" //-100% Ubercharge on hit
 		"subtract victim cloak on hit" "100" //-100% cloak on hit
 	}
-	"589" //Eureka Effect
-	{
-		"alt fire teleport to spawn" "1" //Teleport to Spawn on Taunt
-		"cannot pick up buildings" "1" //Cannot Pick Up Builings
-	}	
 	"593" //Third Degree
 	{
-		"damage all connected" "1" //Damage anyone attached via medic beams
+		"ragdolls become ash" "remove" //Remove ragdolls become ash
 		"mod flamethrower push" "262144" //Crits vs overhealed players
 		"crit mod disabled" "0" //No random crits
 	}
 	"594" //Phlogisinator
 	{
 		"damage penalty" "0.8" //-20% Damage
-		"burn damage earns rage" "1" //Earn Rage on burn damage
-		"mod soldier buff type" "5" //Buff type: Heal, then crits
-		"airblast disabled" "1" //No Airblast
-		"ragdolls become ash" "1" //Vaporization kills
-		"lunchbox adds minicrits" "1" //???
-		"crit mod disabled" "0" //No Random Crits
 		"increase buff duration HIDDEN" "2" //2x Buff duration
 	}
 	"595" //Manmelter
 	{
-		"energy weapon no ammo" "1" //No Ammo
 		"energy weapon no deflect" "1" //Can't be deflected
 		"fire rate penalty HIDDEN" "1" //No Fire Rate Penalty
 		"Projectile speed increased" "3" //2x projectile speed
-		"extinguish earns revenge crits" "1" //Extinguish to get crits
-		"crit mod disabled" "0"  //No Random Crits
-		"ragdolls become ash" "1" //Vaporization Kills
-		"lunchbox adds minicrits" "2" //???
 	}
 	"608" //Bootlegger
 	{
@@ -1425,25 +1269,16 @@
 	}
 	"648" //Wrap Assassin
 	{
-		"mod bat launches ornaments" "1" //Fires ornaments
 		"damage penalty" "0" //-100% Damage
 		"maxammo grenades1 increased" "10" //10 Wrap Assasin Balls
 	}
 	"649" //Spycicle
 	{
-		"freeze backstab victim" "1" //Frozen ragdoll kills
-		"silent killer" "1" //Silent Killer
 		"melts in fire" "150" //150 seconds to regain knife
 		"become fireproof on hit by fire" "20" //20 Seconds of fire invulnerability
-		"set icicle knife mode" "3" //Spycicle bar
 	}	
 	"656" //Holiday Punch
 	{
-		"crit forces victim to laugh" "1" //Crits Force Victim to laugh
-		"crit does no damage" "1" //Crits do no damage
-		"tickle enemies wielding same weapon" "1" //Holiday Punch Heavy interactions
-		"kill eater score type" "25" //???
-		"kill eater score type 2" "0" //???
 		"crit mod disabled hidden" "100" //100% crit chance
 	}
 	"727" //Black Rose
@@ -1453,13 +1288,10 @@
 	}
 	"730" //Beggar's Bazooka
 	{
-		"reload time increased hidden" "0.3" //Hidden Rocket Load speed penalty
-		"projectile spread angle penalty" "30" //30 Degrees of random deviation
-		"no primary ammo from dispensers" "1" //No Ammo from dispensers
 		"fire rate bonus HIDDEN" "0.03" //Hidden Rocket Firing rate bonus
+		"reload time increased hidden" "0.3" //Hidden Rocket Load speed penalty
 		"clip size penalty HIDDEN" "7.5" //Load up to 30 rockets
-		"can overload" "1" //Can Overload
-		"auto fires full clip" "1" //Fires Full clip
+		"projectile spread angle penalty" "30" //30 Degrees of random deviation
 		"maxammo primary increased" "10" //+900% max primary ammo
 	}
 	"735" //Sapper
@@ -1478,23 +1310,14 @@
 	"739" //Lollichop
 	{
 		"bleeding duration" "10" //10 Seconds of Bleed
-		"vision opt in flags" "1" //Vision Opt in Flags
-		"pyrovision only DISPLAY ONLY" "1" //Pyrovision ONLY
-		"pyrovision opt in DISPLAY ONLY" "1" //Pyrivision Opt in flags
 	}
 	"740" //Scorch Shot
 	{
-		"hidden secondary max ammo penalty" "0.5" //Hidden -50% clip penalty
 		"damage penalty" "0.05" //-50% Damage
-		"mod flaregun fires pellets with knockback" "3" //Flares have Knockback
 		"Blast radius increased" "10" //10 Times Explosive Radius
 	}
 	"741" //Rainblower
 	{
-		"vision opt in flags" "1" //Vision Opt in Flags
-		"lunchbox adds minicrits" "3" //Lunchbox Adds Minicrits
-		"pyrovision only DISPLAY ONLY" "1" //Pyrovision ONLY
-		"pyrovision opt in DISPLAY ONLY" "1" //Pyrivision Opt in flags
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
@@ -1503,16 +1326,12 @@
 		"critboost on kill" "30" //30 Seconds of crits on kill
 		"fire rate penalty" "1.7" //-70% Firing speed
 		"clip size penalty" "0.6" //-40% clip size
-		"crit mod disabled" "0" //No Random crits
 	}
 	"752" //Hitman's Heatmaker
 	{
-		"decapitate type" "1" //Decapitate
 		"damage penalty on bodyshot" "0.6" //-40% Damage on bodyshots
 		"rage on kill" "70" //+70 rage on kill
 		"rage on assists" "30" //+30 Rage on assist
-		"mod soldier buff type" "6" //Buff Type: Don't have to zoom out, no flinch, fire tracer rounds
-		"sniper rage DISPLAY ONLY" "0" //Snipe Rage Bar
 		"increase buff duration HIDDEN" "10" //10x Buff duration
 	}
 	"772" //Baby Face's Blaster
@@ -1520,74 +1339,54 @@
 		"damage penalty" "0.4" //-60% Damage
 		"weapon spread bonus" "0.2" //+80% Accuracy
 		"move speed penalty" "0.7" //-30% Speed
-		"hype on damage" "1" //Boost on Damage
+		"hype resets on jump" "remove" //Remove hype resetting on jump
 	}
 	"773" //Pretty Boy's Pocket Pistol
 	{
 		"max health additive bonus" "150" //+150 Health
-		"cancel falling damage" "1" //No Fall Damage
 		"fire rate penalty" "3.5" //-250% Firing Rate
 		"dmg taken from fire increased" "6" //+500% Fire vulnerability
 	}
 	"775" //Escape Plan
 	{
-		"mod shovel speed boost" "2" //Solider Speed formula
-		"mod weapon blocks healing" "1" //Blocks Healing
 		"move speed bonus" "1.1" //+10% speed bonus
 		"provide on active" "1" //Effects only present while active
 	}
 	"810" //Red Tape Recorder
 	{
 		"sapper degenerates buildings" "0.9" //Building Degen
-		"sapper damage penalty" "0" //No Sapper Damage
 	}
 	"811" //Huo Long Heatmaker
 	{
-		"ring of fire while aiming" "1" //Fire Around You
 		"uses ammo while aiming" "60" //60 Ammo for fire
 		"weapon burn dmg increased" "10" //10x Afterburn damage
 	}
 	"812" //Flying Guillotine
 	{
-		"cleaver description" "1" //Guillotine
-		"crit vs stunned players" "65535" //Crit vs Stunned Players
+		"crit vs stunned players" "65536" //Crit vs Stunned Players
 		"effect bar recharge rate increased" "0.1" //10x Faster recharge speed
-		"crit mod disabled" "0" //No Random Crits
-		"no crit boost" "1" //Can't be crit boosted
 	}
 	"813" //Neon Annihilator
 	{
-		"crit vs wet players" "1" //crit vs wet players
 		"dmg penalty vs nonburning" "0.75" //-25% Damage vs nonwet
-		"crit mod disabled" "0" //No Random Crits
-		"ragdolls plasma effect" "1" //Disintigration kills
-		"damage applies to sappers" "1" //Damage applies to sappers
 	}
 	"831" //Red Tape Recorder
 	{
 		"sapper degenerates buildings" "0.9" //Building Degen
-		"sapper damage penalty" "0" //No Sapper Damage
 	}
 	"832" //Huo Long Heatmaker
 	{
-		"ring of fire while aiming" "1" //Fire Around You
 		"uses ammo while aiming" "60" //60 Ammo for fire
 		"weapon burn dmg increased" "10" //10x Afterburn damage
 	}
 	"833" //Flying Guillotine
 	{
-		"cleaver description" "1" //Guillotine
-		"crit vs stunned players" "65535" //Crit vs Stunned Players
-		"crit mod disabled" "0" //No Random Crits
+		"crit vs stunned players" "65536" //Crit vs Stunned Players
 		"effect bar recharge rate increased" "0.1" //10x Faster recharge speed
 	}
 	"834" //Neon Annihilator
 	{
-		"crit vs wet players" "1" //crit vs wet players
 		"dmg penalty vs nonburning" "0" //-100% Damage vs nonwet
-		"crit mod disabled" "0" //No Random Crits
-		"ragdolls plasma effect" "1" //Disintigration kills
-		"damage applies to sappers" "1" //Damage applies to sappers
 	}
 	"851" //Awper Hand
 	{
@@ -1597,7 +1396,6 @@
 	}
 	"863" //Robo-Sandvich
 	{
-		"lunchbox adds minicrits" "3 " //Lunchbox Adds Minicrits
 		"maxammo grenades1 increased" "10" //10 Sandviches
 	}
 	"880" //Freedom Staff
@@ -1607,8 +1405,6 @@
 	"933" //The Ap-Sap
 	{
 		"sapper damage penalty hidden" "3.16" //(sqrt10)x Sapper Damage(hidden)
-		"sapper voice pak" "1" //Talk Wheatley, TALK
-		"sapper voice pak idle wait" "3" //Wait to talk.
 	}
 	"939" //Bat Outta Hell
 	{
@@ -1626,58 +1422,43 @@
 	}
 	"996" //The Loose Cannon
 	{
-		"override projectile type" "17" //Fire Cannon Balls
-		"grenade launcher mortar mode" "2" //Mortar Mode
-		"grenade not explode on impact" "1" //Grenades dont explode on impact
 		"damage bonus HIDDEN" "6" //Hidden Damage Bonus
 		"Projectile speed increased HIDDEN" "6" //Hidden projectile speed bonus
 		"grenade damage reduction on world contact" "0" //No damage if it hits the world
-		"cannonball push back" "1" //Cannon Ball Pushback
 	}
 	"997" //The Rescue Ranger
 	{
 		"engineer building teleporting pickup" "13" //Teleport Buildings
 		"arrow heals buildings" "310"  //Building healing arrows
-		"override projectile type" "18" //Override Projectile Type
-		"mark for death on building pickup" "1" //Mark for death on building grab
 		"maxammo primary reduced" "0.75" //Reduce ammo
 		"mod max primary clip override" "2" //Override the clip size to 2
 	}
 	"998" //The Vaccinator
 	{
-		"lunchbox adds minicrits" "3" //Lunchbox adds minicrits
 		"ubercharge rate bonus" "6" //Ubercharge Rate Bonus
 		"overheal fill rate reduced" "0.01" //Overheal Rate Reduced
-		"kill eater score type" "1" //Kill eater score type 
-		"kill eater score type 2" "2" //Kill eater score type 2
-		"medigun charge is resists" "3" //Uber Charge Is Resistance
 	}
 	"1000" //Festive Axtinguisher
 	{
-		"crit vs burning players" "1" //Crits on Burning Targets
 		"dmg penalty vs nonburning" "0" //%Damage vs Nonburning Targets
-		"no crit vs nonburning" "1" //No Crits vs Nonburning Targets
 		"damage bonus" "2" //100% Damage Boost on crits.
 	}
 	"1001" //Festive Buff Banner
 	{
-		"mod soldier buff type" "1" //Banner Type: Minicrits
 		"increase buff duration HIDDEN" "10" //10x longer banner time
 	}
 	"1002" //Festive Sandvich
 	{
 		"maxammo grenades1 increased" "10" //10 Sandviches
-		"lunchbox adds minicrits" "4" //Dunno why but it has it
 	}
 	"1003" //Festive Ubersaw
 	{
-		"add uber charge on hit" "100" //100% Uber on hit
+		"add uber charge on hit" "25" //100% Uber on hit
 		"fire rate penalty" "3" //200% slower firing speed
 	}
 	"1004" //Festive Frontier Justice + Texas Ten-shot
 	{
-		"mod sentry killed revenge" "1" //Crits on sentry destroyed
-		"crit mod disabled" "0" //No Random Crits
+		"clip size penalty" "remove" //Remove the penalty
 		"clip size bonus" "2.67" //+166% clip size
 		"maxammo primary increased" "3.5" //+250% max primary ammo
 		"tmp dmgbuff on hit" "2.5" //+150% Temporary Damage Buff on hit
@@ -1686,12 +1467,10 @@
 	"1005" //Festive Huntsman
 	{
 		"hidden primary max ammo bonus" "5" //10x Primary Ammo
-		"disable fancy class select anim" "1" //Disables certain class animations 
 		"faster reload rate" "0.8" //-20% Reload speed
 	}
 	"1006" //Festive Ambassador
 	{
-		"revolver use hit locations" "1" //Headshots
 		"damage bonus" "2" //+100% Damage on Headshot
 		"damage penalty on bodyshot" "0.35" //-30% damage on bodyshot
 		"fire rate penalty" "1.4" //-40% firing rate
