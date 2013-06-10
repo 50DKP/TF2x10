@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"38"
+#define PLUGIN_VERSION	"0.38"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -314,7 +314,8 @@ public OnMapStart()
 		if (steamtools && gameDesc)
 		{
 			decl String:locDesc[16];
-			Format(locDesc, sizeof(locDesc), "TF2x10 (r%s)", PLUGIN_VERSION);
+			Format(locDesc, sizeof(locDesc), "TF2x10 %s", PLUGIN_VERSION);
+			ReplaceString(locDesc, sizeof(locDesc), "0.", "r");
 			Steam_SetGameDescription(locDesc);
 		}
 	}

@@ -4,11 +4,11 @@
 	{
 		"Version"
 		{
-			"Latest"	"38"
+			"Latest"	"0.38"
 			"Previous"	"0.37"
 		}
 		
-		"Notes"	"Changed from 0.37 to r38."
+		"Notes"	"All version updates are in BitBucket now."
 	}
 	
 	"Files"
