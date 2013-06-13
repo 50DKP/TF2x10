@@ -1429,7 +1429,7 @@
 	"997" //The Rescue Ranger
 	{
 		"engineer building teleporting pickup" "13" //Teleport Buildings
-		"arrow heals buildings" "310"  //Building healing arrows
+		"arrow heals buildings" "158"  //Building healing arrows
 		"maxammo primary reduced" "0.75" //Reduce ammo
 		"mod max primary clip override" "2" //Override the clip size to 2
 	}
