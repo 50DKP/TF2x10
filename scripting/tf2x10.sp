@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.38"
+#define PLUGIN_VERSION	"0.39"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -48,7 +48,6 @@ new _medPackTraceFilteredEnt = -1; //Candycane full Medipack spawning
 //Mod compatibility variables
 new bool:vshRunning = false; //is VS Saxton Hale running?
 new bool:ff2Running = false; //is Freak Fortress 2 running?
-new bool:rndmRunning = false; //is Randomizer running?
 new bool:hiddenRunning = false; //is The Hidden running?
 
 //========= Cvars/Handles ============
@@ -302,7 +301,6 @@ public OnMapStart()
 	{
 		vshRunning = CheckConVar("hale_enabled") == 1;
 		ff2Running = CheckConVar("ff2_enabled") == 1;
-		rndmRunning = CheckConVar("tf2items_rnd_enabled") == 1;
 		hiddenRunning = CheckConVar("sm_hidden_enabled") == 1;
 		
 		if (vshRunning || ff2Running)
@@ -358,7 +356,7 @@ public OnAdminMenuReady(Handle:topmenu)
 	
 	if (player_commands != INVALID_TOPMENUOBJECT)
 		AddToTopMenu(g_hTopMenu,
-			"sm_tf2x10_recache",
+			"TF2x10 Recache Weapons",
 			TopMenuObject_Item,
 			AdminMenu_Recache,
 			player_commands,
@@ -440,23 +438,19 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 
 public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damagetype, &weapon, Float:damageForce[3], Float:damagePosition[3], damagecustom)
 {
-	if (enabled && damagecustom == TF_CUSTOM_BOOTS_STOMP) 
+	if (!enabled) return Plugin_Continue;
+	
+	if (damagecustom == TF_CUSTOM_BOOTS_STOMP) 
 	{
 		damage *= 10;
 		return Plugin_Changed;
 	}
-				
-	return Plugin_Continue;
-}
-
-public OnTakeDamagePost(client, attacker, inflictor, Float:damage, damagetype)
-{
-	if (!enabled || !IsValidClient(client) || !IsValidClient(attacker))
-		return;
-		
+	
 	new weaponID = GetActiveWeaponID(attacker);
-
-	if ((weaponID == 221 || weaponID == 999) && attacker != client && IsPlayerAlive(client))
+	
+	if (damagecustom != TF_CUSTOM_BLEEDING && damagecustom != TF_CUSTOM_BURNING &&
+		damagecustom != TF_CUSTOM_BURNING_ARROW && damagecustom != TF_CUSTOM_BURNING_FLARE &&
+		weaponID == 221 || weaponID == 999 && attacker != client && IsPlayerAlive(client))
 	{
 		decl Float:ang[3];
 		GetClientEyeAngles(client, ang);
@@ -464,7 +458,15 @@ public OnTakeDamagePost(client, attacker, inflictor, Float:damage, damagetype)
 		
 		TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
 	}
-		
+	
+	return Plugin_Continue;
+}
+
+public OnTakeDamagePost(client, attacker, inflictor, Float:damage, damagetype)
+{
+	if (!enabled || !IsValidClient(client) || !IsValidClient(attacker))
+		return;
+
 	if (IsPlayerAlive(client) && !ShouldDisableWeapons(client))
 		CheckHealthCaps(client);
 	
@@ -479,7 +481,7 @@ public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionI
 	   || !isCompatibleItem(classname, itemDefinitionIndex)
 	   || itemDefinitionIndex > 2000
 	   || (itemQuality == 5 && itemDefinitionIndex != 266)
-	   || itemQuality == 8 || itemQuality == 10 || rndmRunning)
+	   || itemQuality == 8 || itemQuality == 10)
 		return;
 	
 	ModifyAttribs(client, classname, itemDefinitionIndex, entityIndex);
@@ -492,44 +494,8 @@ public Action:Event_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
 		return Plugin_Continue;
 
 	new userid = GetEventInt(event, "userid");
-	
 	TF2_AddCondition(GetClientOfUserId(userid), TFCond_SpeedBuffAlly, 0.01);
-	CreateTimer(0.2, Timer_ClipRndmFix, userid, TIMER_FLAG_NO_MAPCHANGE);
 
-	return Plugin_Continue;
-}
-
-public Action:Timer_ClipRndmFix(Handle:hTimer, any:userid)
-{
-	new client = GetClientOfUserId(userid);
-	
-	UpdateVariables(client);
-	
-	decl String:classname[32];
-	new weapon, slot, wepid;
-		
-	for(slot=0; slot < 5; slot++)
-	{
-		weapon = GetPlayerWeaponSlot(client, slot);
-		if (!IsValidEntity(weapon))
-			continue;
-			
-		wepid = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
-		if (wepid < 0)
-			continue;
-		
-		if (isCompatibleItem(classname, wepid))
-		{
-			if (rndmRunning)
-			{
-				GetEdictClassname(weapon, classname, sizeof(classname));
-				ModifyAttribs(client, classname, wepid, weapon);
-				CheckClips(weapon, wepid);
-			}
-		}
-	}
-	
-	TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01); //recalc their speed after tf2attrib -- thx sarge
 	return Plugin_Continue;
 }
 
@@ -539,8 +505,9 @@ public Action:Event_PostInventoryApplication(Handle:event, const String:name[], 
 		return Plugin_Continue;
 	
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+	
 	UpdateVariables(client);
-
+	
 	return Plugin_Continue;
 }
 
@@ -975,11 +942,8 @@ stock CheckClips(entityIndex, itemDefinitionIndex)
 	if (GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
 	{
 		new ammoCount = 0;
-		if (itemDefinitionIndex != 19 && itemDefinitionIndex != 206 && itemDefinitionIndex != 1007)
-		{
-			new Float:clipSize = StringToFloat(attribValue);
-			ammoCount = RoundToCeil(float(GetEntProp(entityIndex, Prop_Data, "m_iClip1")) * clipSize);
-		}
+		new Float:clipSize = StringToFloat(attribValue);
+		ammoCount = RoundToCeil(GetEntPropFloat(entityIndex, Prop_Data, "m_iClip1") * clipSize);
 		SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), ammoCount, 4, true);
 	}
 	else
@@ -988,6 +952,14 @@ stock CheckClips(entityIndex, itemDefinitionIndex)
 		if (GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
 		{
 			SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), StringToInt(attribValue), 4, true);
+		}
+		else
+		{
+			Format(tmpID, sizeof(tmpID), "%s__%d_chkclip3", selectedMod, itemDefinitionIndex);
+			if (GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
+			{
+				SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iAmmo"), StringToInt(attribValue), 4, true);
+			}
 		}
 	}
 }
