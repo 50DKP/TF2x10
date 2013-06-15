@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.41"
+#define PLUGIN_VERSION	"0.42"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -43,7 +43,7 @@ new bool:g_bTakesHeads[MAXPLAYERS + 1] = false; //can take heads (lowers process
 new bool:steamtools = false; //SteamTools to change description
 new g_iRazorbackCount[MAXPLAYERS + 1] = 10; //Number of Razorbacks for Sniper
 new g_iCabers[MAXPLAYERS + 1] = 10; //Number of Cabers for Demoman
-new g_iBuildingsDestroyed[MAXPLAYERS + 1] = 0;
+new g_iBuildingsDestroyed[MAXPLAYERS + 1] = 0; //Crits when a building is destroyed (Frontier Justice)
 new _medPackTraceFilteredEnt = -1; //Candycane full Medipack spawning
 
 //Mod compatibility variables
@@ -522,7 +522,7 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 	
 	if (damagecustom != TF_CUSTOM_BLEEDING && damagecustom != TF_CUSTOM_BURNING &&
 		damagecustom != TF_CUSTOM_BURNING_ARROW && damagecustom != TF_CUSTOM_BURNING_FLARE &&
-		weaponID == 221 || weaponID == 999 && attacker != client && IsPlayerAlive(client))
+		(weaponID == 221 || weaponID == 999) && attacker != client && IsPlayerAlive(client))
 	{
 		decl Float:ang[3];
 		GetClientEyeAngles(client, ang);
