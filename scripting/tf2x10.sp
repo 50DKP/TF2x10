@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.40"
+#define PLUGIN_VERSION	"0.41"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -486,18 +486,18 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 		
 		if(IsValidEntity(inflictor_entindex))
 		{
-			decl String:inflictorName[32];
+			decl String:inflictorName[16];
 			GetEdictClassname(inflictor_entindex, inflictorName, sizeof(inflictorName));
 			
 			if(StrEqual(inflictorName, "obj_sentrygun"))
 			{
-				if(GetEventInt(event, "assister") == -1)
+				if(GetEventInt(event, "assister") < 1)
 				{
 					g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + critsPerEvent - 2;
 				}
 				else
 				{
-					g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToCeil(float(critsPerEvent) / 2.0) - 1;
+					g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToNearest(float(critsPerEvent / 2)) - 1;
 				}
 			}
 		}
