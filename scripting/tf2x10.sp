@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.39"
+#define PLUGIN_VERSION	"0.40"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -43,6 +43,7 @@ new bool:g_bTakesHeads[MAXPLAYERS + 1] = false; //can take heads (lowers process
 new bool:steamtools = false; //SteamTools to change description
 new g_iRazorbackCount[MAXPLAYERS + 1] = 10; //Number of Razorbacks for Sniper
 new g_iCabers[MAXPLAYERS + 1] = 10; //Number of Cabers for Demoman
+new g_iBuildingsDestroyed[MAXPLAYERS + 1] = 0;
 new _medPackTraceFilteredEnt = -1; //Candycane full Medipack spawning
 
 //Mod compatibility variables
@@ -65,6 +66,7 @@ new maxSpyHealth = 185;
 new spyKunaiHealth = 1800;
 new heavyDalokohOverheal = 500;
 new String:selectedMod[16] = "default";
+new critsPerEvent = 10;
 
 new Handle:cvarEnabled;
 new Handle:cvarGameDesc;
@@ -79,6 +81,7 @@ new Handle:cvarMaxSpyHealth;
 new Handle:cvarSpyKunaiHealth;
 new Handle:cvarHeavyDalokohOverheal;
 new Handle:cvarIncludeBots;
+new Handle:cvarCritsPerEvent;
 new Handle:fnGetMaxHealth; //thx psychonic
 
 public Plugin:myinfo =
@@ -158,6 +161,7 @@ public OnPluginStart()
 	cvarMaxSpyHealth = CreateConVar("tf2x10_maxspyhealth", "185", "Max health a spy can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 1000.0);
 	cvarSpyKunaiHealth = CreateConVar("tf2x10_spykunaihealth", "1800", "Health a spy gains when backstabbing with the kunai. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 1000.0);
 	cvarHeavyDalokohOverheal = CreateConVar("tf2x10_dalokohhealth", "500", "Health a Heavy gets after eating a Dalokoh's/Fishcake. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
+	cvarCritsPerEvent = CreateConVar("tf2x10_critsperevent", "10", "Number of crits after Frontier kill or Diamondback sap", FCVAR_PLUGIN, true, -1.0, false, 100.0);
 
 	HookConVarChange(cvarEnabled, CVarChange);
 	HookConVarChange(cvarGameDesc, CVarChange);
@@ -171,6 +175,7 @@ public OnPluginStart()
 	HookConVarChange(cvarMaxSpyHealth, CVarChange);
 	HookConVarChange(cvarSpyKunaiHealth, CVarChange);
 	HookConVarChange(cvarHeavyDalokohOverheal, CVarChange);
+	HookConVarChange(cvarCritsPerEvent, CVarChange);
 		
 	AutoExecConfig(true, "plugin.tf2x10");
 
@@ -181,6 +186,8 @@ public OnPluginStart()
 	HookEvent("teamplay_restart_round", Event_RoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("arena_win_panel", Event_RoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("round_end", Event_RoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("object_destroyed", Event_Object_Destroyed, EventHookMode_Post);
+	HookEvent("object_removed", Event_Object_Remove, EventHookMode_Post);
 	
 	steamtools = LibraryExists("SteamTools");
 
@@ -237,7 +244,7 @@ public AdminMenu_Recache(Handle:topmenu,
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
-		Format(buffer, maxlength, "%T", "TF2x10 Recache Weapons", param);
+		Format(buffer, maxlength, "TF2x10 Recache Weapons");
 	}
 	else if (action == TopMenuAction_SelectOption)
 	{
@@ -412,6 +419,49 @@ public Action:Event_RoundEnd(Handle:event,const String:name[],bool:dontBroadcast
 	return Plugin_Continue;
 }
 
+public Action:Event_Object_Destroyed(Handle:event, const String:name[], bool:dontBroadcast)
+{
+	if (!enabled) return Plugin_Continue;
+	
+	new attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	new primaryWep = TF2_GetWeaponSlotID(attacker, TFWeaponSlot_Primary);
+	
+	if (IsValidClient(attacker) && IsPlayerAlive(attacker) && critsPerEvent != -1 && primaryWep == 525)
+	{
+		decl String:weapon[32];
+		GetEventString(event, "weapon", weapon, sizeof(weapon));
+		
+		if(StrContains(weapon, "sapper") != -1 || StrEqual(weapon, "recorder"))
+		{
+			new currentCrits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits");
+			SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", currentCrits+critsPerEvent-1);
+		}
+	}
+	
+	return Plugin_Continue;
+}
+
+public Action:Event_Object_Remove(Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+	new entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Primary);
+	
+	if (!IsValidEntity(entity)) return Plugin_Continue;
+	
+	decl String:classname[32];
+	GetEdictClassname(entity, classname, sizeof(classname));
+
+	if(StrEqual(classname, "tf_weapon_sentry_revenge") && GetEventInt(event, "objecttype") == 2)
+	{
+		new currentCrits = GetEntProp(client, Prop_Send, "m_iRevengeCrits");
+		SetEntProp(client, Prop_Send, "m_iRevengeCrits", currentCrits+g_iBuildingsDestroyed[client]);
+		
+		g_iBuildingsDestroyed[client] = 0;
+	}
+	
+	return Plugin_Continue;
+}
+
 public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	if (!enabled)
@@ -419,16 +469,38 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	new attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-	new attackerWep = GetActiveWeaponID(attacker);
+	new activeWep = GetActiveWeaponID(attacker);
 	new customKill = GetEventInt(event, "customkill");
 
-	if (candyCaneMedPackType != -1 && attackerWep == 317)
+	if (candyCaneMedPackType != -1 && activeWep == 317)
 	{
 		TF2_SpawnMedipack(client, candyCaneMedPackType, false);
 	}
-	else if (spyKunaiHealth != -1 && attackerWep == 356 && customKill == TF_CUSTOM_BACKSTAB)
+	else if (spyKunaiHealth != -1 && activeWep == 356 && customKill == TF_CUSTOM_BACKSTAB)
 	{
 		TF2_SetHealth(attacker, spyKunaiHealth);
+	}
+	else if (critsPerEvent != -1)
+	{
+		new inflictor_entindex = GetEventInt(event, "inflictor_entindex");
+		
+		if(IsValidEntity(inflictor_entindex))
+		{
+			decl String:inflictorName[32];
+			GetEdictClassname(inflictor_entindex, inflictorName, sizeof(inflictorName));
+			
+			if(StrEqual(inflictorName, "obj_sentrygun"))
+			{
+				if(GetEventInt(event, "assister") == -1)
+				{
+					g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + critsPerEvent - 2;
+				}
+				else
+				{
+					g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToCeil(float(critsPerEvent) / 2.0) - 1;
+				}
+			}
+		}
 	}
 
 	ResetVariables(client);
@@ -699,6 +771,7 @@ stock ResetVariables(client)
 {
 	g_iRazorbackCount[client] = 0;
 	g_iCabers[client] = 0;
+	g_iBuildingsDestroyed[client] = 0;
 	g_bHasCaber[client] = false;
 	g_bTakesHeads[client] = false;
 }
