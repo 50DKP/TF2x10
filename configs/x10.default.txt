@@ -780,13 +780,10 @@
 		"engy sentry fire rate increased" "2" //+100% Sentry Fire Rate
 		"provide on active" "1" //Effects only active when weapon is active
 	}
-	"141" //Frontier Justice + Texas Ten-shot
+	"141" //Frontier Justice
 	{
-		"clip size penalty" "remove" //Remove the penalty
-		"clip size bonus" "2.67" //+166% clip size
+		"clip size penalty" "0.25" //
 		"maxammo primary increased" "3.5" //+250% max primary ammo
-		"tmp dmgbuff on hit" "2.5" //+150% Temporary Damage Buff on hit
-		"Reload time increased" "9" //+800% Slower reload time
 	}	
 	"142" //Gunslinger
 	{
@@ -1456,14 +1453,11 @@
 		"add uber charge on hit" "25" //100% Uber on hit
 		"fire rate penalty" "3" //200% slower firing speed
 	}
-	"1004" //Festive Frontier Justice + Texas Ten-shot
+	"1004" //Festive Frontier Justice
 	{
-		"clip size penalty" "remove" //Remove the penalty
-		"clip size bonus" "2.67" //+166% clip size
+		"clip size penalty" "0.25" //Remove the penalty
 		"maxammo primary increased" "3.5" //+250% max primary ammo
-		"tmp dmgbuff on hit" "2.5" //+150% Temporary Damage Buff on hit
-		"Reload time increased" "9" //+800% Slower reload time
-	}
+	}	
 	"1005" //Festive Huntsman
 	{
 		"hidden primary max ammo bonus" "5" //10x Primary Ammo
