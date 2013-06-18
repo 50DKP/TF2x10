@@ -1188,6 +1188,8 @@
 		"apply look velocity on damage" "1250" //Horizontal Swing
 		"apply z velocity on damage" "900" //Vertical Swing
 		"fire rate penalty" "1.8" //-80% firing rate
+		"max health additive penalty" "0" //Health
+		"kill eater score type" "0" //no heads
 	}
 	"513" //The Original
 	{
