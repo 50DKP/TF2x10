@@ -620,14 +620,14 @@ public Action:Event_PlayerShieldBlocked(UserMsg:msg_id, Handle:bf, const players
 	return Plugin_Continue; 
 }
 
-public Action:Event_PlayerShieldBlocked(UserMsg:msg_id, Handle:bf, const players[], playersNum, bool:reliable, bool:init) 
+public Action:Event_PlayerExtinguished(UserMsg:msg_id, Handle:bf, const players[], playersNum, bool:reliable, bool:init) 
 {
 	if (!enabled || playersNum < 2)
 		return Plugin_Continue;
 	
-	new client = players[1];
+	new client = players[0];
 
-	if(TF2_GetPlayerClass(client) == TFClass_Pyro && TF2_GetWeaponSlotID(client, TFWeaponSlot_Secondary) == 595)
+	if(TF2_GetWeaponSlotID(client, TFWeaponSlot_Secondary) == 595)
 	{
 		new weaponEnt = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		
