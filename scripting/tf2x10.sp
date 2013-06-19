@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.42"
+#define PLUGIN_VERSION	"0.43"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -182,6 +182,7 @@ public OnPluginStart()
 	HookEvent("player_death", Event_PlayerDeath,  EventHookMode_Post);
 	HookEvent("post_inventory_application", Event_PostInventoryApplication, EventHookMode_Post);
 	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), Event_PlayerShieldBlocked); 
+	HookUserMessage(GetUserMessageId("PlayerExtinguished"), Event_PlayerExtinguished);
 	HookEvent("teamplay_win_panel", Event_RoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("teamplay_restart_round", Event_RoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("arena_win_panel", Event_RoundEnd, EventHookMode_PostNoCopy);
@@ -617,6 +618,30 @@ public Action:Event_PlayerShieldBlocked(UserMsg:msg_id, Handle:bf, const players
 		SDKCall(g_hSdkEquipWearable, victim, entity);
 	}
 	return Plugin_Continue; 
+}
+
+public Action:Event_PlayerShieldBlocked(UserMsg:msg_id, Handle:bf, const players[], playersNum, bool:reliable, bool:init) 
+{
+	if (!enabled || playersNum < 2)
+		return Plugin_Continue;
+	
+	new client = players[1];
+
+	if(TF2_GetPlayerClass(client) == TFClass_Pyro && TF2_GetWeaponSlotID(client, TFWeaponSlot_Secondary) == 595)
+	{
+		new weaponEnt = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		
+		decl String:classname[32];
+		GetEdictClassname(weaponEnt, classname, sizeof(classname));
+		
+		if(!StrEqual(classname, "tf_weapon_flamethrower"))
+		{
+			new currentCrits = GetEntProp(client, Prop_Send, "m_iRevengeCrits");
+			SetEntProp(client, Prop_Send, "m_iRevengeCrits", currentCrits+critsPerEvent-1);
+		}
+	}
+	
+	return Plugin_Continue;
 }
 
 public Action:Command_Taunt(client, args)
