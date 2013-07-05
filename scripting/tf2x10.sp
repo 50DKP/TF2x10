@@ -30,13 +30,13 @@
 //========= Variables =========
 
 //Where to update from
-#define UPDATE_URL	"http://isatis.me/x10/updater.txt"
+#define UPDATE_URL	"http://tf2x10.us.to/dl/updater.txt"
 
 //TF2x10-specific variables
-new Handle:g_hTopMenu = INVALID_HANDLE; //Admin Menu Recaching (Mr. Blue)
-new Handle:g_hSdkEquipWearable = INVALID_HANDLE; //For 10 Razorbacks stuff
-new Handle:g_hItemInfoTrie = INVALID_HANDLE; // Item Info Trie
-new Handle:g_hHudText = INVALID_HANDLE; //Caber/Razorback Remaining
+new Handle:g_hTopMenu; //Admin Menu Recaching (Mr. Blue)
+new Handle:g_hSdkEquipWearable; //For 10 Razorbacks stuff
+new Handle:g_hItemInfoTrie; // Item Info Trie
+new Handle:g_hHudText; //Caber/Razorback Remaining
 new bool:g_bIsEating[MAXPLAYERS + 1] = false; //is eating dalokoh's/fishcake
 new bool:g_bHasCaber[MAXPLAYERS + 1] = false; //does demoman have a caber?
 new bool:g_bTakesHeads[MAXPLAYERS + 1] = false; //can take heads (lowers processing on OnGameFrame)
@@ -49,24 +49,15 @@ new _medPackTraceFilteredEnt = -1; //Candycane full Medipack spawning
 //Mod compatibility variables
 new bool:vshRunning = false; //is VS Saxton Hale running?
 new bool:ff2Running = false; //is Freak Fortress 2 running?
+new bool:rndmRunning = false; //is Randomizer running?
 new bool:hiddenRunning = false; //is The Hidden running?
 
 //========= Cvars/Handles ============
 
 new bool:enabled = true;
-new bool:gameDesc = true;
-new bool:includeBots = false;
 new bool:headScales = false;
 new Float:headScalesCap = 6.0;
-new healthCap = 2000;
-new blackBoxHealthCap = 2000;
-new Float:fishSlapAngle = 120.0;
-new candyCaneMedPackType = 2;
-new maxSpyHealth = 185;
-new spyKunaiHealth = 1800;
-new heavyDalokohOverheal = 500;
 new String:selectedMod[16] = "default";
-new critsPerEvent = 10;
 
 new Handle:cvarEnabled;
 new Handle:cvarGameDesc;
@@ -78,7 +69,6 @@ new Handle:cvarBlackBoxHealthCap;
 new Handle:cvarFishSlapAngle;
 new Handle:cvarCandyCaneMedPackType;
 new Handle:cvarMaxSpyHealth;
-new Handle:cvarSpyKunaiHealth;
 new Handle:cvarHeavyDalokohOverheal;
 new Handle:cvarIncludeBots;
 new Handle:cvarCritsPerEvent;
@@ -117,6 +107,72 @@ public OnPluginStart()
 	g_hHudText = CreateHudSynchronizer();
 	g_hItemInfoTrie = CreateTrie();
 	
+	PrepSDKCalls();
+	
+	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
+	RegAdminCmd("sm_tf2x10_loadmod", Command_LoadMod, ADMFLAG_GENERIC);
+	
+	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	
+	cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable. Needs SteamTools.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells updater.smx to automatically update this plugin. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarHeadScales = CreateConVar("tf2x10_headscales", "0", "Enable Resize Heads. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarHeadScalesCap = CreateConVar("tf2x10_headscalescap", "6.0", "Max Head Scale. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 100.0);
+	cvarHealthCap = CreateConVar("tf2x10_healthcap", "2000", "The max health a player can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
+	cvarBlackBoxHealthCap = CreateConVar("tf2x10_blackboxhealthcap", "2000", "The max health a soldier can have with the black box. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
+	cvarFishSlapAngle = CreateConVar("tf2x10_fishslapangle", "120", "Fish slap rotation angle. Change is instant so 360 is unnoticible.", FCVAR_PLUGIN);
+	cvarCandyCaneMedPackType = CreateConVar("tf2x10_candycanemedpacktype", "2.0", "The type of medpack that is dropped from killing someone while having a candy cane. -1 to disable, 0 small, 1 medium, 2 full.", FCVAR_PLUGIN, true, -1.0, true, 2.0);
+	cvarMaxSpyHealth = CreateConVar("tf2x10_maxspyhealth", "185", "Max health a spy can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 1000.0);
+	cvarHeavyDalokohOverheal = CreateConVar("tf2x10_dalokohhealth", "500", "Health a Heavy gets after eating a Dalokoh's/Fishcake. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
+	cvarCritsPerEvent = CreateConVar("tf2x10_critsperevent", "10", "Number of crits after Frontier kill or Diamondback sap", FCVAR_PLUGIN, true, -1.0, false, 100.0);
+
+	HookConVarChange(cvarEnabled, CVarChange_Enable);
+	HookConVarChange(cvarHeadScales, CVarChange_HeadScales);
+	HookConVarChange(cvarHeadScalesCap, CVarChange_HeadScales);
+		
+	AutoExecConfig(true, "plugin.tf2x10");
+
+	HookEvent("arena_win_panel", Event_RoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("object_destroyed", Event_Object_Destroyed, EventHookMode_Post);
+	HookEvent("object_removed", Event_Object_Remove, EventHookMode_Post);
+	HookEvent("player_death", Event_PlayerDeath,  EventHookMode_Post);
+	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), Event_PlayerShieldBlocked); 
+	HookEvent("post_inventory_application", Event_PostInventoryApplication, EventHookMode_Post);
+	HookEvent("teamplay_restart_round", Event_RoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("teamplay_win_panel", Event_RoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("round_end", Event_RoundEnd, EventHookMode_PostNoCopy);
+	
+	steamtools = LibraryExists("SteamTools");
+
+	for (new client=1; client < MaxClients; client++)
+	{
+		if (IsValidClient(client) && IsClientInGame(client))
+		{
+			UpdateVariables(client);
+		}
+	}
+	
+	if (LibraryExists("updater") && GetConVarBool(cvarAutoUpdate) == true)
+		Updater_AddPlugin(UPDATE_URL);
+	
+	new Handle:topmenu;
+	if (LibraryExists("adminmenu") && ((topmenu = GetAdminTopMenu()) != INVALID_HANDLE))
+		OnAdminMenuReady(topmenu);
+
+	new loaded = LoadFileIntoTrie("default", "tf2x10_base_items");
+	if (loaded == 1)
+		CreateTimer(330.0, Timer_Ads, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	else if (loaded == -1)
+		SetFailState("Could not find the file x10.default.txt. Aborting.");
+	else if (loaded == -2)
+		SetFailState("Text file found, but it is the wrong one. Aborting.");
+	
+}
+
+PrepSDKCalls()
+{
 	new Handle:hConf = LoadGameConfigFile("sdkhooks.games");
 	if (hConf == INVALID_HANDLE)
 		SetFailState("Cannot find sdkhooks.games gamedata.");
@@ -141,81 +197,7 @@ public OnPluginStart()
 	CloseHandle(hConf);
 	
 	if (g_hSdkEquipWearable == INVALID_HANDLE)
-		SetFailState("Failed to set up EquipWearable sdkcall.");
-	
-	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
-	RegAdminCmd("sm_tf2x10_loadmod", Command_LoadMod, ADMFLAG_GENERIC);
-	
-	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	
-	cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable. Needs SteamTools.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells updater.smx to automatically update this plugin. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	cvarHeadScales = CreateConVar("tf2x10_headscales", "0", "Enable Resize Heads. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	cvarHeadScalesCap = CreateConVar("tf2x10_headscalescap", "6.0", "Max Head Scale. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 100.0);
-	cvarHealthCap = CreateConVar("tf2x10_healthcap", "2000", "The max health a player can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
-	cvarBlackBoxHealthCap = CreateConVar("tf2x10_blackboxhealthcap", "2000", "The max health a soldier can have with the black box. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
-	cvarFishSlapAngle = CreateConVar("tf2x10_fishslapangle", "120", "Fish slap rotation angle. Change is instant so 360 is unnoticible.", FCVAR_PLUGIN);
-	cvarCandyCaneMedPackType = CreateConVar("tf2x10_candycanemedpacktype", "2.0", "The type of medpack that is dropped from killing someone while having a candy cane. -1 to disable, 0 small, 1 medium, 2 full.", FCVAR_PLUGIN, true, -1.0, true, 2.0);
-	cvarMaxSpyHealth = CreateConVar("tf2x10_maxspyhealth", "185", "Max health a spy can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 1000.0);
-	cvarSpyKunaiHealth = CreateConVar("tf2x10_spykunaihealth", "1800", "Health a spy gains when backstabbing with the kunai. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 1000.0);
-	cvarHeavyDalokohOverheal = CreateConVar("tf2x10_dalokohhealth", "500", "Health a Heavy gets after eating a Dalokoh's/Fishcake. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
-	cvarCritsPerEvent = CreateConVar("tf2x10_critsperevent", "10", "Number of crits after Frontier kill or Diamondback sap", FCVAR_PLUGIN, true, -1.0, false, 100.0);
-
-	HookConVarChange(cvarEnabled, CVarChange);
-	HookConVarChange(cvarGameDesc, CVarChange);
-	HookConVarChange(cvarIncludeBots, CVarChange);
-	HookConVarChange(cvarHeadScales, CVarChange);
-	HookConVarChange(cvarHeadScalesCap, CVarChange);
-	HookConVarChange(cvarHealthCap, CVarChange);
-	HookConVarChange(cvarBlackBoxHealthCap, CVarChange);
-	HookConVarChange(cvarFishSlapAngle, CVarChange);
-	HookConVarChange(cvarCandyCaneMedPackType, CVarChange);
-	HookConVarChange(cvarMaxSpyHealth, CVarChange);
-	HookConVarChange(cvarSpyKunaiHealth, CVarChange);
-	HookConVarChange(cvarHeavyDalokohOverheal, CVarChange);
-	HookConVarChange(cvarCritsPerEvent, CVarChange);
-		
-	AutoExecConfig(true, "plugin.tf2x10");
-
-	HookEvent("player_death", Event_PlayerDeath,  EventHookMode_Post);
-	HookEvent("post_inventory_application", Event_PostInventoryApplication, EventHookMode_Post);
-	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), Event_PlayerShieldBlocked); 
-	HookUserMessage(GetUserMessageId("PlayerExtinguished"), Event_PlayerExtinguished);
-	HookEvent("teamplay_win_panel", Event_RoundEnd, EventHookMode_PostNoCopy);
-	HookEvent("teamplay_restart_round", Event_RoundEnd, EventHookMode_PostNoCopy);
-	HookEvent("arena_win_panel", Event_RoundEnd, EventHookMode_PostNoCopy);
-	HookEvent("round_end", Event_RoundEnd, EventHookMode_PostNoCopy);
-	HookEvent("object_destroyed", Event_Object_Destroyed, EventHookMode_Post);
-	HookEvent("object_removed", Event_Object_Remove, EventHookMode_Post);
-	
-	steamtools = LibraryExists("SteamTools");
-
-	for(new i=1;i<=MaxClients;i++)
-	{
-        if (IsClientInGame(i))
-		{
-			ResetVariables(i);
-			UpdateVariables(i);
-		}
-    }
-	
-	if (LibraryExists("updater") && GetConVarBool(cvarAutoUpdate) == true)
-		Updater_AddPlugin(UPDATE_URL);
-	
-	new Handle:topmenu;
-	if (LibraryExists("adminmenu") && ((topmenu = GetAdminTopMenu()) != INVALID_HANDLE))
-		OnAdminMenuReady(topmenu);
-
-	new loaded = LoadFileIntoTrie("default", "tf2x10_base_items");
-	if (loaded == 1)
-		CreateTimer(330.0, Timer_Ads, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-	else if (loaded == -1)
-		SetFailState("Could not find the file x10.default.txt. Aborting.");
-	else if (loaded == -2)
-		SetFailState("Text file found, but it is the wrong one. Aborting.");
-	
+		SetFailState("Failed to set up EquipWearable sdkcall, get a new tf2items.randomizer.txt from [TF2Items] GiveWeapon.");
 }
 
 public Action:Timer_Ads(Handle:hTimer)
@@ -236,21 +218,18 @@ public Action:Command_Recache(client, args)
 	return Plugin_Handled;
 }
 
-public AdminMenu_Recache(Handle:topmenu,
-						TopMenuAction:action,
-						TopMenuObject:object_id,
-						param,
-						String:buffer[],
-						maxlength)
+public AdminMenu_Recache(Handle:topmenu, TopMenuAction:action, TopMenuObject:object_id, param, String:buffer[], maxlength)
 {
-	if (action == TopMenuAction_DisplayOption)
+	switch (action)
 	{
-		Format(buffer, maxlength, "TF2x10 Recache Weapons");
-	}
-	else if (action == TopMenuAction_SelectOption)
-	{
-		if (enabled && LoadFileIntoTrie("default", "tf2x10_base_items") == 1)
-			PrintToChat(param, "[TF2x10] Weapons recached.");
+		case TopMenuAction_DisplayOption:
+			Format(buffer, maxlength, "TF2x10 Recache Weapons");
+
+		case TopMenuAction_SelectOption:
+		{
+			if(enabled && LoadFileIntoTrie("default", "tf2x10_base_items") == 1)
+				PrintToChat(param, "[TF2x10] Weapons recached.");
+		}
 	}
 }
 
@@ -309,6 +288,7 @@ public OnMapStart()
 	{
 		vshRunning = CheckConVar("hale_enabled") == 1;
 		ff2Running = CheckConVar("ff2_enabled") == 1;
+		rndmRunning = CheckConVar("tf2items_rnd_enabled") == 1;
 		hiddenRunning = CheckConVar("sm_hidden_enabled") == 1;
 		
 		if (vshRunning || ff2Running)
@@ -317,7 +297,7 @@ public OnMapStart()
 			LoadFileIntoTrie("vshff2");
 		}
 		
-		if (steamtools && gameDesc)
+		if (steamtools && GetConVarBool(cvarGameDesc))
 		{
 			decl String:locDesc[16];
 			Format(locDesc, sizeof(locDesc), "TF2x10 %s", PLUGIN_VERSION);
@@ -329,7 +309,10 @@ public OnMapStart()
 
 public OnMapEnd()
 {
-	if (enabled && steamtools && gameDesc)
+	decl String:locDesc[16];
+	GetGameDescription(locDesc, sizeof(locDesc));
+		
+	if (enabled && steamtools && StrContains(locDesc, "TF2x10") != 0)
 		Steam_SetGameDescription("Team Fortress");
 }
 
@@ -338,9 +321,9 @@ public OnClientPutInServer(client)
 	if (enabled)
 	{
 		ResetVariables(client);
+		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+		SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 	}
-	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
-	SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 }
 
 public OnClientDisconnect(client)
@@ -348,9 +331,9 @@ public OnClientDisconnect(client)
 	if (enabled)
 	{
 		ResetVariables(client);
+		SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+		SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 	}
-	SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
-	SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 }
 
 public OnAdminMenuReady(Handle:topmenu)
@@ -374,20 +357,69 @@ public OnAdminMenuReady(Handle:topmenu)
 
 // ====== CVar Changing ========
 
-public CVarChange(Handle:convar, const String:oldValue[], const String:newValue[])
+public CVarChange_Enable(Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	enabled = GetConVarBool(cvarEnabled);
-	gameDesc = GetConVarBool(cvarGameDesc);
-	includeBots = GetConVarBool(cvarIncludeBots);
+	
+	if (enabled)
+	{
+		for (new client=1; client < MaxClients; client++)
+		{
+			if(IsValidClient(client))
+			{
+				ResetVariables(client);
+				SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+				SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+			}
+		}
+		
+		vshRunning = CheckConVar("hale_enabled") == 1;
+		ff2Running = CheckConVar("ff2_enabled") == 1;
+		rndmRunning = CheckConVar("tf2items_rnd_enabled") == 1;
+		hiddenRunning = CheckConVar("sm_hidden_enabled") == 1;
+		
+		LoadFileIntoTrie("default", "tf2x10_base_items");
+		
+		if (vshRunning || ff2Running)
+		{
+			strcopy(selectedMod, sizeof(selectedMod), "vshff2");
+			LoadFileIntoTrie("vshff2");
+		}
+		
+		if (steamtools && GetConVarBool(cvarGameDesc))
+		{
+			decl String:locDesc[16];
+			Format(locDesc, sizeof(locDesc), "TF2x10 %s", PLUGIN_VERSION);
+			ReplaceString(locDesc, sizeof(locDesc), "0.", "r");
+			Steam_SetGameDescription(locDesc);
+		}
+	}
+	else
+	{
+		for (new client=1; client < MaxClients; client++)
+		{
+			if(IsValidClient(client))
+			{
+				ResetVariables(client);
+				SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+				SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+			}
+		}
+		
+		decl String:locDesc[16];
+		GetGameDescription(locDesc, sizeof(locDesc));
+		
+		if(steamtools && StrContains(locDesc, "TF2x10") == 0)
+			Steam_SetGameDescription("Team Fortress");
+		
+		ClearTrie(g_hItemInfoTrie);
+	}
+}
+
+public CVarChange_HeadScales(Handle:convar, const String:oldValue[], const String:newValue[])
+{
 	headScales = GetConVarBool(cvarHeadScales);
 	headScalesCap = GetConVarFloat(cvarHeadScalesCap);
-	healthCap = GetConVarInt(cvarHealthCap);
-	blackBoxHealthCap = GetConVarInt(cvarBlackBoxHealthCap);
-	fishSlapAngle = GetConVarFloat(cvarFishSlapAngle);
-	candyCaneMedPackType = GetConVarInt(cvarCandyCaneMedPackType);
-	maxSpyHealth = GetConVarInt(cvarMaxSpyHealth);
-	spyKunaiHealth = GetConVarInt(cvarSpyKunaiHealth);
-	heavyDalokohOverheal = GetConVarInt(cvarHeavyDalokohOverheal);
 }
 
 // ======= Event Hooks ===========
@@ -413,9 +445,9 @@ public Action:Event_RoundEnd(Handle:event,const String:name[],bool:dontBroadcast
 	if (!enabled)
 		return Plugin_Continue;
 	
-	for(new i=1;i<=MaxClients;i++)
+	for(new client=1; client < MaxClients; client++)
 	{
-		ResetVariables(i);
+		ResetVariables(client);
     }
 	return Plugin_Continue;
 }
@@ -426,6 +458,7 @@ public Action:Event_Object_Destroyed(Handle:event, const String:name[], bool:don
 	
 	new attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 	new primaryWep = TF2_GetWeaponSlotID(attacker, TFWeaponSlot_Primary);
+	new critsPerEvent = GetConVarInt(cvarCritsPerEvent);
 	
 	if (IsValidClient(attacker) && IsPlayerAlive(attacker) && critsPerEvent != -1 && primaryWep == 525)
 	{
@@ -472,34 +505,34 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	new attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 	new activeWep = GetActiveWeaponID(attacker);
 	new customKill = GetEventInt(event, "customkill");
+	new candyCaneMedPackType = GetConVarBool(cvarCandyCaneMedPackType);
 
 	if (candyCaneMedPackType != -1 && activeWep == 317)
 	{
 		TF2_SpawnMedipack(client, candyCaneMedPackType, false);
 	}
-	else if (spyKunaiHealth != -1 && activeWep == 356 && customKill == TF_CUSTOM_BACKSTAB)
+	else if (activeWep == 356 && customKill == TF_CUSTOM_BACKSTAB && !ff2Running && !vshRunning && !hiddenRunning)
 	{
-		TF2_SetHealth(attacker, spyKunaiHealth);
+		new health = GetEntProp(attacker, Prop_Send, "m_iHealth");
+		TF2_SetHealth(attacker, health * 10);
 	}
-	else if (critsPerEvent != -1)
-	{
-		new inflictor_entindex = GetEventInt(event, "inflictor_entindex");
+	
+	new inflictor_entindex = GetEventInt(event, "inflictor_entindex");
 		
-		if(IsValidEntity(inflictor_entindex))
+	if(IsValidEntity(inflictor_entindex))
+	{
+		decl String:inflictorName[32];
+		GetEdictClassname(inflictor_entindex, inflictorName, sizeof(inflictorName));
+		
+		if(StrContains(inflictorName, "sentry") >= 0)
 		{
-			decl String:inflictorName[16];
-			GetEdictClassname(inflictor_entindex, inflictorName, sizeof(inflictorName));
-			
-			if(StrEqual(inflictorName, "obj_sentrygun"))
+			if(GetEventInt(event, "assister") < 1)
 			{
-				if(GetEventInt(event, "assister") < 1)
-				{
-					g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + critsPerEvent - 2;
-				}
-				else
-				{
-					g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToNearest(float(critsPerEvent / 2)) - 1;
-				}
+				g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + GetConVarInt(cvarCritsPerEvent) - 2;
+			}
+			else
+			{
+				g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToNearest(GetConVarFloat(cvarCritsPerEvent) / 2.0) - 2;
 			}
 		}
 	}
@@ -527,7 +560,7 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 	{
 		decl Float:ang[3];
 		GetClientEyeAngles(client, ang);
-		ang[1] = ang[1] + fishSlapAngle;
+		ang[1] = ang[1] + GetConVarFloat(cvarFishSlapAngle);
 		
 		TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
 	}
@@ -549,7 +582,7 @@ public OnTakeDamagePost(client, attacker, inflictor, Float:damage, damagetype)
 
 public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionIndex, itemLevel, itemQuality, entityIndex)
 {
-	if (!enabled || (includeBots == false && IsFakeClient(client))
+	if (!enabled || (!GetConVarBool(cvarIncludeBots) && IsFakeClient(client))
 	   || ShouldDisableWeapons(client)
 	   || !isCompatibleItem(classname, itemDefinitionIndex)
 	   || itemDefinitionIndex > 2000
@@ -620,39 +653,18 @@ public Action:Event_PlayerShieldBlocked(UserMsg:msg_id, Handle:bf, const players
 	return Plugin_Continue; 
 }
 
-public Action:Event_PlayerExtinguished(UserMsg:msg_id, Handle:bf, const players[], playersNum, bool:reliable, bool:init) 
-{
-	if (!enabled || playersNum < 2)
-		return Plugin_Continue;
-	
-	new client = players[0];
-
-	if(TF2_GetWeaponSlotID(client, TFWeaponSlot_Secondary) == 595)
-	{
-		new weaponEnt = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		
-		decl String:classname[32];
-		GetEdictClassname(weaponEnt, classname, sizeof(classname));
-		
-		if(!StrEqual(classname, "tf_weapon_flamethrower"))
-		{
-			new currentCrits = GetEntProp(client, Prop_Send, "m_iRevengeCrits");
-			SetEntProp(client, Prop_Send, "m_iRevengeCrits", currentCrits+critsPerEvent-1);
-		}
-	}
-	
-	return Plugin_Continue;
-}
-
 public Action:Command_Taunt(client, args)
 {
 	if (enabled && (IsValidClient(client) && IsPlayerAlive(client)) &&
 	   (GetActiveWeaponID(client) == 159 ||
 	    GetActiveWeaponID(client) == 433) &&
-		!g_bIsEating[client] && heavyDalokohOverheal >= 50)
+		!g_bIsEating[client])
 	{
-		CreateTimer(4.1, Timer_Dalokoh, any:client);
-		g_bIsEating[client] = true;
+		if(GetConVarInt(cvarHeavyDalokohOverheal) >= 50)
+		{
+			CreateTimer(4.1, Timer_Dalokoh, any:client);
+			g_bIsEating[client] = true;
+		}
 	}
 	return Plugin_Continue;
 }
@@ -661,6 +673,9 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 {
 	if (!enabled || !IsValidClient(client) || !IsPlayerAlive(client))
 		return Plugin_Continue;
+	
+	if (rndmRunning)
+		Randomizer_OnPlayerRunCmd(client, buttons);
 	
 	if (g_bHasCaber[client])
 	{
@@ -687,7 +702,7 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	}
 
 	if ((buttons & IN_ATTACK) && (GetActiveWeaponID(client) == 159 || GetActiveWeaponID(client) == 433) &&
-	    (GetEntityFlags(client) & FL_ONGROUND) && !g_bIsEating[client] && heavyDalokohOverheal >= 50)
+	    (GetEntityFlags(client) & FL_ONGROUND) && !g_bIsEating[client] && GetConVarInt(cvarHeavyDalokohOverheal) >= 50)
 	{
 		CreateTimer(4.1, Timer_Dalokoh, any:client);
 		g_bIsEating[client] = true;
@@ -700,7 +715,7 @@ public Action:Timer_Dalokoh(Handle:timer, any:client)
 	if (GetClientHealth(client) <= SDKCall(fnGetMaxHealth, client) && TF2_IsPlayerInCondition(client, TFCond_Taunting)
 	   && g_bIsEating[client] == true && (GetActiveWeaponID(client) == 159 || GetActiveWeaponID(client) == 433))
 	{
-		TF2_SetHealth(client, (GetClientHealth(client)+heavyDalokohOverheal-50));
+		TF2_SetHealth(client, (GetClientHealth(client)+GetConVarInt(cvarHeavyDalokohOverheal)-50));
 	}
 	g_bIsEating[client] = false;
 }
@@ -796,7 +811,6 @@ stock ResetVariables(client)
 {
 	g_iRazorbackCount[client] = 0;
 	g_iCabers[client] = 0;
-	g_iBuildingsDestroyed[client] = 0;
 	g_bHasCaber[client] = false;
 	g_bTakesHeads[client] = false;
 }
@@ -816,12 +830,14 @@ stock UpdateVariables(client)
 stock CheckHealthCaps(client)
 {
 	new currentHealth = GetClientHealth(client);
-	new TFClassType:currentClass = TF2_GetPlayerClass(client);
+	new blackBoxHealthCap = GetConVarInt(cvarBlackBoxHealthCap);
+	new maxSpyHealth = GetConVarInt(cvarMaxSpyHealth);
+	new healthCap = GetConVarInt(cvarHealthCap);
 	
 	if (blackBoxHealthCap != -1 && TF2_GetWeaponSlotID(client, TFWeaponSlot_Primary) == 228 && currentHealth > blackBoxHealthCap)
 		TF2_SetHealth(client, blackBoxHealthCap);
 			
-	if (maxSpyHealth != -1 && currentClass == TFClass_Spy && TF2_GetWeaponSlotID(client, TFWeaponSlot_Melee) != 356 && currentHealth > maxSpyHealth)
+	if (maxSpyHealth != -1 && TF2_GetPlayerClass(client) == TFClass_Spy && TF2_GetWeaponSlotID(client, TFWeaponSlot_Melee) != 356 && currentHealth > maxSpyHealth)
 		TF2_SetHealth(client, maxSpyHealth);
 	
 	if (healthCap != -1 && currentHealth > healthCap)
@@ -1119,13 +1135,17 @@ stock RemovePlayerBack(client)
 stock CheckConVar(const String:cvarname[])
 {
 	new Handle:p_enabled = FindConVar(cvarname);
-	new isenabled = -1;
-	
 	if(p_enabled == INVALID_HANDLE)
 		return -1;
 
-	isenabled = GetConVarInt(p_enabled);
+	new isenabled = GetConVarInt(p_enabled);
 	CloseHandle(p_enabled);
 	
 	return isenabled;
+}
+
+// ==== Randomizer Support ====
+
+stock Randomizer_OnPlayerRunCmd(client, &buttons)
+{
 }
