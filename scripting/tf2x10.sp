@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.43"
+#define PLUGIN_VERSION	"0.44"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -38,12 +38,14 @@ new Handle:g_hSdkEquipWearable; //For 10 Razorbacks stuff
 new Handle:g_hItemInfoTrie; // Item Info Trie
 new Handle:g_hHudText; //Caber/Razorback Remaining
 new bool:g_bIsEating[MAXPLAYERS + 1] = false; //is eating dalokoh's/fishcake
-new bool:g_bHasCaber[MAXPLAYERS + 1] = false; //does demoman have a caber?
+new bool:g_bHasCaber[MAXPLAYERS + 1] = false; //does client have a caber?
+new bool:g_bHasManmelter[MAXPLAYERS + 1] = false; //does client have manmelter?
 new bool:g_bTakesHeads[MAXPLAYERS + 1] = false; //can take heads (lowers processing on OnGameFrame)
 new bool:steamtools = false; //SteamTools to change description
 new g_iRazorbackCount[MAXPLAYERS + 1] = 10; //Number of Razorbacks for Sniper
 new g_iCabers[MAXPLAYERS + 1] = 10; //Number of Cabers for Demoman
 new g_iBuildingsDestroyed[MAXPLAYERS + 1] = 0; //Crits when a building is destroyed (Frontier Justice)
+new g_iRevengeCrits[MAXPLAYERS + 1] = 0; //Since Manmelter has no SourceMod event, keeps track of revenge crits pyro has
 new _medPackTraceFilteredEnt = -1; //Candycane full Medipack spawning
 
 //Mod compatibility variables
@@ -143,6 +145,7 @@ public OnPluginStart()
 	HookEvent("teamplay_restart_round", Event_RoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("teamplay_win_panel", Event_RoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("round_end", Event_RoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("object_deflected", Event_Deflected, EventHookMode_Post);
 	
 	steamtools = LibraryExists("SteamTools");
 
@@ -452,6 +455,26 @@ public Action:Event_RoundEnd(Handle:event,const String:name[],bool:dontBroadcast
 	return Plugin_Continue;
 }
 
+public Action:Event_Deflected(Handle:event, const String:name[], bool:dontBroadcast)
+{
+	if (!enabled || !ff2Running) return Plugin_Continue;
+	
+	new index = FF2_GetBossIndex(GetClientOfUserId(GetEventInt(event, "ownerid")));
+	
+	if (index != -1 && GetEventInt(event, "weaponid") == 40)
+	{
+		new Float:bossCharge = FF2_GetBossCharge(index, 0) + 63.0;
+		//work with FF2's deflect to set to 70 in total instead of  7
+		
+		if(bossCharge > 100)
+			FF2_SetBossCharge(index, 0, 100.0);
+		else
+			FF2_SetBossCharge(index, 0, bossCharge);
+	}
+	
+	return Plugin_Continue;
+}
+
 public Action:Event_Object_Destroyed(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	if (!enabled) return Plugin_Continue;
@@ -591,7 +614,6 @@ public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionI
 		return;
 	
 	ModifyAttribs(client, classname, itemDefinitionIndex, entityIndex);
-	CheckClips(entityIndex, itemDefinitionIndex);
 }
 
 public Action:Event_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
@@ -611,8 +633,17 @@ public Action:Event_PostInventoryApplication(Handle:event, const String:name[], 
 		return Plugin_Continue;
 	
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
-	
 	UpdateVariables(client);
+	
+	for(new slot=0; slot < 2; slot++)
+	{
+		new wepEntity = GetPlayerWeaponSlot(client, slot);
+		
+		if(IsValidEntity(wepEntity))
+		{
+			CheckClips(wepEntity);
+		}
+	}
 	
 	return Plugin_Continue;
 }
@@ -680,18 +711,22 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	if (g_bHasCaber[client])
 	{
 		new meleeweapon = GetPlayerWeaponSlot(client, 2);
-		new detonated = GetEntProp(meleeweapon, Prop_Send, "m_iDetonated");
 		
-		if (detonated == 0)
+		if (IsValidEntity(meleeweapon))
 		{
-			SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
-			ShowSyncHudText(client, g_hHudText, "Cabers: %d", g_iCabers[client]);
-		}
-		
-		if (g_iCabers[client] > 1 && detonated == 1)
-		{
-			SetEntProp(meleeweapon, Prop_Send, "m_iDetonated", 0);
-			g_iCabers[client]--;
+			new detonated = GetEntProp(meleeweapon, Prop_Send, "m_iDetonated");
+			
+			if (detonated == 0)
+			{
+				SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
+				ShowSyncHudText(client, g_hHudText, "Cabers: %d", g_iCabers[client]);
+			}
+			
+			if (g_iCabers[client] > 1 && detonated == 1)
+			{
+				SetEntProp(meleeweapon, Prop_Send, "m_iDetonated", 0);
+				g_iCabers[client]--;
+			}
 		}
 	}
 	
@@ -699,6 +734,21 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	{
 		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
 		ShowSyncHudText(client, g_hHudText, "Razorbacks: %d", g_iRazorbackCount[client]);
+	}
+	
+	if (g_bHasManmelter[client])
+	{
+		new revengeCrits = GetEntProp(client, Prop_Send, "m_iRevengeCrits");
+		if (revengeCrits > g_iRevengeCrits[client])
+		{
+			new newCrits = ((revengeCrits - g_iRevengeCrits[client]) * GetConVarInt(cvarCritsPerEvent)) + revengeCrits - 1;
+			SetEntProp(client, Prop_Send, "m_iRevengeCrits", newCrits);
+			g_iRevengeCrits[client] = newCrits;
+		}
+		else
+		{
+			g_iRevengeCrits[client] = revengeCrits;
+		}
 	}
 
 	if ((buttons & IN_ATTACK) && (GetActiveWeaponID(client) == 159 || GetActiveWeaponID(client) == 433) &&
@@ -811,7 +861,9 @@ stock ResetVariables(client)
 {
 	g_iRazorbackCount[client] = 0;
 	g_iCabers[client] = 0;
+	g_iRevengeCrits[client] = 0;
 	g_bHasCaber[client] = false;
+	g_bHasManmelter[client] = false;
 	g_bTakesHeads[client] = false;
 }
 
@@ -823,6 +875,7 @@ stock UpdateVariables(client)
 	
 	g_iRazorbackCount[client] = secndWepID == 57 ? 10 : 0;
 	g_bHasCaber[client] = meleeWep == 307;
+	g_bHasManmelter[client] = TF2_GetWeaponSlotID(client, TFWeaponSlot_Secondary) == 595;
 	g_iCabers[client] = g_bHasCaber[client] ? 10 : 0;
 	g_bTakesHeads[client] = meleeWep == 132 || meleeWep == 266 || meleeWep == 482;
 }
@@ -1046,18 +1099,20 @@ stock ModifyAttribs(client, const String:classname[], itemDefinitionIndex, entit
 	}
 }
 
-stock CheckClips(entityIndex, itemDefinitionIndex)
+stock CheckClips(entityIndex)
 {
 	//TF2Attrib apparently doesn't affect clip size penalties, so manually checking here.
 	decl String:tmpID[32];
 	decl String:attribValue[8];
 	
+	new itemDefinitionIndex = GetEntProp(entityIndex, Prop_Send, "m_iItemDefinitionIndex");
+	
 	Format(tmpID, sizeof(tmpID), "%s__%d_chkclip1", selectedMod, itemDefinitionIndex);
 	if (GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
 	{
-		new ammoCount = 0;
+		new ammoCount = GetEntProp(entityIndex, Prop_Data, "m_iClip1");
 		new Float:clipSize = StringToFloat(attribValue);
-		ammoCount = RoundToCeil(GetEntPropFloat(entityIndex, Prop_Data, "m_iClip1") * clipSize);
+		ammoCount = (itemDefinitionIndex == 19 || itemDefinitionIndex == 206 || itemDefinitionIndex == 1007) ? 0 : RoundToCeil(ammoCount * clipSize);
 		SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), ammoCount, 4, true);
 	}
 	else
@@ -1066,14 +1121,6 @@ stock CheckClips(entityIndex, itemDefinitionIndex)
 		if (GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
 		{
 			SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), StringToInt(attribValue), 4, true);
-		}
-		else
-		{
-			Format(tmpID, sizeof(tmpID), "%s__%d_chkclip3", selectedMod, itemDefinitionIndex);
-			if (GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
-			{
-				SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iAmmo"), StringToInt(attribValue), 4, true);
-			}
 		}
 	}
 }
