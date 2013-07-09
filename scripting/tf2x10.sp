@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.45"
+#define PLUGIN_VERSION	"0.46"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -58,6 +58,7 @@ new bool:hiddenRunning = false; //is The Hidden running?
 
 new bool:enabled = true;
 new bool:headScales = false;
+new bool:x10debug = false;
 new Float:headScalesCap = 6.0;
 new String:selectedMod[16] = "default";
 
@@ -74,6 +75,7 @@ new Handle:cvarMaxSpyHealth;
 new Handle:cvarHeavyDalokohOverheal;
 new Handle:cvarIncludeBots;
 new Handle:cvarCritsPerEvent;
+new Handle:cvarDebug;
 new Handle:fnGetMaxHealth; //thx psychonic
 
 public Plugin:myinfo =
@@ -129,10 +131,13 @@ public OnPluginStart()
 	cvarMaxSpyHealth = CreateConVar("tf2x10_maxspyhealth", "185", "Max health a spy can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 1000.0);
 	cvarHeavyDalokohOverheal = CreateConVar("tf2x10_dalokohhealth", "500", "Health a Heavy gets after eating a Dalokoh's/Fishcake. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
 	cvarCritsPerEvent = CreateConVar("tf2x10_critsperevent", "10", "Number of crits after Frontier kill or Diamondback sap", FCVAR_PLUGIN, true, -1.0, false, 100.0);
+	
+	cvarDebug = CreateConVar("tf2x10_debug", "0", "Enable debugging for developmental purposes.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
 	HookConVarChange(cvarEnabled, CVarChange_Enable);
 	HookConVarChange(cvarHeadScales, CVarChange_HeadScales);
 	HookConVarChange(cvarHeadScalesCap, CVarChange_HeadScales);
+	HookConVarChange(cvarDebug, CVarChange_HeadScales);
 		
 	AutoExecConfig(true, "plugin.tf2x10");
 
@@ -250,6 +255,9 @@ public Action:Command_LoadMod(client, args)
 	new i = 0;
 	GetCmdArg(1, selectedMod, sizeof(selectedMod));
 	
+	if (x10debug)
+		LogMessage("[%N] Command_LoadMod called, argument: %s", client, selectedMod);
+	
 	if (!StrEqual(selectedMod, "default") && !GetTrieValue(g_hItemInfoTrie, selectedMod, i))
 	{
 		new loaded = LoadFileIntoTrie(selectedMod);
@@ -298,6 +306,9 @@ public OnMapStart()
 		{
 			strcopy(selectedMod, sizeof(selectedMod), "vshff2");
 			LoadFileIntoTrie("vshff2");
+			
+			if (x10debug)
+				LogMessage("VSH/FF2 running, loading vshff2 trie.");
 		}
 		
 		if (steamtools && GetConVarBool(cvarGameDesc))
@@ -366,6 +377,9 @@ public CVarChange_Enable(Handle:convar, const String:oldValue[], const String:ne
 	
 	if (enabled)
 	{
+		if (x10debug)
+			LogMessage("cvar tf2x10_enabled set to 1");
+		
 		for (new client=1; client < MaxClients; client++)
 		{
 			if(IsValidClient(client))
@@ -399,6 +413,9 @@ public CVarChange_Enable(Handle:convar, const String:oldValue[], const String:ne
 	}
 	else
 	{
+		if (x10debug)
+			LogMessage("cvar tf2x10_enabled set to 0");
+		
 		for (new client=1; client < MaxClients; client++)
 		{
 			if(IsValidClient(client))
@@ -423,6 +440,7 @@ public CVarChange_HeadScales(Handle:convar, const String:oldValue[], const Strin
 {
 	headScales = GetConVarBool(cvarHeadScales);
 	headScalesCap = GetConVarFloat(cvarHeadScalesCap);
+	x10debug = GetConVarBool(cvarDebug);
 }
 
 // ======= Event Hooks ===========
@@ -471,6 +489,10 @@ public Action:Event_Deflected(Handle:event, const String:name[], bool:dontBroadc
 			FF2_SetBossCharge(index, 0, 100.0);
 		else
 			FF2_SetBossCharge(index, 0, bossCharge);
+			
+
+		if (x10debug)
+			LogMessage("+63 airblast added to FF2 boss");
 	}
 	
 	return Plugin_Continue;
@@ -493,6 +515,9 @@ public Action:Event_Object_Destroyed(Handle:event, const String:name[], bool:don
 		{
 			new currentCrits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits");
 			SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", currentCrits+critsPerEvent-1);
+			
+			if (x10debug)
+				LogMessage("[%N] destroyed building, set revenge crits from %d to %d", attacker, currentCrits, currentCrits+critsPerEvent-1);
 		}
 	}
 	
@@ -512,6 +537,10 @@ public Action:Event_Object_Remove(Handle:event, const String:name[], bool:dontBr
 	if(StrEqual(classname, "tf_weapon_sentry_revenge") && GetEventInt(event, "objecttype") == 2)
 	{
 		new currentCrits = GetEntProp(client, Prop_Send, "m_iRevengeCrits");
+		
+		if (x10debug)
+			LogMessage("[%N] used PDA destroy as engie, set revenge crits from %d to %d", client, currentCrits, currentCrits+g_iBuildingsDestroyed[client]);
+
 		SetEntProp(client, Prop_Send, "m_iRevengeCrits", currentCrits+g_iBuildingsDestroyed[client]);
 		
 		g_iBuildingsDestroyed[client] = 0;
@@ -534,6 +563,9 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	if (candyCaneMedPackType != -1 && activeWep == 317)
 	{
 		TF2_SpawnMedipack(client, candyCaneMedPackType, false);
+		
+		if (x10debug)
+			LogMessage("[%N] spawned large candy cane after killing %N", attacker, client);
 	}
 	else if (activeWep == 356 && customKill == TF_CUSTOM_BACKSTAB && !ff2Running && !vshRunning && !hiddenRunning)
 	{
@@ -571,7 +603,11 @@ public Action:Timer_Apply10xHealth(Handle:hTimer, any:userid)
 	
 	if (!IsValidClient(client) || !IsPlayerAlive(client)) return Plugin_Continue;
 	
+	if (x10debug)
+		LogMessage("[%N] x10'ing %d health", client, GetEntProp(client, Prop_Send, "m_iHealth"));
+	
 	TF2_SetHealth(client, GetEntProp(client, Prop_Send, "m_iHealth") * 10);
+		
 	return Plugin_Continue;
 }
 
@@ -591,11 +627,15 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 		damagecustom != TF_CUSTOM_BURNING_ARROW && damagecustom != TF_CUSTOM_BURNING_FLARE &&
 		(weaponID == 221 || weaponID == 999) && attacker != client && IsPlayerAlive(client))
 	{
+		if (x10debug)
+			LogMessage("[%N] slapping %N with a FIIIISH", attacker, client);
+	
 		decl Float:ang[3];
 		GetClientEyeAngles(client, ang);
 		ang[1] = ang[1] + GetConVarFloat(cvarFishSlapAngle);
 		
 		TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
+	
 	}
 	
 	return Plugin_Continue;
@@ -622,6 +662,9 @@ public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionI
 	   || (itemQuality == 5 && itemDefinitionIndex != 266)
 	   || itemQuality == 8 || itemQuality == 10)
 		return;
+		
+	if (x10debug)
+		LogMessage("[%N] OnGiveNamedItemPost, classname %s, itemDefinitionIndex %d, entityIndex %d", client, classname, itemDefinitionIndex, entityIndex);
 
 	new bool:usingdefault = false;
 	new size;
@@ -658,10 +701,16 @@ public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionI
 
 		if(StrEqual(attribValue, "remove"))
 		{
+			if (x10debug)
+				LogMessage(">>>>%d: removing attribute %s", itemDefinitionIndex, attribName);
+			
 			TF2Attrib_RemoveByName(entityIndex, attribName);
 		}
 		else
 		{
+			if (x10debug)
+				LogMessage(">>>>%d: set '%s' to %f", itemDefinitionIndex, attribName, StringToFloat(attribValue));
+			
 			TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
 		}
 	}
@@ -689,10 +738,16 @@ public Action:Event_PostInventoryApplication(Handle:event, const String:name[], 
 	
 	if (!rndmRunning)
 	{
+		if (x10debug)
+			LogMessage("[%N] No Randomizer, fixing clips in 0.1s.", GetClientOfUserId(userid));
+		
 		CreateTimer(0.1, Timer_FixClips, userid, TIMER_FLAG_NO_MAPCHANGE);
 	}
 	else
 	{
+		if (x10debug)
+			LogMessage("[%N] Randomizer is enabled, fixing clips in 0.3s.", GetClientOfUserId(userid));
+		
 		CreateTimer(0.3, Timer_FixClips, userid, TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
@@ -712,6 +767,9 @@ public Action:Timer_FixClips(Handle:hTimer, any:userid)
 			
 		if(IsValidEntity(wepEntity))
 		{
+			if(x10debug)
+				LogMessage("[%N] fixing clips for slot %d...", client, slot);
+			
 			CheckClips(wepEntity);
 		}
 	}
@@ -729,6 +787,9 @@ public Action:Event_PlayerShieldBlocked(UserMsg:msg_id, Handle:bf, const players
 	if (g_iRazorbackCount[victim] > 1)
 	{
 		g_iRazorbackCount[victim]--;
+		
+		if (x10debug)
+			LogMessage("[%N] lost razorback due to a backstab, regenerating", victim);
 		
 		new loopBreak = 0;
 		new slotEntity = -1;
@@ -795,6 +856,9 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 			
 			if (g_iCabers[client] > 1 && detonated == 1)
 			{
+				if (x10debug)
+					LogMessage("[%N] used a caber. %d remaining.", client, g_iCabers[client]-1);
+				
 				SetEntProp(meleeweapon, Prop_Send, "m_iDetonated", 0);
 				g_iCabers[client]--;
 			}
@@ -813,6 +877,10 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		if (revengeCrits > g_iRevengeCrits[client])
 		{
 			new newCrits = ((revengeCrits - g_iRevengeCrits[client]) * GetConVarInt(cvarCritsPerEvent)) + revengeCrits - 1;
+			
+			if (x10debug)
+				LogMessage("[%N] gained a manmelter crit, set revenge crits from %d to %d", client, revengeCrits, newCrits);
+			
 			SetEntProp(client, Prop_Send, "m_iRevengeCrits", newCrits);
 			g_iRevengeCrits[client] = newCrits;
 		}
@@ -836,6 +904,9 @@ public Action:Timer_Dalokoh(Handle:timer, any:client)
 	if (GetClientHealth(client) <= SDKCall(fnGetMaxHealth, client) && TF2_IsPlayerInCondition(client, TFCond_Taunting)
 	   && g_bIsEating[client] == true && (GetActiveWeaponID(client) == 159 || GetActiveWeaponID(client) == 433))
 	{
+		if (x10debug)
+			LogMessage("[%N] ate a dalokoh bar, setting health", client);
+			
 		TF2_SetHealth(client, (GetClientHealth(client)+GetConVarInt(cvarHeavyDalokohOverheal)-50));
 	}
 	g_bIsEating[client] = false;
@@ -936,6 +1007,9 @@ stock ResetVariables(client)
 	g_bHasCaber[client] = false;
 	g_bHasManmelter[client] = false;
 	g_bTakesHeads[client] = false;
+	
+	if (x10debug)
+		LogMessage("[%N] ResetVariables called", client);
 }
 
 stock UpdateVariables(client)
@@ -949,6 +1023,9 @@ stock UpdateVariables(client)
 	g_bHasManmelter[client] = TF2_GetWeaponSlotID(client, TFWeaponSlot_Secondary) == 595;
 	g_iCabers[client] = g_bHasCaber[client] ? 10 : 0;
 	g_bTakesHeads[client] = meleeWep == 132 || meleeWep == 266 || meleeWep == 482;
+	
+	if (x10debug)
+		LogMessage("[%N] UpdateVariables called. secondary wep id %d, melee wep id %d", client, secndWepID, meleeWep);
 }
 
 stock CheckHealthCaps(client)
@@ -1138,6 +1215,10 @@ stock CheckClips(entityIndex)
 		new ammoCount = GetEntProp(entityIndex, Prop_Data, "m_iClip1");
 		new Float:clipSize = StringToFloat(attribValue);
 		ammoCount = (itemDefinitionIndex == 19 || itemDefinitionIndex == 206 || itemDefinitionIndex == 1007) ? 0 : RoundToCeil(ammoCount * clipSize);
+		
+		if(x10debug)
+			LogMessage(">>>%d: set m_iClip1 from clipsize penalty/bonus to %d", itemDefinitionIndex, ammoCount);
+		
 		SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), ammoCount, 4, true);
 	}
 	else
@@ -1145,6 +1226,9 @@ stock CheckClips(entityIndex)
 		Format(tmpID, sizeof(tmpID), "%s__%d_chkclip2", selectedMod, itemDefinitionIndex);
 		if (GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue)))
 		{
+			if(x10debug)
+				LogMessage(">>>%d: set m_iClip1 from static variable to %s", itemDefinitionIndex, attribValue);
+			
 			SetEntData(entityIndex, FindSendPropInfo("CTFWeaponBase", "m_iClip1"), StringToInt(attribValue), 4, true);
 		}
 	}
