@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.44"
+#define PLUGIN_VERSION	"0.45"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -112,7 +112,7 @@ public OnPluginStart()
 	PrepSDKCalls();
 	
 	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
-	RegAdminCmd("sm_tf2x10_loadmod", Command_LoadMod, ADMFLAG_GENERIC);
+	RegAdminCmd("sm_tf2x10_loadmod", Command_LoadMod, ADMFLAG_CHEATS);
 	
 	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	
@@ -452,6 +452,7 @@ public Action:Event_RoundEnd(Handle:event,const String:name[],bool:dontBroadcast
 	{
 		ResetVariables(client);
     }
+	
 	return Plugin_Continue;
 }
 
@@ -536,8 +537,7 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	}
 	else if (activeWep == 356 && customKill == TF_CUSTOM_BACKSTAB && !ff2Running && !vshRunning && !hiddenRunning)
 	{
-		new health = GetEntProp(attacker, Prop_Send, "m_iHealth");
-		TF2_SetHealth(attacker, health * 10);
+		CreateTimer(0.1, Timer_Apply10xHealth, GetClientUserId(attacker), TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
 	new inflictor_entindex = GetEventInt(event, "inflictor_entindex");
@@ -562,6 +562,16 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 
 	ResetVariables(client);
 	
+	return Plugin_Continue;
+}
+
+public Action:Timer_Apply10xHealth(Handle:hTimer, any:userid)
+{
+	new client = GetClientOfUserId(userid);
+	
+	if (!IsValidClient(client) || !IsPlayerAlive(client)) return Plugin_Continue;
+	
+	TF2_SetHealth(client, GetEntProp(client, Prop_Send, "m_iHealth") * 10);
 	return Plugin_Continue;
 }
 
@@ -612,8 +622,49 @@ public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionI
 	   || (itemQuality == 5 && itemDefinitionIndex != 266)
 	   || itemQuality == 8 || itemQuality == 10)
 		return;
+
+	new bool:usingdefault = false;
+	new size;
+	decl String:attribName[64];
+	decl String:attribValue[8];
+	decl String:tmpID[32];
 	
-	ModifyAttribs(client, classname, itemDefinitionIndex, entityIndex);
+	Format(tmpID, sizeof(tmpID), "%s__%d_size", selectedMod, itemDefinitionIndex);
+	if (!GetTrieValue(g_hItemInfoTrie, tmpID, size))
+	{
+		Format(tmpID, sizeof(tmpID), "default__%d_size", itemDefinitionIndex);
+		if (!GetTrieValue(g_hItemInfoTrie, tmpID, size))
+			return;
+		else
+			usingdefault = true;
+	}
+
+	for(new i=0; i < size; i++)
+	{
+		if (usingdefault)
+		{
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", "default", itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", "default", itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+		}
+		else
+		{
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", selectedMod, itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", selectedMod, itemDefinitionIndex, i);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+		}
+
+		if(StrEqual(attribValue, "remove"))
+		{
+			TF2Attrib_RemoveByName(entityIndex, attribName);
+		}
+		else
+		{
+			TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
+		}
+	}
 }
 
 public Action:Event_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
@@ -632,13 +683,33 @@ public Action:Event_PostInventoryApplication(Handle:event, const String:name[], 
 	if (!enabled)
 		return Plugin_Continue;
 	
-	new client = GetClientOfUserId(GetEventInt(event, "userid"));
-	UpdateVariables(client);
+	new userid = GetEventInt(event, "userid");
+	
+	UpdateVariables(GetClientOfUserId(userid));
+	
+	if (!rndmRunning)
+	{
+		CreateTimer(0.1, Timer_FixClips, userid, TIMER_FLAG_NO_MAPCHANGE);
+	}
+	else
+	{
+		CreateTimer(0.3, Timer_FixClips, userid, TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	return Plugin_Continue;
+}
+
+public Action:Timer_FixClips(Handle:hTimer, any:userid)
+{
+	new client = GetClientOfUserId(userid);
+	
+	if (!enabled || !IsValidClient(client) || !IsPlayerAlive(client))
+		return Plugin_Continue;
 	
 	for(new slot=0; slot < 2; slot++)
 	{
 		new wepEntity = GetPlayerWeaponSlot(client, slot);
-		
+			
 		if(IsValidEntity(wepEntity))
 		{
 			CheckClips(wepEntity);
@@ -1053,52 +1124,6 @@ stock ShouldDisableWeapons(client)
 		   (hiddenRunning && GetClientTeam(client) == _:TFTeam_Blue);
 }
 
-stock ModifyAttribs(client, const String:classname[], itemDefinitionIndex, entityIndex)
-{
-	new bool:usingdefault = false;
-	new size;
-	decl String:attribName[64];
-	decl String:attribValue[8];
-	decl String:tmpID[32];
-	
-	Format(tmpID, sizeof(tmpID), "%s__%d_size", selectedMod, itemDefinitionIndex);
-	if (!GetTrieValue(g_hItemInfoTrie, tmpID, size))
-	{
-		Format(tmpID, sizeof(tmpID), "default__%d_size", itemDefinitionIndex);
-		if (!GetTrieValue(g_hItemInfoTrie, tmpID, size))
-			return;
-		else
-			usingdefault = true;
-	}
-
-	for(new i=0; i < size; i++)
-	{
-		if (usingdefault)
-		{
-			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", "default", itemDefinitionIndex, i);
-			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
-			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", "default", itemDefinitionIndex, i);
-			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
-		}
-		else
-		{
-			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", selectedMod, itemDefinitionIndex, i);
-			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
-			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", selectedMod, itemDefinitionIndex, i);
-			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
-		}
-
-		if(StrEqual(attribValue, "remove"))
-		{
-			TF2Attrib_RemoveByName(entityIndex, attribName);
-		}
-		else
-		{
-			TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
-		}
-	}
-}
-
 stock CheckClips(entityIndex)
 {
 	//TF2Attrib apparently doesn't affect clip size penalties, so manually checking here.
@@ -1195,4 +1220,5 @@ stock CheckConVar(const String:cvarname[])
 
 stock Randomizer_OnPlayerRunCmd(client, &buttons)
 {
+	//TODO: Sandvich/Sandman/Wrap Assassin/Jarate fixes here
 }
