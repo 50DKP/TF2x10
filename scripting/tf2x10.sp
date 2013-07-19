@@ -24,7 +24,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.46"
+#define PLUGIN_VERSION	"0.47"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -658,7 +658,13 @@ public OnTakeDamagePost(client, attacker, inflictor, Float:damage, damagetype)
 
 public Action:TF2Items_OnGivedNamedItem(client, String:classname[], iItemDefinitionIndex, &Handle:hItem)
 {
-	if (enabled && GetConVarBool(cvarUseTF2Items))
+	if (!enabled || (!GetConVarBool(cvarIncludeBots) && IsFakeClient(client))
+	   || ShouldDisableWeapons(client)
+	   || !isCompatibleItem(classname, itemDefinitionIndex)
+	   || itemDefinitionIndex > 2000)
+		return;
+		
+	if (GetConVarBool(cvarUseTF2Items))
 	{
 		if (x10debug)
 			LogMessage("[%N] OnGiveNamedItem, classname %s, itemDefinitionIndex %d", client, classname, itemDefinitionIndex);
@@ -699,9 +705,6 @@ public Action:TF2Items_OnGivedNamedItem(client, String:classname[], iItemDefinit
 		attrID = TF2II_GetAttributeByName(attribName);
 		Format(fullAttr, sizeof(fullAttr), "%d ; %s", attrID, attribValue);
 		
-		if (x10debug)
-			LogMessage(">>>>%d: attribute 0 '%s' will be set to %f", itemDefinitionIndex, attribName, StringToFloat(attribValue));
-	
 		for(new i=1; i < size; i++)
 		{
 			if (usingdefault)
@@ -719,18 +722,22 @@ public Action:TF2Items_OnGivedNamedItem(client, String:classname[], iItemDefinit
 				GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
 			}
 			
-			if (x10debug)
-				LogMessage(">>>>%d: attribute %d '%s' will be set to %f", i, itemDefinitionIndex, attribName, StringToFloat(attribValue));
-			
 			attrID = TF2II_GetAttributeIDByName(attribName);
 			Format(tmpID, sizeof(tmpID), " ; %d ; %s", attrID, attribValue);
 			StrCat(fullAttr, sizeof(fullAttr), tmpID);
 		}
 	
+		if (x10debug)
+			LogMessage(">>>> adding/changing weapon attributes: %s", fullAttr);
+		
 		new Handle:hItemOverride = PrepareItemHandle(hItem, _, _, fullAttr);
 		if (hItemOverride != INVALID_HANDLE)
 		{
 			hItem = hItemOverride;
+			
+			if (x10debug)
+				LogMessage(">>>> valid item, successfully replaced");
+			
 			return Plugin_Changed;
 		}
 	}
