@@ -14,6 +14,7 @@
 #tryinclude <updater>
 #tryinclude <freak_fortress_2>
 #tryinclude <saxtonhale>
+#tryinclude <tf2itemsinfo>
 #define REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <steamtools>
@@ -65,6 +66,7 @@ new String:selectedMod[16] = "default";
 new Handle:cvarEnabled;
 new Handle:cvarGameDesc;
 new Handle:cvarAutoUpdate;
+new Handle:cvarUseTF2Items;
 new Handle:cvarHeadScales;
 new Handle:cvarHeadScalesCap;
 new Handle:cvarHealthCap;
@@ -122,6 +124,7 @@ public OnPluginStart()
 	cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable. Needs SteamTools.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells updater.smx to automatically update this plugin. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	cvarUseTF2items = CreateConVar("tf2x10_use_tf2items", "0", "Use TF2Items for x10 attributes instead. NOT RECOMMENDED. Only set to 1 if an update broke TF2Attributes.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	cvarHeadScales = CreateConVar("tf2x10_headscales", "0", "Enable Resize Heads. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	cvarHeadScalesCap = CreateConVar("tf2x10_headscalescap", "6.0", "Max Head Scale. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 100.0);
 	cvarHealthCap = CreateConVar("tf2x10_healthcap", "2000", "The max health a player can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
@@ -653,9 +656,92 @@ public OnTakeDamagePost(client, attacker, inflictor, Float:damage, damagetype)
 		CheckHealthCaps(attacker);
 }
 
+public Action:TF2Items_OnGivedNamedItem(client, String:classname[], iItemDefinitionIndex, &Handle:hItem)
+{
+	if (enabled && GetConVarBool(cvarUseTF2Items))
+	{
+		if (x10debug)
+			LogMessage("[%N] OnGiveNamedItem, classname %s, itemDefinitionIndex %d", client, classname, itemDefinitionIndex);
+	
+		new bool:usingdefault = false;
+		new size, attribID = -1;
+		decl String:attribName[64];
+		decl String:attribValue[8];
+		decl String:fullAttr[256];
+		decl String:tmpID[32];
+		
+		Format(tmpID, sizeof(tmpID), "%s__%d_size", selectedMod, itemDefinitionIndex);
+		
+		if (!GetTrieValue(g_hItemInfoTrie, tmpID, size) || size == 0)
+		{
+			Format(tmpID, sizeof(tmpID), "default__%d_size", itemDefinitionIndex);
+			if (!GetTrieValue(g_hItemInfoTrie, tmpID, size) || size == 0)
+				return;
+			else
+				usingdefault = true;
+		}
+		
+		if (usingdefault)
+		{
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", "default", itemDefinitionIndex, 0);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", "default", itemDefinitionIndex, 0);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+		}
+		else
+		{
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", selectedMod, itemDefinitionIndex, 0);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+			Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", selectedMod, itemDefinitionIndex, 0);
+			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+		}
+		
+		attrID = TF2II_GetAttributeByName(attribName);
+		Format(fullAttr, sizeof(fullAttr), "%d ; %s", attrID, attribValue);
+		
+		if (x10debug)
+			LogMessage(">>>>%d: attribute 0 '%s' will be set to %f", itemDefinitionIndex, attribName, StringToFloat(attribValue));
+	
+		for(new i=1; i < size; i++)
+		{
+			if (usingdefault)
+			{
+				Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", "default", itemDefinitionIndex, i);
+				GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+				Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", "default", itemDefinitionIndex, i);
+				GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+			}
+			else
+			{
+				Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", selectedMod, itemDefinitionIndex, i);
+				GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+				Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", selectedMod, itemDefinitionIndex, i);
+				GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+			}
+			
+			if (x10debug)
+				LogMessage(">>>>%d: attribute %d '%s' will be set to %f", i, itemDefinitionIndex, attribName, StringToFloat(attribValue));
+			
+			attrID = TF2II_GetAttributeIDByName(attribName);
+			Format(tmpID, sizeof(tmpID), " ; %d ; %s", attrID, attribValue);
+			StrCat(fullAttr, sizeof(fullAttr), tmpID);
+		}
+	
+		new Handle:hItemOverride = PrepareItemHandle(hItem, _, _, fullAttr);
+		if (hItemOverride != INVALID_HANDLE)
+		{
+			hItem = hItemOverride;
+			return Plugin_Changed;
+		}
+	}
+	
+	return Plugin_Continue;
+}
+
 public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionIndex, itemLevel, itemQuality, entityIndex)
 {
 	if (!enabled || (!GetConVarBool(cvarIncludeBots) && IsFakeClient(client))
+	   || GetConVarBool(cvarUseTF2Items)
 	   || ShouldDisableWeapons(client)
 	   || !isCompatibleItem(classname, itemDefinitionIndex)
 	   || itemDefinitionIndex > 2000
@@ -736,19 +822,22 @@ public Action:Event_PostInventoryApplication(Handle:event, const String:name[], 
 	
 	UpdateVariables(GetClientOfUserId(userid));
 	
-	if (!rndmRunning)
+	if (!GetConVarBool(cvarUseTF2Items))
 	{
-		if (x10debug)
-			LogMessage("[%N] No Randomizer, fixing clips in 0.1s.", GetClientOfUserId(userid));
-		
-		CreateTimer(0.1, Timer_FixClips, userid, TIMER_FLAG_NO_MAPCHANGE);
-	}
-	else
-	{
-		if (x10debug)
-			LogMessage("[%N] Randomizer is enabled, fixing clips in 0.3s.", GetClientOfUserId(userid));
-		
-		CreateTimer(0.3, Timer_FixClips, userid, TIMER_FLAG_NO_MAPCHANGE);
+		if (!rndmRunning)
+		{
+			if (x10debug)
+				LogMessage("[%N] No Randomizer, fixing clips in 0.1s.", GetClientOfUserId(userid));
+			
+			CreateTimer(0.1, Timer_FixClips, userid, TIMER_FLAG_NO_MAPCHANGE);
+		}
+		else
+		{
+			if (x10debug)
+				LogMessage("[%N] Randomizer is enabled, fixing clips in 0.3s.", GetClientOfUserId(userid));
+			
+			CreateTimer(0.3, Timer_FixClips, userid, TIMER_FLAG_NO_MAPCHANGE);
+		}
 	}
 	
 	return Plugin_Continue;
@@ -1286,6 +1375,76 @@ stock RemovePlayerBack(client)
 			}
 		}
 	}
+}
+
+stock Handle:PrepareItemHandle(Handle:hItem, String:name[] = "", index = -1, const String:att[] = "", bool:dontpreserve = false)
+{	//credit: Freak Fortress 2
+
+	static Handle:hWeapon;
+	new addattribs = 0;
+
+	new String:weaponAttribsArray[32][32];
+	new attribCount = ExplodeString(att, " ; ", weaponAttribsArray, 32, 32);
+
+	new flags = OVERRIDE_ATTRIBUTES;
+	if (!dontpreserve) flags |= PRESERVE_ATTRIBUTES;
+	if (hWeapon == INVALID_HANDLE) hWeapon = TF2Items_CreateItem(flags);
+	else TF2Items_SetFlags(hWeapon, flags);
+//	new Handle:hWeapon = TF2Items_CreateItem(flags);	//INVALID_HANDLE;
+	if (hItem != INVALID_HANDLE)
+	{
+		addattribs = TF2Items_GetNumAttributes(hItem);
+		if (addattribs > 0)
+		{
+			for (new i = 0; i < 2 * addattribs; i += 2)
+			{
+				new bool:dontAdd = false;
+				new attribIndex = TF2Items_GetAttributeId(hItem, i);
+				for (new z = 0; z < attribCount+i; z += 2)
+				{
+					if (StringToInt(weaponAttribsArray[z]) == attribIndex)
+					{
+						dontAdd = true;
+						break;
+					}
+				}
+				if (!dontAdd)
+				{
+					IntToString(attribIndex, weaponAttribsArray[i+attribCount], 32);
+					FloatToString(TF2Items_GetAttributeValue(hItem, i), weaponAttribsArray[i+1+attribCount], 32);
+				}
+			}
+			attribCount += 2 * addattribs;
+		}
+		CloseHandle(hItem);	//probably returns false but whatever
+	}
+
+	if (name[0] != '\0')
+	{
+		flags |= OVERRIDE_CLASSNAME;
+		TF2Items_SetClassname(hWeapon, name);
+	}
+	if (index != -1)
+	{
+		flags |= OVERRIDE_ITEM_DEF;
+		TF2Items_SetItemIndex(hWeapon, index);
+	}
+	if (attribCount > 0)
+	{
+		TF2Items_SetNumAttributes(hWeapon, (attribCount/2));
+		new i2 = 0;
+		for (new i = 0; i < attribCount && i2 < 16; i += 2)
+		{
+			TF2Items_SetAttribute(hWeapon, i2, StringToInt(weaponAttribsArray[i]), StringToFloat(weaponAttribsArray[i+1]));
+			i2++;
+		}
+	}
+	else
+	{
+		TF2Items_SetNumAttributes(hWeapon, 0);
+	}
+	TF2Items_SetFlags(hWeapon, flags);
+	return hWeapon;
 }
 
 stock CheckConVar(const String:cvarname[])
