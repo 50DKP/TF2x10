@@ -676,7 +676,7 @@ public Action:TF2Items_OnGivedNamedItem(client, String:classname[], iItemDefinit
 		{
 			Format(tmpID, sizeof(tmpID), "default__%d_size", itemDefinitionIndex);
 			if (!GetTrieValue(g_hItemInfoTrie, tmpID, size) || size == 0)
-				return;
+				return Plugin_Continue;
 			else
 				usingdefault = true;
 		}
