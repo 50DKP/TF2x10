@@ -875,6 +875,7 @@
 	{
 		"add cloak on hit" "100" //+100 Cloak on hit
 		"damage penalty" "0.01" //-99% Damage
+		"cloak consume rate decreased" "0.01" //+99% cloak duration
 	}
 	"225" //Your Eternal Reward
 	{
@@ -899,6 +900,8 @@
 	"231" //Darwin's Danger Shield
 	{
 		"max health additive bonus" "250" //+250 Health
+		"dmg taken from bullets reduced" "0" //-100% damage from bullets
+		"dmg taken from blast increased" "3" //+200% blast damage
 	}
 	"232" //Bushwacka
 	{
@@ -1073,6 +1076,7 @@
 	{
 		"heal rate bonus" "5" //+400% Heal Rate
 		"ubercharge rate bonus" "3.5" //+250% Ubercharge rate
+		"overheal penalty" "0.05" //5% overheal
 	}
 	"412" //Overdose
 	{
@@ -1125,7 +1129,6 @@
 	"441" //Cow Mangler 5000
 	{
 		"weapon burn dmg increased" "3" //Crit Afterburn damage
-		"damage penalty" "0.8" //-20% Damage
 	}
 	"444" //Mantreads
 	{
@@ -1149,6 +1152,7 @@
 	{
 		"damage bonus" "2.5" //+150% Damage
 		"clip size penalty" "0.18" //-82% clip size
+		"increased jump height from weapon" "3.5" //+250% jump height while active
 	}
 	"450" //Atomizer
 	{
@@ -1270,7 +1274,7 @@
 	{
 		"health regen" "10" //+10HP Per second
 		"aiming knockback resistance" "0.01" //-99% Knockback while aiming
-		"sniper aiming movespeed decreased" "0.01" //-99% Speed while aiming
+		"dmg taken increased" "3" //+200% damage
 		"hide enemy health" "1" //No Flinching while aiming
 	}
 	"648" //Wrap Assassin
@@ -1434,7 +1438,7 @@
 	"997" //The Rescue Ranger
 	{
 		"engineer building teleporting pickup" "13" //Teleport Buildings
-		"arrow heals buildings" "158"  //Building healing arrows
+		"arrow heals buildings" "237"  //Building healing arrows
 		"maxammo primary reduced" "0.75" //Reduce ammo
 		"mod max primary clip override" "2" //Override the clip size to 2
 	}
