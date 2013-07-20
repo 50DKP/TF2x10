@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.46"
+#define PLUGIN_VERSION	"0.47"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -569,7 +569,7 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	}
 	else if (activeWep == 356 && customKill == TF_CUSTOM_BACKSTAB && !ff2Running && !vshRunning && !hiddenRunning)
 	{
-		CreateTimer(0.1, Timer_Apply10xHealth, GetClientUserId(attacker), TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.3, Timer_Apply10xHealth, GetClientUserId(attacker), TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
 	new inflictor_entindex = GetEventInt(event, "inflictor_entindex");
@@ -699,20 +699,10 @@ public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionI
 			GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
 		}
 
-		if(StrEqual(attribValue, "remove"))
-		{
-			if (x10debug)
-				LogMessage(">>>>%d: removing attribute %s", itemDefinitionIndex, attribName);
+		if (x10debug)
+			LogMessage(">>>>%d: set '%s' to %f", itemDefinitionIndex, attribName, StringToFloat(attribValue));
 			
-			TF2Attrib_RemoveByName(entityIndex, attribName);
-		}
-		else
-		{
-			if (x10debug)
-				LogMessage(">>>>%d: set '%s' to %f", itemDefinitionIndex, attribName, StringToFloat(attribValue));
-			
-			TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
-		}
+		TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
 	}
 }
 
@@ -961,12 +951,12 @@ stock LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
 						Format(tmpID, sizeof(tmpID), "%s__%s_%d_val", rawname, strBuffer, i);
 						SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
 						
-						if (StrContains(strBuffer2, "clip size ") != -1 && !StrEqual(strBuffer3, "remove"))
+						if (StrContains(strBuffer2, "clip size ") != -1)
 						{
 							Format(tmpID, sizeof(tmpID), "%s__%s_chkclip1", rawname, strBuffer);
 							SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
 						}
-						else if (StrContains(strBuffer2, "mod max primary clip override") != -1 && !StrEqual(strBuffer3, "-1") && !StrEqual(strBuffer3, "remove"))
+						else if (StrContains(strBuffer2, "mod max primary clip override") != -1 && !StrEqual(strBuffer3, "-1"))
 						{
 							Format(tmpID, sizeof(tmpID), "%s__%s_chkclip2", rawname, strBuffer);
 							SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
