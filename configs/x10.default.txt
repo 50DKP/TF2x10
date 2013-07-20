@@ -1480,7 +1480,7 @@
 		"damage bonus" "2" //+100% Damage on Headshot
 		"damage penalty on bodyshot" "0.35" //-30% damage on bodyshot
 		"fire rate penalty" "1.4" //-40% firing rate
-		"damage penalty" "0" //Remove the old damage penalty
+		"damage penalty" "0" //Remove the old damage penalty.
 	}
 	"1013" //The Ham Shank
 	{
