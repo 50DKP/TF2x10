@@ -739,7 +739,7 @@
 		"damage bonus" "2" //+100% Damage on Headshot
 		"damage penalty on bodyshot" "0.35" //-30% damage on bodyshot
 		"fire rate penalty" "1.4" //-40% firing rate
-		"damage penalty" "remove" //Remove the old damage penalty
+		"damage penalty" "0" //Remove the old damage penalty
 	}
 	"127" //Direct Hit
 	{
@@ -989,7 +989,7 @@
 	}
 	"317" //Candy Cane
 	{
-		"drop health pack on kill" "remove" //Remove attribute
+		"drop health pack on kill" "0" //Remove attribute
 		"dmg taken from blast increased" "3.5" //+250% explosive vulnerability
 	}
 	"325" //Boston Basher
@@ -1028,11 +1028,11 @@
 		"damage bonus" "11" //+1000% damage
 		"dmg penalty vs nonburning" "0" //0% damage vs nonburning targets
 		"crit mod disabled" "0" //No Random Critical Hits
-		"damage penalty" "remove" //Remove the old damage penalty
+		"damage penalty" "0" //Remove the old damage penalty
 	}
 	"351" //Detonator
 	{
-		"blast dmg to self increased" "remove"
+		"blast dmg to self increased" "0"
 		"self dmg push force increased" "10" //+100% Self Knockback
 	}
 	"354" //Concheror
@@ -1240,7 +1240,7 @@
 	}
 	"593" //Third Degree
 	{
-		"ragdolls become ash" "remove" //Remove ragdolls become ash
+		"ragdolls become ash" "0" //Remove ragdolls become ash
 		"mod flamethrower push" "262144" //Crits vs overhealed players
 		"crit mod disabled" "0" //No random crits
 	}
@@ -1349,7 +1349,7 @@
 		"damage penalty" "0.4" //-60% Damage
 		"weapon spread bonus" "0.2" //+80% Accuracy
 		"move speed penalty" "0.7" //-30% Speed
-		"hype resets on jump" "remove" //Remove hype resetting on jump
+		"hype resets on jump" "0" //Remove hype resetting on jump
 	}
 	"773" //Pretty Boy's Pocket Pistol
 	{
@@ -1480,7 +1480,7 @@
 		"damage bonus" "2" //+100% Damage on Headshot
 		"damage penalty on bodyshot" "0.35" //-30% damage on bodyshot
 		"fire rate penalty" "1.4" //-40% firing rate
-		"damage penalty" "remove" //Remove the old damage penalty
+		"damage penalty" "0" //Remove the old damage penalty
 	}
 	"1013" //The Ham Shank
 	{
