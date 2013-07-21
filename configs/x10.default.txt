@@ -900,7 +900,7 @@
 	"231" //Darwin's Danger Shield
 	{
 		"max health additive bonus" "250" //+250 Health
-		"dmg taken from bullets reduced" "-0.5" //-150% damage from bullets
+		"dmg taken from bullets reduced" "0" //-100% damage from bullets
 		"dmg taken from blast increased" "3" //+200% blast damage
 	}
 	"232" //Bushwacka
@@ -959,6 +959,7 @@
 	"305" //Crusader's Crossbow
 	{
 		"crit kill will gib"	"1"	//Just putting a dummy stat in here to keep the crossbow's place until a better fix is devised.
+		"Reload time decreased" "0.5" //+50% reload speed
 	}
 	"307" //Ullapool Caber
 	{
