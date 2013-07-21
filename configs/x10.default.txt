@@ -958,7 +958,7 @@
 	}	
 	"305" //Crusader's Crossbow
 	{
-		"Reload time decreased" "0" //-100% Reload speed
+		"crit kill will gib"	"1"	//Just putting a dummy stat in here to keep the crossbow's place until a better fix is devised.
 	}
 	"307" //Ullapool Caber
 	{
