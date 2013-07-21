@@ -900,7 +900,7 @@
 	"231" //Darwin's Danger Shield
 	{
 		"max health additive bonus" "250" //+250 Health
-		"dmg taken from bullets reduced" "0" //-100% damage from bullets
+		"dmg taken from bullets reduced" "-0.5" //-150% damage from bullets
 		"dmg taken from blast increased" "3" //+200% blast damage
 	}
 	"232" //Bushwacka
@@ -1482,11 +1482,11 @@
 		"fire rate penalty" "1.4" //-40% firing rate
 		"damage penalty" "1" //Remove the old damage penalty
 	}
-	"1013" //The Ham Shank
+		"1013" //The Ham Shank
 	{
-		"chance of hunger decrease" "11" //Chance of hunger decrease
+		"chance of hunger decrease" "11" //1000% Chane of Hunger Decrease
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
-		"attach particle effect static" "69" //Antifreeze
+		"attach particle effect static" "1" //Fire
 	}
 }
