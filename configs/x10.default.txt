@@ -853,6 +853,7 @@
 		"dmg taken from bullets increased" "2" //+100% Bullet vulnerability
 		"move speed bonus" "2" //+100% Walk Speed
 		"provide on active" "0" //remove on active only
+		"dmg taken increased" "1" //remove damage increase
 	}
 	"215" //Degreaser
 	{
