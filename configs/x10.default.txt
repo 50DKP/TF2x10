@@ -1035,7 +1035,7 @@
 	}
 	"351" //Detonator
 	{
-		"blast dmg to self increased" "0"
+		"blast dmg to self increased" "1"
 		"self dmg push force increased" "10" //+100% Self Knockback
 	}
 	"354" //Concheror
