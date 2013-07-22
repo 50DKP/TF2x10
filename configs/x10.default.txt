@@ -852,6 +852,7 @@
 		"dmg from melee increased" "1.4" //+40% Melee vulnerability while out
 		"dmg taken from bullets increased" "2" //+100% Bullet vulnerability
 		"move speed bonus" "2" //+100% Walk Speed
+		"provide on active" "0" //remove on active only
 	}
 	"215" //Degreaser
 	{
