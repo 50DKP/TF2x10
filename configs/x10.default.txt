@@ -796,7 +796,7 @@
 		"dmg bonus vs buildings" "11" //+1000% Damage vs Buildings
 		"dmg penalty vs players" "0" //-100% Damage vs players
 		"provide on active" "1" //Effects only present while active
-		"dmg from sentry reduced" "0" //-100% Damage from sentries
+		"SET BONUS: dmg from sentry reduced" "0" //Sentry Immunity
 	}
 	"154" //Pain Train
 	{
@@ -1189,7 +1189,7 @@
 		"dmg penalty vs players" "0" //-100% Damage vs players
 		"damage applies to sappers" "1" //Destroys sappers
 		"provide on active" "1" //Effects only present while active
-		"dmg from sentry reduced" "0" //-100% Damage from sentries
+		"SET BONUS: dmg from sentry reduced" "" //Sentry Immunity
 	}
 	"474" //Protest Sign
 	{
@@ -1212,7 +1212,7 @@
 	"525" //Diamondback
 	{
 		"damage penalty" "0.7" //-30% damage
-		"dmg from sentry reduced" "0.7" //-30% damage from sentries
+		"SET BONUS: dmg from sentry reduced" "0.7" //30% Sentry resistance
 	}
 	"526" //Machina
 	{
