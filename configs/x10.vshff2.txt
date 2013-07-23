@@ -2,55 +2,55 @@
 {
 	"4"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"194"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"638"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"665"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"727"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"794"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"803"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"883"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"892"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"901"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"910"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"959"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"968"
 	{
-		"damage penalty" "0.9" //+10% Damage
+		"damage bonus" "0.1" //+10% Damage
 	}
 	"16"
 	{
@@ -208,8 +208,8 @@
 	}
 	"43" //GRU
 	{
-		"critboost on kill" "remove"
-		"fire rate penalty" "remove"
+		"critboost on kill" "0"
+		"fire rate penalty" "0"
 		"move speed bonus" "4"
 		"damage penalty" "0"
 		"provide on active" "1"
@@ -242,17 +242,22 @@
 	{
 		"rocket jump damage reduction" "0.05" //-95% self damage while rocket jumping
 	}
-	"214"
+	"214" //Powerjack
 	{
 		"heal on kill" "150" //+150 Health on Kill
 		"dmg from melee increased" "1.4" //+40% Melee vulnerability while out
 		"dmg taken from bullets increased" "2" //+100% Bullet vulnerability
-		"move speed bonus" "1.2" //Nerfed from 2 to 1.2, even while raged nobody could catch Pyro lololol
+		"move speed bonus" "1.2" //+120% Walk Speed
+		"provide on active" "0" //remove on active only
+		"dmg taken increased" "1" //remove damage increase
 	}
-	"220"
+	"220" //Shortstop
 	{
 		"reload time increased hidden" "1" //Old Reload speed
 		"max health additive bonus" "250" //+250 Health
+		"damage force increase hidden"	"9"	//Big damage force increase
+		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
+		"healing received bonus"	"3"	//Super healing bonus while active
 		"move speed penalty" "0.80" //-20% Move Speed on Wearer, nerf because shortstop+madmilk=insane
 	}
 	"226"
@@ -274,9 +279,9 @@
 		"active health degen" "-70" //getting high... literally
 		"attach particle effect static" "2" //Flaming bits
 	}
-	"305"
+	"305" //Crusader's Crossbow
 	{
-		"Reload time decreased" "0" //-100% Reload speed
+		"Reload time decreased" "0.5" //+50% reload speed
 		"add uber charge on hit" "0.1"
 		"damage bonus" "1.2"
 	}
@@ -300,6 +305,12 @@
 		"deploy time decreased" "0" //100% faster weapon switch
 		"minicrits become crits" "1" //Crits when it should Minicrit
 		"mod mini-crit airborne deploy" "99999.0" //minicrit airborne targets
+	}
+	"449" //Winger
+	{
+		"damage bonus" "2.5" //+150% Damage
+		"clip size penalty" "0.18" //-82% clip size
+		"increased jump height from weapon" "1.25" //+25% jump height while active
 	}
 	"528"
 	{
