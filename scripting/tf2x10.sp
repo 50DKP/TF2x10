@@ -23,7 +23,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, InvisGhost"
-#define PLUGIN_VERSION	"0.47"
+#define PLUGIN_VERSION	"0.48"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/groups/tf2x10"
 #define PLUGIN_DESCRIPTION	"Also known as: TF2x10 or TF20!"
 
@@ -31,6 +31,7 @@
 
 //Where to update from
 #define UPDATE_URL	"http://tf2x10.us.to/dl/updater.txt"
+#define KUNAI_DAMAGE	180
 
 //TF2x10-specific variables
 new Handle:g_hTopMenu; //Admin Menu Recaching (Mr. Blue)
@@ -569,7 +570,7 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	}
 	else if (activeWep == 356 && customKill == TF_CUSTOM_BACKSTAB && !ff2Running && !vshRunning && !hiddenRunning)
 	{
-		CreateTimer(0.3, Timer_Apply10xHealth, GetClientUserId(attacker), TIMER_FLAG_NO_MAPCHANGE);
+		TF2_SetHealth(client, KUNAI_DAMAGE * 10);
 	}
 	
 	new inflictor_entindex = GetEventInt(event, "inflictor_entindex");
@@ -594,20 +595,6 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 
 	ResetVariables(client);
 	
-	return Plugin_Continue;
-}
-
-public Action:Timer_Apply10xHealth(Handle:hTimer, any:userid)
-{
-	new client = GetClientOfUserId(userid);
-	
-	if (!IsValidClient(client) || !IsPlayerAlive(client)) return Plugin_Continue;
-	
-	if (x10debug)
-		LogMessage("[%N] x10'ing %d health", client, GetEntProp(client, Prop_Send, "m_iHealth"));
-	
-	TF2_SetHealth(client, GetEntProp(client, Prop_Send, "m_iHealth") * 10);
-		
 	return Plugin_Continue;
 }
 
