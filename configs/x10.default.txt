@@ -766,7 +766,6 @@
 	{
 		"dmg taken from fire reduced" "0" //-100% Fire Vulnerability
 		"dmg taken from blast reduced" "0" //-100% Blast Vulnerability
-		"dmg taken from crit reduced"	"0" //100% Crit immunity
 	}
 	"132" //Eyelander
 	{
