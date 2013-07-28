@@ -853,6 +853,7 @@
 		"move speed bonus" "2" //+100% Walk Speed
 		"provide on active" "0" //remove on active only
 		"dmg taken increased" "1" //remove damage increase
+		"SET BONUS: calling card on kill"	"4" //Gas Jockey Calling Card
 	}
 	"215" //Degreaser
 	{
@@ -867,6 +868,7 @@
 		"damage force increase hidden"	"9"	//Big damage force increase
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 		"healing received bonus"	"3"	//Super healing bonus while active
+		"SET BONUS: calling card on kill"	"1"	//Special Delivery Calling Card
 	}
 	"222" //Mad Milk
 	{
@@ -893,6 +895,7 @@
 		"heal on hit for rapidfire" "150" //+150 Health on hit
 		"clip size penalty" "0.25" //-75% Clip Size
 		"SET BONUS: dmg from sentry reduced" "-1" //-200% Damage from sentries
+		"SET BONUS: calling card on kill"	"3"		//Tankbuster Calling Card
 	}
 	"230" //Sydney Sleeper
 	{
@@ -904,6 +907,7 @@
 		"max health additive bonus" "250" //+250 Health
 		"dmg taken from bullets reduced" "-0.5" //-150% damage from bullets
 		"dmg taken from blast increased" "3" //+200% blast damage
+		"SET BONUS: calling card on kill"	"2"		//Croc O Style Calling Card
 	}
 	"232" //Bushwacka
 	{
