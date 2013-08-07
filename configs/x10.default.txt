@@ -1062,7 +1062,7 @@
 	}
 	"404" //Persian Persuader
 	{
-		"charge recharge rate increased" "3" //+200% Charge rate on user
+		"charge recharge rate increased" "11" //+1000% Charge rate on user
 	}
 	"405" //Ali Baba's Wee Booties
 	{
