@@ -1509,6 +1509,6 @@
 		"SET BONUS: chance of hunger decrease" "11" //1000% Chane of Hunger Decrease
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
-		"attach particle effect static" "1" //Fire
+		"attach particle effect static" "62" //Disco Beatdown
 	}
 }
