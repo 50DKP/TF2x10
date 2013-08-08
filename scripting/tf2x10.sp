@@ -778,14 +778,18 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 	
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	new attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	new activeWepID = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
+	new weaponid = GetEventInt(event, "weaponid");
 	new customKill = GetEventInt(event, "customkill");
 
-	if (activeWepID == 317) {
-		TF2_SpawnMedipack(client);
-	} else if (activeWepID == 356 && customKill == TF_CUSTOM_BACKSTAB && !g_bFF2Running && !g_bVSHRunning && !g_bHiddenRunning) {
-		TF2_SetHealth(attacker, KUNAI_DAMAGE);
+	switch(weaponid) {
+		case 317: { //Candy Cane
+			TF2_SpawnMedipack(client);
+		}
+		case 356: { //Conniver's Kunai
+			if(customKill == TF_CUSTOM_BACKSTAB && !g_bFF2Running && !g_bVSHRunning && !g_bHiddenRunning) {
+				TF2_SetHealth(attacker, KUNAI_DAMAGE);
+			}
+		}
 	}
 	
 	new inflictor_entindex = GetEventInt(event, "inflictor_entindex");
@@ -812,8 +816,6 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 new _medPackTraceFilteredEnt = 0;
 
 TF2_SpawnMedipack(client, bool:cmd = false) {
-	if (!IsValidClient(client)) return;
-
 	decl Float:fPlayerPosition[3];
 	GetClientAbsOrigin(client, fPlayerPosition);
 

@@ -18,9 +18,9 @@
 
 #define PLUGIN_NAME		"[TF2Items] Randomizer"
 #define PLUGIN_AUTHOR		"FlaminSarge"
-#define PLUGIN_VERSION		"1.58" //As of Jul20, 2012
+#define PLUGIN_VERSION		"1.59" //As of Jul20, 2012
 #define PLUGIN_CONTACT		"https://forums.alliedmods.net/showthread.php?t=139069"
-#define PLUGIN_DESCRIPTION	"[TF2] Randomizer rebuilt around TF2Items extension"
+#define PLUGIN_DESCRIPTION	"[TF2] Randomizer rebuilt around the TF2Items extension"
 
 #define EF_BONEMERGE			(1 << 0)
 #define EF_BONEMERGE_FASTCULL	(1 << 7)
@@ -164,7 +164,7 @@ static const String:strWeaponPrimary[][] =
 	"Backburner",
 	"Natascha",
 	"Force-a-Nature",
-	"Hunstman",
+	"Huntsman",
 	"Ambassador",
 	"Direct Hit",
 	"Frontier Justice",
@@ -1069,7 +1069,10 @@ public Action:Event_PlayerHurt(Handle:event, const String:name[], bool:dontBroad
 		new sec = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Secondary);
 		if (sec > MaxClients && IsValidEntity(sec) && GetEntityClassname(sec, secondary, sizeof(secondary)) && StrEqual(secondary, "tf_weapon_medigun", false))
 		{
-			SetEntPropFloat(sec, Prop_Send, "m_flChargeLevel", 1.0);
+			new Float:charge = GetEntPropFloat(sec, Prop_Send, "m_flChargeLevel");
+			charge += 0.25;
+			if (charge > 1.0) charge = 1.0;
+			SetEntPropFloat(sec, Prop_Send, "m_flChargeLevel", charge);
 		}
 	}
 	if (GetEntProp(attacker, Prop_Send, "m_bRageDraining")) return;
@@ -1270,7 +1273,9 @@ public OnMapStart()
 	PrecacheSound("vo/pyro_paincrticialdeath03.wav", true);
 	PrecacheSound("weapons/drg_wrench_teleport.wav", true);
 	PrecacheSound("weapons/teleporter_send.wav", true);
-//	if (FileExists("models/buildables/toolbox_placement_sentry1.mdl", true)) PrecacheModel("models/buildables/toolbox_placement_sentry1.mdl", true);
+	if (FileExists("models/buildables/toolbox_placement_sentry1.mdl", true)) PrecacheModel("models/buildables/toolbox_placement_sentry1.mdl", true);
+ 	if (FileExists("models/buildables/toolbox_placement.mdl", true)) PrecacheModel("models/buildables/toolbox_placement.mdl", true);
+	if (FileExists("models/buildables/toolbox_placed.mdl", true)) PrecacheModel("models/buildables/toolbox_placed.mdl", true);
 	PrepareAllModels();
 //	new String:mapname[64];
 //	GetCurrentMap(mapname, sizeof(mapname));
@@ -3213,7 +3218,7 @@ public OnGameFrame()	//asherkin is in here somewhere
 			if (bDoubleJumped[client]) bDoubleJumped[client] = false;
 			if (hasBuilder[client]) hasBuilder[client] = false;
 //			flBabyFaceSpeed[client] = -1.0;
-			flLastHype[client] = -1.0;
+//			flLastHype[client] = -1.0;
 			lastwep[client] = -1;
 			lastprim[client] = -1;
 		}
@@ -3319,9 +3324,9 @@ stock DoNewHealBeams(client, weapon, target)
 			DispatchKeyValue(particle, "effect_name", effect_name);
 			DispatchKeyValue(particle, "cpoint1", controlpoint);
 			DispatchSpawn(particle);
-			SetVariantString(targetname);
-			AcceptEntityInput(particle, "SetParent");
-			SetVariantString("muzzle");
+			SetVariantString("!activator");
+			AcceptEntityInput(particle, "SetParent", weapon);
+			SetVariantString("weapon_bone_L");
 			AcceptEntityInput(particle, "SetParentAttachment");
 			ActivateEntity(particle);
 			AcceptEntityInput(particle, "Start");
@@ -3341,9 +3346,9 @@ stock DoNewHealBeams(client, weapon, target)
 					DispatchKeyValue(particle2, "effect_name", effect_name);
 					DispatchKeyValue(particle2, "cpoint1", controlpoint);
 					DispatchSpawn(particle2);
-					SetVariantString(targetname);
-					AcceptEntityInput(particle2, "SetParent");
-					SetVariantString("muzzle");
+					SetVariantString("!activator");
+					AcceptEntityInput(particle2, "SetParent", weapon);
+					SetVariantString("weapon_bone_L");
 					AcceptEntityInput(particle2, "SetParentAttachment");
 					ActivateEntity(particle2);
 					AcceptEntityInput(particle2, "Start");
@@ -7948,7 +7953,7 @@ public SickleClimbWalls(client)
 		if (!IsPlayerAlive(healer)) continue;
 		new sec = GetPlayerWeaponSlot(healer, TFWeaponSlot_Secondary);
 		GetEdictClassname(sec, classname, sizeof(classname));
-		if (StrEqual(classname, "tf_weapon_medigun", false))	//it's a medigun
+		if (IsValidEntity(sec) && GetEdictClassname(sec, classname, sizeof(classname)) && StrEqual(classname, "tf_weapon_medigun", false)) //it's a medigun
 		{
 			if (GetEntProp(sec, Prop_Send, "m_iItemDefinitionIndex") != 411 || client != GetEntPropEnt(sec, Prop_Send, "m_hHealingTarget"))
 			{
