@@ -948,7 +948,7 @@
 	{
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
-		"attach particle effect static" "36" //Particle: Steaming
+		"attach particle effect static" "35" //Particle: Burnt Bacon
 	}
 	"265" //Sticky Jumper
 	{
@@ -1456,6 +1456,7 @@
 	{
 		"Projectile speed increased HIDDEN" "6" //Hidden projectile speed bonus
 		"grenade damage reduction on world contact" "0" //No damage if it hits the world
+		"apply z velocity on damage" "400" //x10'd the knockback
 	}
 	"997" //The Rescue Ranger
 	{
@@ -1509,6 +1510,6 @@
 		"SET BONUS: chance of hunger decrease" "11" //1000% Chane of Hunger Decrease
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
-		"attach particle effect static" "62" //Disco Beatdown
+		"attach particle effect static" "60" //Particle: Dead Presidents
 	}
 }
