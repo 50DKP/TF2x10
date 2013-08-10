@@ -257,7 +257,7 @@
 		"max health additive bonus" "250" //+250 Health
 		"damage force increase hidden"	"9"	//Big damage force increase
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
-		"healing received bonus"	"3"	//Super healing bonus while active
+		"healing received bonus"	"1.2"	//Super healing bonus while active
 		"move speed penalty" "0.80" //-20% Move Speed on Wearer, nerf because shortstop+madmilk=insane
 	}
 	"226"
