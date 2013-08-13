@@ -16,7 +16,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"0.5"
+#define PLUGIN_VERSION	"0.6"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/id/isatism"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -38,7 +38,6 @@ static const Float:g_fBazaarRates[] =
 	0.165 //seconds for 7+ heads
 };
 
-new bool:g_bClicked[MAXPLAYERS + 1] = false;
 new bool:g_bFF2Running = false;
 new bool:g_bHasCaber[MAXPLAYERS + 1] = false;
 new bool:g_bHasManmelter[MAXPLAYERS + 1] = false;
@@ -50,7 +49,7 @@ new bool:g_bVSHRunning = false;
 new Float:g_fChargeBegin[MAXPLAYERS + 1] = 0.0;
 new Float:g_fHeadScalingCap = 0.0;
 
-new Handle:g_hBazaarTimer[MAXPLAYERS + 1];
+new Handle:g_hGenericTimer[MAXPLAYERS + 1];
 new Handle:g_hHudText;
 new Handle:g_hItemInfoTrie;
 new Handle:g_hSdkGetMaxHealth;
@@ -128,9 +127,6 @@ public OnPluginStart() {
 	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_tf2x10_setmod", Command_SetMod, ADMFLAG_CHEATS);
 	
-	RegConsoleCmd("taunt", Command_Taunt);
-	RegConsoleCmd("+taunt", Command_Taunt);
-
 	HookAllEvents();
 
 	for (new client=1; client <= MaxClients; client++)
@@ -561,10 +557,15 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 	if(!GetConVarBool(g_cvarEnabled)) return;
 	
 	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	
-	if(condition == TFCond_Zoomed && IsValidEntity(activeWep) && GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") == 402) {
+	if(condition == TFCond_Zoomed && index == 402) {
 		g_fChargeBegin[client] = GetGameTime();
-		g_hBazaarTimer[client] = CreateTimer(0.05, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		g_hGenericTimer[client] = CreateTimer(0.05, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	if(condition == TFCond_Taunting && (index == 159 || index == 433)) {
+		g_hGenericTimer[client] = CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
@@ -586,12 +587,42 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 	return Plugin_Continue;
 }
 
+public Action:Timer_DalokohX10(Handle:timer, any:userid) {
+	new client = GetClientOfUserId(userid);
+	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+
+	if(!IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep) || !TF2_IsPlayerInCondition(client, TFCond_Taunting)) {
+		g_iDalokohSecs[client] = 0;
+		return Plugin_Stop;
+	}
+	
+	g_iDalokohSecs[client]++; //add 1 second
+
+	if (g_iDalokohSecs[client] == 1) {
+		TF2Attrib_SetByName(activeWep, "max health additive bonus", float(DALOKOH_MAXHEALTH-350));
+	} else if (g_iDalokohSecs[client] == 4 && GetClientHealth(client) <= DALOKOH_MAXHEALTH) {
+		new remainingHealth = (DALOKOH_MAXHEALTH - 400) - (DALOKOH_HEALTHPERSEC * 3) + 150;
+		TF2_SetHealth(client, GetClientHealth(client)+remainingHealth);
+	}
+
+	if (g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3 && GetClientHealth(client) <= DALOKOH_MAXHEALTH) {
+		TF2_SetHealth(client, GetClientHealth(client)+DALOKOH_HEALTHPERSEC-50);
+	}
+
+	return Plugin_Continue;
+}
+
 public TF2_OnConditionRemoved(client, TFCond:condition) {
 	if(!GetConVarBool(g_cvarEnabled)) return;
 	
 	if(condition == TFCond_Zoomed && g_fChargeBegin[client] != 0.0) {
 		g_fChargeBegin[client] = 0.0;
-		KillTimer(g_hBazaarTimer[client]);
+		KillTimer(g_hGenericTimer[client]);
+	}
+	
+	if(condition == TFCond_Taunting && g_iDalokohSecs[client] != 0) {
+		g_iDalokohSecs[client] = 0;
+		KillTimer(g_hGenericTimer[client]);
 	}
 }
 
@@ -651,16 +682,6 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		}
 	}
 
-	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
-	
-	if ((buttons & IN_ATTACK) && (GetEntityFlags(client) & FL_ONGROUND) && !g_bClicked[client] &&
-		g_iDalokohSecs[client] == 0 && (index == 159 || index == 433) && !g_bFF2Running && !g_bVSHRunning && !g_bHiddenRunning)
-	{
-		g_bClicked[client] = true;
-		CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-	}
-
 	return Plugin_Continue;
 }
 
@@ -717,55 +738,6 @@ public Action:event_object_remove(Handle:event, const String:name[], bool:dontBr
 	return Plugin_Continue;
 }
 
-public Action:Command_Taunt(client, args) {
-	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
-	
-	if (GetConVarBool(g_cvarEnabled) && g_iDalokohSecs[client] == 0 && IsValidClient(client)
-		&& IsPlayerAlive(client) && (index == 159 || index == 433)  && !g_bFF2Running && !g_bVSHRunning && !g_bHiddenRunning)
-	{
-		CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-	}
-	return Plugin_Continue;
-}
-
-public Action:Timer_DalokohX10(Handle:timer, any:userid) {
-	new client = GetClientOfUserId(userid);
-	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-
-	if(!IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep) || !TF2_IsPlayerInCondition(client, TFCond_Taunting)) {
-		g_iDalokohSecs[client] = 0;
-		return Plugin_Stop;
-	}
-	
-	g_iDalokohSecs[client]++; //add 1 second
-	
-	if(g_bClicked[client])
-		g_bClicked[client] = false;
-	
-	if (g_iDalokohSecs[client] == 1) {
-		if(SDKCall(g_hSdkGetMaxHealth, client) != DALOKOH_MAXHEALTH) {
-			TF2Attrib_SetByName(activeWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-300));
-		} else {
-			g_iDalokohSecs[client] = 0;
-			return Plugin_Stop;
-		}
-	} else if (g_iDalokohSecs[client] == 4) {
-		new remainingHealth = (DALOKOH_MAXHEALTH - 400) - (DALOKOH_HEALTHPERSEC * 3) + 150;
-		if (remainingHealth > 0)
-			TF2_SetHealth(client, GetClientHealth(client)+remainingHealth);
-	} else if(g_iDalokohSecs[client] == 5) {
-		g_iDalokohSecs[client] = 0;
-		return Plugin_Stop;
-	}
-
-	if (g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3 && GetClientHealth(client) <= DALOKOH_MAXHEALTH) {
-		TF2_SetHealth(client, GetClientHealth(client)+DALOKOH_HEALTHPERSEC-50);
-	}
-
-	return Plugin_Continue;
-}
-
 /******************************************************************
 
 		Gameplay: Damage and Death Only
@@ -778,38 +750,36 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 	
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	new attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-	new weaponid = GetEventInt(event, "weaponid");
-	new customKill = GetEventInt(event, "customkill");
-
-	switch(weaponid) {
-		case 317: { //Candy Cane
-			TF2_SpawnMedipack(client);
-		}
-		case 356: { //Conniver's Kunai
-			if(customKill == TF_CUSTOM_BACKSTAB && !g_bFF2Running && !g_bVSHRunning && !g_bHiddenRunning) {
-				TF2_SetHealth(attacker, KUNAI_DAMAGE);
-			}
-		}
-	}
-	
 	new inflictor_entindex = GetEventInt(event, "inflictor_entindex");
+	new activewep = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
+	new weaponid = IsValidEntity(activewep) ? GetEntProp(activewep, Prop_Send, "m_iItemDefinitionIndex") : -1;
+	new customKill = GetEventInt(event, "customkill");
+	
+	if(weaponid == 317) {
+		TF2_SpawnMedipack(client);
+		ResetVariables(client);
 		
-	if(IsValidEntity(inflictor_entindex)) {
-		decl String:inflictorName[32];
-		GetEdictClassname(inflictor_entindex, inflictorName, sizeof(inflictorName));
+		return Plugin_Continue;
+	} else if(weaponid == 356 && customKill == TF_CUSTOM_BACKSTAB && !g_bFF2Running && !g_bVSHRunning && !g_bHiddenRunning) {
+		TF2_SetHealth(attacker, KUNAI_DAMAGE);
+		ResetVariables(client);
 		
-		if(StrContains(inflictorName, "sentry") >= 0) {
-			new critsFJ = GetConVarInt(g_cvarCritsFJ);
+		return Plugin_Continue;
+	}
+		
+	decl String:inflictorName[32];
+	GetEdictClassname(inflictor_entindex, inflictorName, sizeof(inflictorName));
+		
+	if(StrContains(inflictorName, "sentry") >= 0) {
+		new critsFJ = GetConVarInt(g_cvarCritsFJ);
 			
-			if(GetEventInt(event, "assister") < 1)
-				g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + critsFJ - 2;
-			else
-				g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToNearest(critsFJ / 2.0) - 2;
-		}
+		if(GetEventInt(event, "assister") < 1)
+			g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + critsFJ - 2;
+		else
+			g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToNearest(critsFJ / 2.0) - 2;
 	}
 
 	ResetVariables(client);
-	
 	return Plugin_Continue;
 }
 
