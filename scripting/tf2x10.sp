@@ -558,7 +558,7 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 	
 	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
-	
+
 	if(condition == TFCond_Zoomed && index == 402) {
 		g_fChargeBegin[client] = GetGameTime();
 		g_hGenericTimer[client] = CreateTimer(0.05, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
@@ -599,7 +599,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	g_iDalokohSecs[client]++; //add 1 second
 
 	if (g_iDalokohSecs[client] == 1) {
-		TF2Attrib_SetByName(activeWep, "max health additive bonus", float(DALOKOH_MAXHEALTH-350));
+		TF2Attrib_SetByName(activeWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-350));
 	} else if (g_iDalokohSecs[client] == 4 && GetClientHealth(client) <= DALOKOH_MAXHEALTH) {
 		new remainingHealth = (DALOKOH_MAXHEALTH - 400) - (DALOKOH_HEALTHPERSEC * 3) + 150;
 		TF2_SetHealth(client, GetClientHealth(client)+remainingHealth);
