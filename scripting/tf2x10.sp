@@ -846,19 +846,18 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 	
 	new activeWep = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
 	
-	if (damagecustom != TF_CUSTOM_BLEEDING && damagecustom != TF_CUSTOM_BURNING &&
-		damagecustom != TF_CUSTOM_BURNING_ARROW && damagecustom != TF_CUSTOM_BURNING_FLARE &&
-		attacker != client && IsPlayerAlive(client) && IsValidEntity(activeWep))
+	decl String:class[19];
+	GetEdictClassname(activeWep, class, sizeof(class));
+
+	if (StrEqual(class, "tf_weapon_bat_fish") && damagecustom != TF_CUSTOM_BLEEDING && 
+		damagecustom != TF_CUSTOM_BURNING && damagecustom != TF_CUSTOM_BURNING_ARROW && 
+		damagecustom != TF_CUSTOM_BURNING_FLARE && attacker != client && IsPlayerAlive(client))
 	{
-		new Address:attribAddress = TF2Attrib_GetByName(activeWep, "kill eater score type");
-		
-		if(attribAddress != Address_Null && RoundToNearest(TF2Attrib_GetValue(attribAddress)) == 7) {
-			decl Float:ang[3];
-			GetClientEyeAngles(client, ang);
-			ang[1] = ang[1] + 120.0;
+		decl Float:ang[3];
+		GetClientEyeAngles(client, ang);
+		ang[1] = ang[1] + 120.0;
 			
-			TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
-		}
+		TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
 	}
 	
 	return Plugin_Continue;
