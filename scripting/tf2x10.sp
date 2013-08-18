@@ -16,15 +16,16 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"0.6"
+#define PLUGIN_VERSION	"1.0"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/id/isatism"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
 #define UPDATE_URL	"http://tf2x10.us.to/dl/updater.txt"
 
 #define	KUNAI_DAMAGE	1800
-#define DALOKOH_MAXHEALTH	850
+#define DALOKOH_MAXHEALTH	800
 #define DALOKOH_HEALTHPERSEC	150
+#define DALOKOH_LASTHEALTH	50
 
 static const Float:g_fBazaarRates[] =
 {
@@ -126,6 +127,7 @@ public OnPluginStart() {
 	RegAdminCmd("sm_tf2x10_getmod", Command_GetMod, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_tf2x10_setmod", Command_SetMod, ADMFLAG_CHEATS);
+	RegConsoleCmd("sm_x10group", Command_Group);
 	
 	HookAllEvents();
 
@@ -133,18 +135,27 @@ public OnPluginStart() {
 		if (IsValidClient(client) && IsClientInGame(client))
 			UpdateVariables(client);
 
-	if (LibraryExists("adminmenu") && ((hTopMenu = GetAdminTopMenu())))
+	if (LibraryExists("adminmenu") && (hTopMenu = GetAdminTopMenu()))
 		OnAdminMenuReady(hTopMenu);
 }
 
 public OnConfigsExecuted() {
+	if(!GetConVarBool(g_cvarEnabled))
+		return;
+	
+	if(FindConVar("aw2_version") != INVALID_HANDLE)
+		SetFailState("x10 is incompatible with Advanced Weaponiser.");
+
 	switch (LoadFileIntoTrie("default", "tf2x10_base_items")) {
 		case -1:
 			SetFailState("Could not find the file configs/x10.default.txt. Aborting.");
 		case -2:
 			SetFailState("Your configs/x10.default.txt seems to be corrupt. Aborting.");
-		default:
+		default: {
+			g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
+			g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
 			CreateTimer(330.0, Timer_ServerRunningX10, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		}
 	}
 	
 	if (GetConVarBool(g_cvarAutoUpdate) && LibraryExists("updater"))
@@ -358,8 +369,8 @@ public Action:Timer_ServerRunningX10(Handle:hTimer) {
 	if (!GetConVarBool(g_cvarEnabled))
 		return Plugin_Stop;
 	
-	PrintToChatAll("\x05[TF2x10]\x01 Multiply By 10 mod by \x05UltiMario\x01 and \x05Mr. Blue\x01, coding done by \x05Isatis\x01 and \x05InvisGhost\x01. Like playing x10? Check out the group for more game mods x10:");
-	PrintToChatAll("\x05http://www.steamcommunity.com/groups/tf2x10\x01");
+	PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] Mod by \x07FF5C33UltiMario\x01 and \x073399FFMr. Blue\x01. Plugin development by \x0794DBFFI\x01s\x0794DBFFa\x01t\x0794DBFFi\x01s (based off \x075C5C8AInvisGhost\x01's code).");
+	PrintToChatAll("\x01Join our Steam group for Hale x10, Randomizer x10 and more by typing \x05/x10group\x01!");
 	return Plugin_Continue;
 }
 
@@ -408,6 +419,19 @@ public Action:Command_GetMod(client, args) {
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
+}
+
+public Action:Command_Group(client, args)
+{
+	new Handle:kv = CreateKeyValues("data");
+	KvSetString(kv, "title", "TF2x10 Steam Group");
+	KvSetString(kv, "msg", "http://www.steamcommunity.com/groups/tf2x10");
+	KvSetNum(kv, "customsvr", 1);
+	KvSetNum(kv, "type", MOTDPANEL_TYPE_URL);
+	ShowVGUIPanel(client, "info", kv, true);
+	CloseHandle(kv);
+	
+	return Plugin_Handled;
 }
 
 public Action:Command_Recache(client, args) {
@@ -561,7 +585,7 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 
 	if(condition == TFCond_Zoomed && index == 402) {
 		g_fChargeBegin[client] = GetGameTime();
-		g_hGenericTimer[client] = CreateTimer(0.05, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		g_hGenericTimer[client] = CreateTimer(0.02, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
 	if(condition == TFCond_Taunting && (index == 159 || index == 433)) {
@@ -590,26 +614,44 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	new client = GetClientOfUserId(userid);
 	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	new health = GetClientHealth(client);
+	new newHealth;
 
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep) || !TF2_IsPlayerInCondition(client, TFCond_Taunting)) {
 		g_iDalokohSecs[client] = 0;
 		return Plugin_Stop;
 	}
 	
-	g_iDalokohSecs[client]++; //add 1 second
+	g_iDalokohSecs[client]++;
 
 	if (g_iDalokohSecs[client] == 1) {
-		TF2Attrib_SetByName(activeWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-350));
-	} else if (g_iDalokohSecs[client] == 4 && GetClientHealth(client) <= DALOKOH_MAXHEALTH) {
-		new remainingHealth = (DALOKOH_MAXHEALTH - 400) - (DALOKOH_HEALTHPERSEC * 3) + 150;
-		TF2_SetHealth(client, GetClientHealth(client)+remainingHealth);
+		CreateTimer(0.01, Timer_GiveBuffHealth, activeWep, TIMER_FLAG_NO_MAPCHANGE);
+	} else if (g_iDalokohSecs[client] == 4) {
+		newHealth = health + DALOKOH_LASTHEALTH;
+		
+		if(newHealth > DALOKOH_MAXHEALTH)
+			newHealth = DALOKOH_MAXHEALTH;
+		
+		TF2_SetHealth(client, newHealth);
 	}
 
-	if (g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3 && GetClientHealth(client) <= DALOKOH_MAXHEALTH) {
-		TF2_SetHealth(client, GetClientHealth(client)+DALOKOH_HEALTHPERSEC-50);
+	if (GetClientHealth(client) < DALOKOH_MAXHEALTH && g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3) {
+		newHealth = g_iDalokohSecs[client] == 3 ? health + DALOKOH_HEALTHPERSEC : health + DALOKOH_HEALTHPERSEC - 50;
+		
+		if(newHealth > DALOKOH_MAXHEALTH)
+			newHealth = DALOKOH_MAXHEALTH;
+			
+		TF2_SetHealth(client, newHealth);
 	}
 
 	return Plugin_Continue;
+}
+
+public Action:Timer_GiveBuffHealth(Handle:timer, any:activeWep) {
+	if(IsValidEntity(activeWep))
+		TF2Attrib_SetByName(activeWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-300));
+	
+	return Plugin_Stop;
 }
 
 public TF2_OnConditionRemoved(client, TFCond:condition) {
@@ -760,23 +802,25 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 		ResetVariables(client);
 		
 		return Plugin_Continue;
-	} else if(weaponid == 356 && customKill == TF_CUSTOM_BACKSTAB && !g_bFF2Running && !g_bVSHRunning && !g_bHiddenRunning) {
+	} else if(weaponid == 356 && customKill == TF_CUSTOM_BACKSTAB && !g_bHiddenRunning) {
 		TF2_SetHealth(attacker, KUNAI_DAMAGE);
 		ResetVariables(client);
 		
 		return Plugin_Continue;
 	}
+	
+	if(IsValidEntity(inflictor_entindex)) {
+		decl String:inflictorName[32];
+		GetEdictClassname(inflictor_entindex, inflictorName, sizeof(inflictorName));
 		
-	decl String:inflictorName[32];
-	GetEdictClassname(inflictor_entindex, inflictorName, sizeof(inflictorName));
-		
-	if(StrContains(inflictorName, "sentry") >= 0) {
-		new critsFJ = GetConVarInt(g_cvarCritsFJ);
+		if(StrContains(inflictorName, "sentry") >= 0) {
+			new critsFJ = GetConVarInt(g_cvarCritsFJ);
 			
-		if(GetEventInt(event, "assister") < 1)
-			g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + critsFJ - 2;
-		else
-			g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToNearest(critsFJ / 2.0) - 2;
+			if(GetEventInt(event, "assister") < 1)
+				g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + critsFJ - 2;
+			else
+				g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToNearest(critsFJ / 2.0) - 2;
+		}
 	}
 
 	ResetVariables(client);
@@ -836,7 +880,7 @@ public bool:MedipackTraceFilter(ent, contentMask) {
 }
 
 public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damagetype, &weapon, Float:damageForce[3], Float:damagePosition[3], damagecustom) {
-	if (!GetConVarBool(g_cvarEnabled))
+	if (!GetConVarBool(g_cvarEnabled) || (damagetype & DMG_FALL))
 		return Plugin_Continue;
 	
 	if (damagecustom == TF_CUSTOM_BOOTS_STOMP) {
@@ -844,10 +888,8 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 		return Plugin_Changed;
 	}
 	
-	new activeWep = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
-	
 	decl String:class[19];
-	GetEdictClassname(activeWep, class, sizeof(class));
+	GetEdictClassname(weapon, class, sizeof(class));
 
 	if (StrEqual(class, "tf_weapon_bat_fish") && damagecustom != TF_CUSTOM_BLEEDING && 
 		damagecustom != TF_CUSTOM_BURNING && damagecustom != TF_CUSTOM_BURNING_ARROW && 
@@ -864,13 +906,13 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 }
 
 public OnTakeDamagePost(client, attacker, inflictor, Float:damage, damagetype) {
-	if (!GetConVarBool(g_cvarEnabled) || !IsValidClient(client) || !IsValidClient(attacker))
+	if (!GetConVarBool(g_cvarEnabled))
 		return;
 
-	if (IsPlayerAlive(client) && !ShouldDisableWeapons(client))
+	if (IsValidClient(client) && IsPlayerAlive(client) && !ShouldDisableWeapons(client))
 		CheckHealthCaps(client);
 	
-	if (attacker != client && !ShouldDisableWeapons(attacker) && IsPlayerAlive(attacker))
+	if (IsValidClient(attacker) && attacker != client && !ShouldDisableWeapons(attacker) && IsPlayerAlive(attacker))
 		CheckHealthCaps(attacker);
 }
 
@@ -1032,8 +1074,6 @@ public Action:Timer_FixClips(Handle:hTimer, any:userid) {
 }
 
 CheckClips(entityIndex) {
-	//TF2Attrib apparently doesn't affect clip size penalties on spawn, so manually checking here.
-
 	new Address:attribAddress;
 	
 	if ( (attribAddress = TF2Attrib_GetByName(entityIndex, "clip size penalty")) != Address_Null ||
@@ -1184,12 +1224,13 @@ stock RemovePlayerBack(client)
 }
 
 stock GetConVarValue(const String:cvarname[]) {
-	new Handle:p_enabled = FindConVar(cvarname);
-	if(p_enabled == INVALID_HANDLE)
-		return -1;
-
-	new isenabled = GetConVarInt(p_enabled);
-	CloseHandle(p_enabled);
+	new Handle:cvar = FindConVar(cvarname);
 	
-	return isenabled;
+	if(cvar == INVALID_HANDLE)
+		return 0;
+
+	new value = GetConVarInt(cvar);
+	CloseHandle(cvar);
+	
+	return value;
 }
