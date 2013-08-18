@@ -4,8 +4,8 @@
 	{
 		"Version"
 		{
-			"Latest"	"0.60"
-			"Previous"	"0.50"
+			"Latest"	"1.0"
+			"Previous"	"0.60"
 		}
 		
 		"Notes"	"All version updates are in BitBucket now."
@@ -15,9 +15,6 @@
 	{
 		"Plugin"	"Path_SM/configs/x10.default.txt"
 		"Plugin"	"Path_SM/configs/x10.vshff2.txt"
-		"Plugin"	"Path_SM/gamedata/tf2.attributes.txt"
-		"Plugin"	"Path_SM/gamedata/tf2items.randomizer.txt"
 		"Plugin"	"Path_SM/plugins/tf2x10.smx"
-		"Plugin"	"Path_SM/plugins/tf2attributes.smx"
 	}
 }
