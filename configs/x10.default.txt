@@ -889,7 +889,7 @@
 	}
 	"225" //Your Eternal Reward
 	{
-		"SET BONUS: quiet unstealth" "1" //Quiet Unstealth
+		"SET BONUS: quiet unstealth" "10" //Quiet Unstealth
 		"SET BONUS: cloak blink time penalty" "0.5" //Cloak blink time penalty
 		"SET BONUS: custom taunt particle attr"	"1"	//That custom taunt particle?
 	}
@@ -1237,6 +1237,12 @@
 	{
 		"fire rate bonus" "0.9" //+10% Firing Rate
 		"damage bonus" "1.1" //+10% Damage
+	}
+	"574" //Wanga Prick
+	{
+		"SET BONUS: quiet unstealth" "10" //Quiet Unstealth
+		"SET BONUS: cloak blink time penalty" "0.5" //Cloak blink time penalty
+		"SET BONUS: custom taunt particle attr"	"1"	//That custom taunt particle?
 	}
 	"587" //Apoco Fists
 	{
