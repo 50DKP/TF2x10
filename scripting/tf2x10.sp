@@ -2,25 +2,25 @@
 
 #include <sourcemod>
 #include <sdktools>
-#include <sdkhooks>
 #include <adminmenu>
+#include <sdkhooks>
 #include <tf2_stocks>
 #include <tf2items>
 #include <tf2attributes>
 #include <steamtools>
+#include <updater>
 #undef REQUIRE_PLUGIN
-#tryinclude <updater>
 #tryinclude <freak_fortress_2>
 #tryinclude <saxtonhale>
 #define REQUIRE_PLUGIN
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.0"
+#define PLUGIN_VERSION	"1.1"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/id/isatism"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
-#define UPDATE_URL	"http://tf2x10.us.to/dl/updater.txt"
+#define UPDATE_URL	"http://x10updaterbot:xM7B47y9NRO1hT1@isatis.foxtopia.info/tf2x10/raw/default/updater.txt"
 
 #define	KUNAI_DAMAGE	1800
 #define DALOKOH_MAXHEALTH	800
@@ -330,7 +330,7 @@ LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
 						KvGetSectionName(hKeyValues, strBuffer2, sizeof(strBuffer2));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%d_name", rawname, strBuffer, i);
 						SetTrieString(g_hItemInfoTrie, tmpID, strBuffer2);
-						
+							
 						KvGetString(hKeyValues, NULL_STRING, strBuffer3, sizeof(strBuffer3));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%d_val", rawname, strBuffer, i);
 						SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
@@ -366,6 +366,8 @@ LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
 }
 
 public Action:Timer_ServerRunningX10(Handle:hTimer) {
+	DetectGameDescSetting();
+	
 	if (!GetConVarBool(g_cvarEnabled))
 		return Plugin_Stop;
 	
@@ -585,10 +587,10 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 
 	if(condition == TFCond_Zoomed && index == 402) {
 		g_fChargeBegin[client] = GetGameTime();
-		g_hGenericTimer[client] = CreateTimer(0.02, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		g_hGenericTimer[client] = CreateTimer(0.01, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
-	if(condition == TFCond_Taunting && (index == 159 || index == 433)) {
+	if(condition == TFCond_Taunting && (index == 159 || index == 433) && (!g_bVSHRunning || !g_bFF2Running || !g_bHiddenRunning)) {
 		g_hGenericTimer[client] = CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
@@ -600,6 +602,9 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 		return Plugin_Stop;
 	
 	new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
+	
+	if(heads > 7)
+		heads = 7;
 	
 	new Float:charge = ((GetGameTime() - g_fChargeBegin[client]) / g_fBazaarRates[heads]) * 150;
 	
@@ -729,9 +734,13 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 
 public Action:event_deflected(Handle:event, const String:name[], bool:dontBroadcast) {
 	if(GetConVarBool(g_cvarEnabled) && g_bFF2Running) {
-		new iBossIndex = FF2_GetBossIndex(GetClientOfUserId(GetEventInt(event, "ownerid")));
+		new client = GetClientOfUserId(GetEventInt(event, "userid"));
+		new iBossIndex = FF2_GetBossIndex(client);
 
-		if (iBossIndex != -1 && GetEventInt(event, "weaponid") == 40) { //backburner
+		new activeWep = GetEntPropEnt(GetClientOfUserId(GetEventInt(event, "ownerid")), Prop_Send, "m_hActiveWeapon");
+		new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
+		
+		if (iBossIndex != -1 && index == 40) { //backburner
 			new Float:fBossCharge = FF2_GetBossCharge(iBossIndex, 0) + 63.0; //work with FF2's deflect to set to 70 in total instead of  7
 
 			if(fBossCharge > 100.0)
