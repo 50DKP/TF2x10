@@ -12,11 +12,10 @@
 #undef REQUIRE_PLUGIN
 #tryinclude <freak_fortress_2>
 #tryinclude <saxtonhale>
-#define REQUIRE_PLUGIN
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.1"
+#define PLUGIN_VERSION	"1.11"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/id/isatism"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -26,6 +25,7 @@
 #define DALOKOH_MAXHEALTH	800
 #define DALOKOH_HEALTHPERSEC	150
 #define DALOKOH_LASTHEALTH	50
+#define MAX_CURRENCY	30000
 
 static const Float:g_fBazaarRates[] =
 {
@@ -274,6 +274,7 @@ HookAllEvents() {
 	HookEvent("teamplay_win_panel", event_round_end, EventHookMode_PostNoCopy);
 	HookEvent("round_end", event_round_end, EventHookMode_PostNoCopy);
 	HookEvent("object_deflected", event_deflected, EventHookMode_Post);
+	HookEvent("mvm_pickup_currency", event_pickup_currency, EventHookMode_Pre);
 }
 
 public OnAdminMenuReady(Handle:topmenu)
@@ -495,6 +496,17 @@ public Action:Command_SetMod(client, args) {
 
  ******************************************************************/
 
+public OnAllPluginsLoaded() {
+	g_bFF2Running = LibraryExists("freak_fortress_2") ? FF2_IsFF2Enabled() : false;
+	g_bHiddenRunning = GetConVarValue("sm_hidden_enabled") == 1;
+	g_bVSHRunning = LibraryExists("saxtonhale") ? VSH_IsSaxtonHaleModeEnabled() : false;
+
+	if(g_bFF2Running || g_bVSHRunning) {
+		g_sSelectedMod = "vshff2";
+		LoadFileIntoTrie(g_sSelectedMod);
+	}
+}
+
 public OnLibraryAdded(const String:name[]) {
 	if (StrEqual(name, "updater") && GetConVarBool(g_cvarAutoUpdate))
 		Updater_AddPlugin(UPDATE_URL);
@@ -514,15 +526,17 @@ public OnLibraryRemoved(const String:name[]) {
 public OnMapStart() {
 	if (!GetConVarBool(g_cvarEnabled))
 		return;
-
-	g_bFF2Running = LibraryExists("freak_fortress_2") ? FF2_IsFF2Enabled() : false;
-	g_bHiddenRunning = GetConVarValue("sm_hidden_enabled") == 1;
-	g_bVSHRunning = LibraryExists("saxtonhale") ? VSH_IsSaxtonHaleModeEnabled() : false;
-
-	if(g_bFF2Running || g_bVSHRunning) {
-		g_sSelectedMod = "vshff2";
-		LoadFileIntoTrie(g_sSelectedMod);
-	}
+	
+	/*decl String:mapName[64];
+	GetCurrentMap(mapName, sizeof(mapName));
+	
+	if(StrContains(mapName, "mvm_") == 0 &&
+		(StrContains(mapName, "_titans") == -1 ||
+		 StrContains(mapName, "_omnipotence") == -1))
+	{
+		PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] x10 is disabled. Choose a non-Valve mission, please!");
+		SetConVarBool(g_cvarEnabled, false);
+	}*/
 
 	DetectGameDescSetting();
 }
@@ -786,6 +800,21 @@ public Action:event_object_remove(Handle:event, const String:name[], bool:dontBr
 		g_iBuildingsDestroyed[client] = 0;
 	}
 	
+	return Plugin_Continue;
+}
+
+public Action:event_pickup_currency(Handle:event, const String:name[], bool:dontBroadcast) {
+	new client = GetEventInt(event, "player");
+	new dollars = GetEventInt(event, "currency");
+	new newDollahs;
+
+	if(GetEntProp(client, Prop_Send, "m_nCurrency") >= MAX_CURRENCY)
+		newDollahs = 0;
+	else
+		newDollahs = RoundToNearest(float(dollars) / 3.16);
+	
+	SetEventInt(event, "currency", newDollahs);
+
 	return Plugin_Continue;
 }
 
