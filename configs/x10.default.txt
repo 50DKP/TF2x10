@@ -944,7 +944,7 @@
 		"no self blast dmg" "2" //No Self Damage (including Nades/Caber)
 		"clip size bonus" "10" //10x loaded ammo
 		"maxammo secondary increased" "21" //+2000% Max secondary ammo
-		"max pipebombs increased" "72" //+72 Stickybombs out
+		"max pipebombs increased" "78" //80 Stickybombs out
 	}
 	"266" //Headtaker
 	{
