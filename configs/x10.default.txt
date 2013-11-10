@@ -1094,6 +1094,11 @@
 		"damage penalty" "0" //-20% damage
 		"provide on active" "1" //Effects only present while active
 	}
+	"413" //Solemn Vow
+	{
+		"mod see enemy health" "1" //See Enemy Health
+		"mod stun waist high airborne" "10" //Stun them if you hit them in the nuts while airborne
+	}
 	"414" //Liberty Launcher
 	{
 		"Projectile speed increased" "5" //+400% Projectile Speed
