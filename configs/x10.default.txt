@@ -512,67 +512,67 @@
 	}
 	"21" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"208" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"659" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"798" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"807" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"887" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"896" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"905" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"914" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"963" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"972" //Flamethrower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
@@ -932,7 +932,7 @@
 	{
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
-		"attach particle effect static" "35" //Particle: Burnt Bacon
+		"attach particle effect static" "79" //Particle: Darkblaze
 	}
 	"265" //Sticky Jumper
 	{
@@ -1343,7 +1343,7 @@
 	}
 	"741" //Rainblower
 	{
-		"airblast cost decreased" ".8" //1/10th airblast cost
+		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
@@ -1504,6 +1504,6 @@
 		"SET BONUS: chance of hunger decrease" "11" //1000% Chane of Hunger Decrease
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
-		"attach particle effect static" "71" //Particle: Green Black Hole
+		"attach particle effect static" "80" //Particle: Demonflame
 	}
 }
