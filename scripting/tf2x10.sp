@@ -15,11 +15,11 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.11"
-#define PLUGIN_CONTACT	"http://www.steamcommunity.com/id/isatism"
+#define PLUGIN_VERSION	"1.2"
+#define PLUGIN_CONTACT	"http://www.steamcommunity.com/id/isatis_"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
-#define UPDATE_URL	"http://x10updaterbot:xM7B47y9NRO1hT1@isatis.foxtopia.info/tf2x10/raw/default/updater.txt"
+#define UPDATE_URL	"http://isatis.me/bb.php/updater.txt"
 
 #define	KUNAI_DAMAGE	1800
 #define DALOKOH_MAXHEALTH	800
@@ -688,10 +688,10 @@ public TF2_OnConditionRemoved(client, TFCond:condition) {
 }
 
 public OnGameFrame() {
-	for(new client=1; client <= MaxClients; client++) {
+	for(new client=1; client < MaxClients; client++) {
 		if (!IsValidClient(client) || !IsPlayerAlive(client))
 			continue;
-		
+
 		if (g_bHeadScaling && g_bTakesHeads[client]) {
 			new Float:fPlayerHeads = 1.0 + (GetEntProp(client, Prop_Send, "m_iDecapitations") / 4.0);
 			
@@ -774,7 +774,7 @@ public Action:event_object_destroyed(Handle:event, const String:name[], bool:don
 	new primaryWep = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary);
 	new critsDiamondback = GetConVarInt(g_cvarCritsDiamondback);
 
-	if (IsValidClient(attacker) && IsPlayerAlive(attacker) && critsDiamondback > 0 && IsValidEntity(primaryWep) && TF2Attrib_GetByName(primaryWep, "sapper kills collect crits") != Address_Null) {
+	if (IsValidClient(attacker) && IsPlayerAlive(attacker) && critsDiamondback > 0 && IsValidEntity(primaryWep) && WeaponHasAttribute(attacker, primaryWep, "sapper kills collect crits")) {
 		decl String:weapon[32];
 		GetEventString(event, "weapon", weapon, sizeof(weapon));
 
@@ -793,7 +793,7 @@ public Action:event_object_remove(Handle:event, const String:name[], bool:dontBr
 	
 	if (!IsValidEntity(entity)) return Plugin_Continue;
 
-	if(TF2Attrib_GetByName(entity, "mod sentry killed revenge") != Address_Null && GetEventInt(event, "objecttype") == 2)
+	if(WeaponHasAttribute(client, entity, "mod sentry killed revenge") && GetEventInt(event, "objecttype") == 2)
 	{
 		new crits = GetEntProp(client, Prop_Send, "m_iRevengeCrits") + g_iBuildingsDestroyed[client];
 		SetEntProp(client, Prop_Send, "m_iRevengeCrits", crits);
@@ -806,11 +806,9 @@ public Action:event_object_remove(Handle:event, const String:name[], bool:dontBr
 public Action:event_pickup_currency(Handle:event, const String:name[], bool:dontBroadcast) {
 	new client = GetEventInt(event, "player");
 	new dollars = GetEventInt(event, "currency");
-	new newDollahs;
+	new newDollahs = 0;
 
-	if(GetEntProp(client, Prop_Send, "m_nCurrency") >= MAX_CURRENCY)
-		newDollahs = 0;
-	else
+	if(GetEntProp(client, Prop_Send, "m_nCurrency") < MAX_CURRENCY)
 		newDollahs = RoundToNearest(float(dollars) / 3.16);
 	
 	SetEventInt(event, "currency", newDollahs);
@@ -831,7 +829,7 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	new attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 	new inflictor_entindex = GetEventInt(event, "inflictor_entindex");
-	new activewep = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
+	new activewep = IsValidEntity(attacker) ? GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon") : -1;
 	new weaponid = IsValidEntity(activewep) ? GetEntProp(activewep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	new customKill = GetEventInt(event, "customkill");
 	
@@ -918,7 +916,7 @@ public bool:MedipackTraceFilter(ent, contentMask) {
 }
 
 public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damagetype, &weapon, Float:damageForce[3], Float:damagePosition[3], damagecustom) {
-	if (!GetConVarBool(g_cvarEnabled) || (damagetype & DMG_FALL))
+	if (!GetConVarBool(g_cvarEnabled))
 		return Plugin_Continue;
 	
 	if (damagecustom == TF_CUSTOM_BOOTS_STOMP) {
@@ -927,8 +925,9 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 	}
 	
 	decl String:class[19];
-	GetEdictClassname(weapon, class, sizeof(class));
-
+	if (!IsValidEntity(weapon) || !GetEdictClassname(weapon, class, sizeof(class)))
+		return Plugin_Continue;
+	
 	if (StrEqual(class, "tf_weapon_bat_fish") && damagecustom != TF_CUSTOM_BLEEDING && 
 		damagecustom != TF_CUSTOM_BURNING && damagecustom != TF_CUSTOM_BURNING_ARROW && 
 		damagecustom != TF_CUSTOM_BURNING_FLARE && attacker != client && IsPlayerAlive(client))
@@ -939,6 +938,15 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 			
 		TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
 	}
+	
+	/*this won't work, damageForce is not applied by reference, only static
+	if (g_bTakesHeads[client] && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 482) {
+		new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
+		
+		damageForce[0] *= (heads + 1);
+		damageForce[1] *= (heads + 1);
+		damageForce[2] *= (heads + 1);
+	}*/
 	
 	return Plugin_Continue;
 }
@@ -1183,8 +1191,8 @@ UpdateVariables(client) {
 	if(!IsValidEntity(secndWep)) secndWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
 	
 	if(IsValidEntity(secndWep)) {
-		g_iRazorbackCount[client] = TF2Attrib_GetByName(secndWep, "backstab shield") != Address_Null ? 10 : 0;
-		g_bHasManmelter[client] = TF2Attrib_GetByName(meleeWep, "extinguish earns revenge crits") != Address_Null;
+		g_iRazorbackCount[client] = WeaponHasAttribute(client, secndWep, "backstab shield") ? 10 : 0;
+		g_bHasManmelter[client] = WeaponHasAttribute(client, secndWep, "extinguish earns revenge crits");
 	} else {
 		g_iRazorbackCount[client] = 0;
 		g_bHasManmelter[client] = false;
@@ -1192,7 +1200,7 @@ UpdateVariables(client) {
 	
 	if(IsValidEntity(meleeWep)) {
 		g_bHasCaber[client] = GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") == 307;
-		g_bTakesHeads[client] = TF2Attrib_GetByName(meleeWep, "decapitate type") != Address_Null;
+		g_bTakesHeads[client] = WeaponHasAttribute(client, meleeWep, "decapitate type");
 	} else {
 		g_bHasCaber[client] = g_bHasManmelter[client] = g_bTakesHeads[client] = false;
 	}
@@ -1259,6 +1267,27 @@ stock RemovePlayerBack(client)
 			}
 		}
 	}
+}
+
+//I have this in case TF2Attrib_GetByName acts up
+stock bool:WeaponHasAttribute(client, entity, String:name[]) {
+	if(TF2Attrib_GetByName(entity, name) != Address_Null)
+		return true;
+
+	if(StrEqual(name, "backstab shield") && (GetPlayerWeaponSlot_Wearable(client, TFWeaponSlot_Secondary) == 57))
+		return true;
+
+	new itemIndex = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+
+	return (StrEqual(name, "sapper kills collect crits") && (itemIndex == 525))
+		|| (StrEqual(name, "mod sentry killed revenge") &&
+			(itemIndex == 141 || itemIndex == 1004)
+		   )
+		|| (StrEqual(name, "decapitate type") &&
+			(itemIndex == 132 || itemIndex == 266 || itemIndex == 482)
+		   )
+		|| (StrEqual(name, "ullapool caber") && (itemIndex == 307))
+		|| (StrEqual(name, "extinguish earns revenge crits") && (itemIndex == 595));
 }
 
 stock GetConVarValue(const String:cvarname[]) {
