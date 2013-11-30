@@ -1511,6 +1511,6 @@
 	{
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
-		"attach particle effect static" "78" //Particle: Hellfire
+		"attach particle effect static" "17" //Particle: Sunbeams
 	}
 }
