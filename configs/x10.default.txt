@@ -891,6 +891,7 @@
 	"226" //Battalion's Backup
 	{
 		"increase buff duration HIDDEN" "10" //10x Buff Duration
+		"max health additive bonus" "200" //+200 health
 	}
 	"228" //Black Box
 	{
@@ -1050,6 +1051,7 @@
 	"354" //Concheror
 	{
 		"increase buff duration HIDDEN" "10" //10x Banner duration
+		"health regen" "20" //+20HP Per second
 	}
 	"355" //Fan-o-War
 	{
