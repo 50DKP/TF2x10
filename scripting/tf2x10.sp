@@ -15,11 +15,11 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.2"
+#define PLUGIN_VERSION	"1.2.1"
 #define PLUGIN_CONTACT	"http://www.steamcommunity.com/id/isatis_"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
-#define UPDATE_URL	"http://isatis.me/bb.php/updater.txt"
+#define UPDATE_URL	"http://kaabiiserver.site.nfoservers.com/bb.php/updater.txt"
 
 #define	KUNAI_DAMAGE	1800
 #define DALOKOH_MAXHEALTH	800
@@ -562,12 +562,17 @@ public OnClientPutInServer(client) {
 		SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 	}
 
-	//TF2x10-wide ban for a certain player. See ban description.
+	//TF2x10-wide ban for player(s). See ban description.
 	decl String:steamid[20], String:ipaddr[20];
 	GetClientAuthString(client, steamid, sizeof(steamid));
 	
-	if(StrEqual(steamid, "STEAM_0:1:25092722") && GetClientIP(client, ipaddr, sizeof(ipaddr)))
-		BanIdentity(ipaddr, 0, BANFLAG_IP, "Accused of shutting down servers and DDoSing. Ask UltiMario or Blue if there are any more questions.", "Server is full.");
+	if(GetClientIP(client, ipaddr, sizeof(ipaddr)) {
+		if(StrEqual(steamid, "STEAM_0:1:25092722")) {
+			BanIdentity(ipaddr, 0, BANFLAG_IP, "Accused of shutting down servers and DDoSing. Ask UltiMario or Blue if there are any more questions.", "Server is full.");
+		} else if(StrEqual(steamid, "STEAM_0:0:22085237")) {
+			BanIdentity(ipaddr, 0, BANFLAG_IP, "Harassment.", "Server is full.");
+		}
+	}
 }
 
 public OnClientDisconnect(client) {
@@ -829,20 +834,22 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	new attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 	new inflictor_entindex = GetEventInt(event, "inflictor_entindex");
-	new activewep = IsValidEntity(attacker) ? GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon") : -1;
+	new activewep = IsValidClient(attacker) ? GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon") : -1;
 	new weaponid = IsValidEntity(activewep) ? GetEntProp(activewep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	new customKill = GetEventInt(event, "customkill");
 	
 	if(weaponid == 317) {
 		TF2_SpawnMedipack(client);
-		ResetVariables(client);
+	} else if(customKill == TF_CUSTOM_BACKSTAB && !g_bHiddenRunning) {
+		if(weaponid == 356) {
+			TF2_SetHealth(attacker, KUNAI_DAMAGE);
+		}
 		
-		return Plugin_Continue;
-	} else if(weaponid == 356 && customKill == TF_CUSTOM_BACKSTAB && !g_bHiddenRunning) {
-		TF2_SetHealth(attacker, KUNAI_DAMAGE);
-		ResetVariables(client);
-		
-		return Plugin_Continue;
+		new primWep = IsValidClient(attacker) ? GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary) : -1;
+		if(WeaponHasAttribute(attacker, primWep, "sapper kills collect crits")) {
+			new crits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + GetConVarInt(g_cvarCritsDiamondback) - 1;
+			SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", crits);
+		}
 	}
 	
 	if(IsValidEntity(inflictor_entindex)) {
@@ -1284,7 +1291,7 @@ stock bool:WeaponHasAttribute(client, entity, String:name[]) {
 			(itemIndex == 141 || itemIndex == 1004)
 		   )
 		|| (StrEqual(name, "decapitate type") &&
-			(itemIndex == 132 || itemIndex == 266 || itemIndex == 482)
+			(itemIndex == 132 || itemIndex == 266 || itemIndex == 482 || itemIndex == 1082)
 		   )
 		|| (StrEqual(name, "ullapool caber") && (itemIndex == 307))
 		|| (StrEqual(name, "extinguish earns revenge crits") && (itemIndex == 595));
