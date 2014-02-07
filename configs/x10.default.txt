@@ -868,7 +868,7 @@
 		"reload time increased hidden" "1" //Old Reload speed
 		"max health additive bonus" "250" //+250 Health
 		"damage force increase hidden"	"9"	//Big damage force increase
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
+		"airblast vulnerability multiplier hidden"	"5"	//Big airblast vulnerability increase
 		"healing received bonus"	"3"	//Super healing bonus while active
 		"SET BONUS: calling card on kill"	"1"	//Special Delivery Calling Card
 	}
@@ -1113,7 +1113,7 @@
 	"415" //Reserve Shooter
 	{
 		"clip size penalty" "0.2" //-80% clip size
-		"mod mini-crit airborne deploy" "30" //mini crit airborne targets 30 seconds after being drawn
+		"mod mini-crit airborne deploy" "50" //mini crit airborne targets 30 seconds after being drawn
 		"deploy time decreased" "0" //100% faster weapon switch
 		"minicrits become crits" "1" //Crits when it should Minicrit
 	}
@@ -1353,7 +1353,7 @@
 	}
 	"751" //Cleaner's Carbine
 	{
-		"critboost on kill" "30" //30 Seconds of crits on kill
+		"minicritboost on kill" "80" //80 Seconds of minicrits on kill
 		"fire rate penalty" "1.7" //-70% Firing speed
 		"clip size penalty" "0.6" //-40% clip size
 	}
