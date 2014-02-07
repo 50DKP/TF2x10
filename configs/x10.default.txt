@@ -690,6 +690,7 @@
 	}
 	"41" //Natascha + Ludmila
 	{
+		"maxammo primary increased" "6" //+500% max ammo
 		"damage penalty" "0.50" //50% less damage
 		"minigun spinup time increased" "1.6" //60% slower rev-up
 		"heal on hit for rapidfire" "30" //+30 Health on Hit
