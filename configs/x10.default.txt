@@ -1562,5 +1562,11 @@
 		"SET BONUS: dmg from sentry reduced" "-1" //-200% Damage from sentries
 		"SET BONUS: calling card on kill"	"3"		//Tankbuster Calling Card
 	}	
+		"1092" //The Fortified Compound
+	{
+		"hidden primary max ammo bonus" "5" //10x Primary Ammo
+		"disable fancy class select anim" "1" //Disables certain class animations 
+		"faster reload rate" "0.8" //-20% Reload speed
+	}
 	
 }
