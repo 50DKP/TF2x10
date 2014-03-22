@@ -822,7 +822,6 @@
 	{
 		"clip size bonus" "10" //10x Loaded Ammo
 		"maxammo secondary increased" "10" //10x max primary ammo
-		"weapon spread bonus" "0.01" //+99% Accuracy
 	}
 	"163" //Crit-a-Cola
 	{
@@ -1231,8 +1230,8 @@
 	}
 	"527" //Widowmaker
 	{
-		"mod ammo per shot" "15" //30 Ammo Per Shot (15)
-		"add onhit addammo" "75" //Add a maximum of 100 ammo on hit (75)
+		"mod ammo per shot" "3" //30 Ammo Per Shot (15)
+		"add onhit addammo" "100" //Add a maximum of 100 ammo on hit (75)
 	}
 	"528" //Short Circuit
 	{
