@@ -442,7 +442,7 @@
 		"can overload" "1" //load
 		"auto fires full clip" "1" //overload
 		"maxammo primary increased" "3.125" //50 ammo
-		"no primary ammo from dispensers" "1" //no ammo from dispensers
+		"no primary ammo from dispensers while active" "1" //no ammo from dispensers
 	}
 	"206" //Grenade Launcher
 	{
@@ -453,7 +453,7 @@
 		"can overload" "1" //load
 		"auto fires full clip" "1" //overload
 		"maxammo primary increased" "3.125" //50 ammo
-		"no primary ammo from dispensers" "1" //no ammo from dispensers
+		"no primary ammo from dispensers while active" "1" //no ammo from dispensers
 	}
 	"1007" //Grenade Launcher
 	{
@@ -464,7 +464,7 @@
 		"can overload" "1" //load
 		"auto fires full clip" "1" //overload
 		"maxammo primary increased" "3.125" //50 ammo
-		"no primary ammo from dispensers" "1" //no ammo from dispensers
+		"no primary ammo from dispensers while active" "1" //no ammo from dispensers
 	}
 	"20" //Stickybomb Launcher
 	{
