@@ -1527,7 +1527,7 @@
 	{
 		"crit kill will gib"	"1"	//Just putting a dummy stat in here to keep the crossbow's place until a better fix is devised.
 		"Reload time decreased" "0.5" //+50% reload speed
-		"override_projectile_type" "23" //Fire Candy Canes
+		"override projectile type" "23" //Fire Candy Canes
 	}
 		"1080" //Festive Sapper
 	{
