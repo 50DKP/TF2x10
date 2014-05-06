@@ -514,67 +514,56 @@
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"208" //Flamethrower
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"659" //Flamethrower
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"798" //Flamethrower
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"807" //Flamethrower
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"887" //Flamethrower
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"896" //Flamethrower
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"905" //Flamethrower
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"914" //Flamethrower
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"963" //Flamethrower
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"972" //Flamethrower
 	{
 		"airblast cost decreased" ".2" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"22" //Engineer Pistol
 	{
