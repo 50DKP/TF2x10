@@ -922,7 +922,7 @@
 	{
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
-		"attach particle effect static" "79" //Particle: Darkblaze
+		"attach particle effect static" "77" //Particle: Something Burning This Way Comes
 	}
 	"265" //Sticky Jumper
 	{
@@ -1495,7 +1495,7 @@
 		"SET BONUS: chance of hunger decrease" "11" //1000% Chane of Hunger Decrease
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
-		"attach particle effect static" "80" //Particle: Demonflame
+		"attach particle effect static" "75" //Particle: Chiroptera Venenata
 	}
 		"1071" //The Golden Frying Pan
 	{
@@ -1556,5 +1556,42 @@
 		"disable fancy class select anim" "1" //Disables certain class animations 
 		"faster reload rate" "0.8" //-20% Reload speed
 	}
-	
+		"1098" //The Classic
+	{
+		"damage penalty on bodyshot" "0" //No Bodyshot Damage
+		"SRifle Charge rate increased"	"0.1" //Increased charge rate cuz it needs some love
+	}
+		"1099" //The Tide Turner
+	{
+		"dmg taken from fire reduced"	"0.5"	//1/2 Fire Damage
+		"dmg taken from blast reduced"	"0.5"	//1/2 Explosive Damage
+	}
+		"1100" //The Bread Bite
+	{
+		"move speed bonus" "4" //+300% Walk Speed
+		"damage penalty" "0" //-100% Damage
+	}
+		"1102" //The Snack Attack
+	{
+		"sapper damage penalty hidden" "3.16" //(sqrt10)x Sapper Damage(hidden)
+	}
+		"1103" //The Back Scatter
+	{
+		"clip size penalty"	"0.9"
+		"spread penalty"	"3"
+		"minicrits become crits" "1" //Crits when it should Minicrit
+	}
+		"1104" //The Air Strike
+	{
+		"no self blast dmg" "2" //No rocket jump damage
+		"rocketjump attackrate bonus"	"0.0015"
+		"Blast radius decreased" "0.01" //-99% Explosive Radius
+		"clip size penalty"	"0.25"
+		"clipsize increase on kill"	"79"
+		"maxammo primary increased" "10" //+900% max primary ammo
+	}
+		"1105" //The Self-Aware Beauty Mark
+	{
+		"maxammo grenades1 increased" "10" //10 Jarates
+	}
 }
