@@ -1559,7 +1559,7 @@
 		"1098" //The Classic
 	{
 		"damage penalty on bodyshot" "0" //No Bodyshot Damage
-		"SRifle Charge rate increased"	"0.1" //Increased charge rate cuz it needs some love
+		"SRifle Charge rate increased"	"10" //Increased charge rate cuz it needs some love
 	}
 		"1099" //The Tide Turner
 	{
