@@ -16,10 +16,10 @@
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
 #define PLUGIN_VERSION	"1.2.1"
-#define PLUGIN_CONTACT	"http://www.steamcommunity.com/id/isatis_"
+#define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
-#define UPDATE_URL	"http://kaabiiserver.site.nfoservers.com/bb.php/updater.txt"
+#define UPDATE_URL	"http://isatis.qc.to/tf2x10/raw/default/updater.txt"
 
 #define	KUNAI_DAMAGE	1800
 #define DALOKOH_MAXHEALTH	800
