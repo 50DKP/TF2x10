@@ -8,8 +8,8 @@
 #include <tf2items>
 #include <tf2attributes>
 #include <steamtools>
+#include <updater>
 #undef REQUIRE_PLUGIN
-#tryinclude <updater>
 #tryinclude <freak_fortress_2>
 #tryinclude <saxtonhale>
 
@@ -369,6 +369,9 @@ LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
 public Action:Timer_ServerRunningX10(Handle:hTimer) {
 	DetectGameDescSetting();
 	
+	PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] Mod by \x07FF5C33UltiMario\x01 and \x073399FFMr. Blue\x01. Plugin development by \x0794DBFFI\x01s\x0794DBFFa\x01t\x0794DBFFi\x01s (based off \x075C5C8AInvisGhost\x01's code).");
+	PrintToChatAll("\x01Join our Steam group for Hale x10, Randomizer x10 and more by typing \x05/x10group\x01!");
+	
 	if (!GetConVarBool(g_cvarEnabled))
 		return Plugin_Stop;
 	
@@ -558,7 +561,6 @@ public OnClientPutInServer(client) {
 		ResetVariables(client);
 		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 		SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
-		CreateTimer(20.0, ShowJoinMessage, GetClientUserId(client));
 	}
 	
 	//TF2x10-wide ban for player(s). See ban description.
@@ -572,17 +574,6 @@ public OnClientPutInServer(client) {
 			BanIdentity(ipaddr, 0, BANFLAG_IP, "Harassment.", "Server is full.");
 		}
 	}
-}
-
-public Action:ShowJoinMessage(Handle:timer, any:userid) {
-	new client = GetClientOfUserId(userid);
-	
-	if(IsValidClient(client)) {
-		PrintToChat(client, "\x01[\x07FF0000TF2\x070000FFx10\x01] Mod by \x07FF5C33UltiMario\x01 and \x073399FFMr. Blue\x01. Plugin development by \x0794DBFFI\x01s\x0794DBFFa\x01t\x0794DBFFi\x01s (based off \x075C5C8AInvisGhost\x01's code).");
-		PrintToChat(client, "\x01Join our Steam group for Hale x10, Randomizer x10 and more by typing \x05/x10group\x01!");
-	}
-	
-	return Plugin_Continue;
 }
 
 public OnClientDisconnect(client) {
@@ -855,12 +846,10 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 			TF2_SetHealth(attacker, KUNAI_DAMAGE);
 		}
 		
-		if(IsValidClient(attacker)) {
-			new primWep = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary);
-			if(IsValidEntity(primWep) && WeaponHasAttribute(attacker, primWep, "sapper kills collect crits")) {
-				new crits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + GetConVarInt(g_cvarCritsDiamondback) - 1;
-				SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", crits);
-			}
+		new primWep = IsValidClient(attacker) ? GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary) : -1;
+		if(WeaponHasAttribute(attacker, primWep, "sapper kills collect crits")) {
+			new crits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + GetConVarInt(g_cvarCritsDiamondback) - 1;
+			SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", crits);
 		}
 	}
 	
