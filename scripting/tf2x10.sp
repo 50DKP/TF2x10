@@ -566,7 +566,7 @@ public OnClientPutInServer(client) {
 	decl String:steamid[20], String:ipaddr[20];
 	GetClientAuthString(client, steamid, sizeof(steamid));
 	
-	if(GetClientIP(client, ipaddr, sizeof(ipaddr)) {
+	if(GetClientIP(client, ipaddr, sizeof(ipaddr))) {
 		if(StrEqual(steamid, "STEAM_0:1:25092722")) {
 			BanIdentity(ipaddr, 0, BANFLAG_IP, "Accused of shutting down servers and DDoSing. Ask UltiMario or Blue if there are any more questions.", "Server is full.");
 		} else if(StrEqual(steamid, "STEAM_0:0:22085237")) {
