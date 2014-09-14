@@ -855,10 +855,12 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 			TF2_SetHealth(attacker, KUNAI_DAMAGE);
 		}
 		
-		new primWep = IsValidClient(attacker) ? GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary) : -1;
-		if(WeaponHasAttribute(attacker, primWep, "sapper kills collect crits")) {
-			new crits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + GetConVarInt(g_cvarCritsDiamondback) - 1;
-			SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", crits);
+		if(IsValidClient(attacker)) {
+			new primWep = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary);
+			if(IsValidEntity(primWep) && WeaponHasAttribute(attacker, primWep, "sapper kills collect crits")) {
+				new crits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + GetConVarInt(g_cvarCritsDiamondback) - 1;
+				SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", crits);
+			}
 		}
 	}
 	
