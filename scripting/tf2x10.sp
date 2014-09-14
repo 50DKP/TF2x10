@@ -8,8 +8,8 @@
 #include <tf2items>
 #include <tf2attributes>
 #include <steamtools>
-#include <updater>
 #undef REQUIRE_PLUGIN
+#tryinclude <updater>
 #tryinclude <freak_fortress_2>
 #tryinclude <saxtonhale>
 
