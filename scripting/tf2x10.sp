@@ -713,21 +713,19 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	if (!GetConVarBool(g_cvarEnabled) || !IsValidClient(client) || !IsPlayerAlive(client))
 		return Plugin_Continue;
 	
-	if (g_bHasCaber[client]) {
-		new meleeweapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+	new meleeweapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+	
+	if (IsValidEntity(meleeweapon) && GetEntProp(meleeweapon, Prop_Send, "m_iItemDefinitionIndex") == 307) {
+		new detonated = GetEntProp(meleeweapon, Prop_Send, "m_iDetonated");
 		
-		if (IsValidEntity(meleeweapon)) {
-			new detonated = GetEntProp(meleeweapon, Prop_Send, "m_iDetonated");
-			
-			if (detonated == 0) {
-				SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
-				ShowSyncHudText(client, g_hHudText, "Cabers: %d", g_iCabers[client]);
-			}
-			
-			if (g_iCabers[client] > 1 && detonated == 1) {
-				SetEntProp(meleeweapon, Prop_Send, "m_iDetonated", 0);
-				g_iCabers[client]--;
-			}
+		if (detonated == 0) {
+			SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
+			ShowSyncHudText(client, g_hHudText, "Cabers: %d", g_iCabers[client]);
+		}
+		
+		if (g_iCabers[client] > 1 && detonated == 1) {
+			SetEntProp(meleeweapon, Prop_Send, "m_iDetonated", 0);
+			g_iCabers[client]--;
 		}
 	}
 	
