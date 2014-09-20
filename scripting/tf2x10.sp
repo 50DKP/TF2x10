@@ -689,11 +689,13 @@ public TF2_OnConditionRemoved(client, TFCond:condition) {
 	
 	if(condition == TFCond_Zoomed && g_fChargeBegin[client] != 0.0) {
 		g_fChargeBegin[client] = 0.0;
+		if(g_hGenericTimer[client] != INVALID_HANDLE)
 		KillTimer(g_hGenericTimer[client]);
 	}
 	
 	if(condition == TFCond_Taunting && g_iDalokohSecs[client] != 0) {
 		g_iDalokohSecs[client] = 0;
+		if(g_hGenericTimer[client] != INVALID_HANDLE)
 		KillTimer(g_hGenericTimer[client]);
 	}
 }
