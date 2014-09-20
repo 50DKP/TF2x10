@@ -617,6 +617,11 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 
 public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 	new client = GetClientOfUserId(userid);
+	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
+	
+	if(index != 402) // I understand its not the best to check twice but when errors happen it makes sense.
+		return Plugin_Stop; 
 	
 	if(g_fChargeBegin[client] == 0.0)
 		return Plugin_Stop;
