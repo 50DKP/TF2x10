@@ -42,7 +42,6 @@ static const Float:g_fBazaarRates[] =
 new bool:g_bFF2Running = false;
 new bool:g_bHasCaber[MAXPLAYERS + 1] = false;
 new bool:g_bHasManmelter[MAXPLAYERS + 1] = false;
-new bool:g_bGTimerActive[MAXPLAYERS + 1] = false;
 new bool:g_bHeadScaling = false;
 new bool:g_bHiddenRunning = false;
 new bool:g_bTakesHeads[MAXPLAYERS + 1] = false;
@@ -609,12 +608,10 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 	if(condition == TFCond_Zoomed && index == 402) {
 		g_fChargeBegin[client] = GetGameTime();
 		g_hGenericTimer[client] = CreateTimer(0.01, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-		g_bGTimerActive[client] = true;
 	}
 	
 	if(condition == TFCond_Taunting && (index == 159 || index == 433) && (!g_bVSHRunning || !g_bFF2Running || !g_bHiddenRunning)) {
 		g_hGenericTimer[client] = CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-		g_bGTimerActive[client] = true;
 	}
 }
 
@@ -624,7 +621,7 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	
 	if(index != 402 || g_fChargeBegin[client] == 0.0) {
-		g_bGTimerActive[client] = false;
+		g_hGenericTimer[client] = INVALID_HANDLE;
 		return Plugin_Stop; 
 	}
 	
@@ -651,7 +648,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep) || !TF2_IsPlayerInCondition(client, TFCond_Taunting)) {
 		g_iDalokohSecs[client] = 0;
-		g_bGTimerActive[client] = false;
+		g_hGenericTimer[client] = INVALID_HANDLE;
 		return Plugin_Stop;
 	}
 	
@@ -692,13 +689,13 @@ public TF2_OnConditionRemoved(client, TFCond:condition) {
 	
 	if(condition == TFCond_Zoomed && g_fChargeBegin[client] != 0.0) {
 		g_fChargeBegin[client] = 0.0;
-		if(g_bGTimerActive[client])
+		if(g_hGenericTimer[client] != INVALID_HANDLE)
 		KillTimer(g_hGenericTimer[client]);
 	}
 	
 	if(condition == TFCond_Taunting && g_iDalokohSecs[client] != 0) {
 		g_iDalokohSecs[client] = 0;
-		if(g_bGTimerActive[client])
+		if(g_hGenericTimer[client] != INVALID_HANDLE)
 		KillTimer(g_hGenericTimer[client]);
 	}
 }
