@@ -18,7 +18,7 @@
 
 #define PLUGIN_NAME		"[TF2Items] Randomizer"
 #define PLUGIN_AUTHOR		"FlaminSarge"
-#define PLUGIN_VERSION		"1.59" //As of Jul20, 2012
+#define PLUGIN_VERSION		"1.592" //As of Sep24, 2014
 #define PLUGIN_CONTACT		"https://forums.alliedmods.net/showthread.php?t=139069"
 #define PLUGIN_DESCRIPTION	"[TF2] Randomizer rebuilt around the TF2Items extension"
 
@@ -147,7 +147,11 @@ static const iWeaponPrimary[] =
 	772,
 	811,
 	996,
-	997
+	997,
+ 	1092,
+ 	1098,
+ 	1103,
+ 	1104
 };
 static const String:strWeaponPrimary[][] =
 {
@@ -204,7 +208,11 @@ static const String:strWeaponPrimary[][] =
 	"Baby Face's Blaster",
 	"Huo-Long Heater",
 	"Loose Cannon",
-	"Rescue Ranger"
+	"Rescue Ranger",
+	"Fortified Compound",
+ 	"Classic",
+ 	"Back Scatter",
+ 	"Air Strike" 
 };
 static const iWeaponSecondary[] =
 {
@@ -253,7 +261,12 @@ static const iWeaponSecondary[] =
 	735,
 	810,
 	998,
-	933
+	933,
+ 	1099,
+ 	1101,
+ 	1105,
+ 	1121,
+ 	1102 
 };
 static const String:strWeaponSecondary[][] =
 {
@@ -302,7 +315,12 @@ static const String:strWeaponSecondary[][] =
 	"Sapper",
 	"Red-Tape Recorder",
 	"Vaccinator",
-	"Ap-Sap"
+	"Ap-Sap",
+ 	"Tide Turner",
+	"B.A.S.E. Jumper",
+ 	"Self-Aware Beauty Mark",
+ 	"Mutated Milk",
+ 	"Snack Attack" 
 };
 static const iWeaponMelee[] =
 {
@@ -384,7 +402,9 @@ static const iWeaponMelee[] =
 	813,
 	939,
 	954,
-	1013
+	1013,
+ 	1100,
+ 	1071 
 };
 static const String:strWeaponMelee[][] =
 {
@@ -466,7 +486,9 @@ static const String:strWeaponMelee[][] =
 	"Neon Annihilator",
 	"Bat Outta Hell",
 	"Memory Maker",
-	"Ham Shank"
+	"Ham Shank",
+ 	"Bread Bite",
+ 	"Gold Frying Pan" 
 };
 static const iWeaponCloakary[] =	//so clever at naming these things b/c why not
 {
@@ -4292,13 +4314,18 @@ stock Handle:PrepareItemHandle(weaponLookupIndex, TFClassType:classbased = TFCla
 	TF2Items_SetLevel(hWeapon, weaponLevel);
 	TF2Items_SetQuality(hWeapon, weaponQuality);
 
-	if (attribCount > 0) {
+	if (attribCount > 1) {
 		new attrIdx;
 		new Float:attrVal;
 		TF2Items_SetNumAttributes(hWeapon, attribCount/2);
 		new i2 = 0;
 		for (new i = 0; i < attribCount; i+=2) {
 			attrIdx = StringToInt(weaponAttribsArray[i]);
+			if (attrIdx <= 0)
+			{
+				LogError("Tried to set attribute index to %d on weapon of index %d, attrib string was '%s', count was %d", attrIdx, weaponLookupIndex, weaponAttribs, attribCount);
+				continue;
+			} 
 			switch (attrIdx)
 			{
 				case 133, 143, 147, 152, 184, 185, 186, 192, 193, 194, 198, 211, 214, 227, 228, 229, 262, 294, 302, 372, 373, 374, 379, 381, 383, 403, 420:
@@ -5683,8 +5710,7 @@ CreateItemInfoTrie()
 	SetTrieString(hItemInfoTrie, "326_attribs", "2 ; 1.25 ; 69 ; 0.25 ; 108 ; 1.5", false);
 	SetTrieValue(hItemInfoTrie, "326_ammo", -1, false);
 
-//Claidheamh Mòr
-	SetTrieString(hItemInfoTrie, "327_classname", "tf_weapon_sword", false);
+//Claidheamh M??	SetTrieString(hItemInfoTrie, "327_classname", "tf_weapon_sword", false);
 	SetTrieValue(hItemInfoTrie, "327_index", 327, false);
 	SetTrieValue(hItemInfoTrie, "327_slot", 2, false);
 	SetTrieValue(hItemInfoTrie, "327_quality", 6, false);
@@ -6549,6 +6575,104 @@ CreateItemInfoTrie()
 	SetTrieString(hItemInfoTrie, "1013_attribs", "", false);
 	SetTrieValue(hItemInfoTrie, "1013_ammo", -1, false);
 
+//Air Strike
+	SetTrieString(hItemInfoTrie, "1104_classname", "tf_weapon_rocketlauncher_airstrike", false);
+	SetTrieValue(hItemInfoTrie, "1104_index", 1104, false);
+	SetTrieValue(hItemInfoTrie, "1104_slot", 0, false);
+	SetTrieValue(hItemInfoTrie, "1104_quality", 6, false);
+	SetTrieValue(hItemInfoTrie, "1104_level", 5, false);
+	SetTrieString(hItemInfoTrie, "1104_attribs", "99 ; 0.85 ; 476 ; 0.75 ; 643 ; 0.75 ; 621 ; 0.35 ; 424 ; 0.75 ; 642 ; 1 ; 644 ; 5 ; 328 ; 1", false);
+	SetTrieValue(hItemInfoTrie, "1104_ammo", 20, false);
+
+//Back Scatter
+	SetTrieString(hItemInfoTrie, "1103_classname", "tf_weapon_scattergun", false);
+	SetTrieValue(hItemInfoTrie, "1103_index", 1103, false);
+	SetTrieValue(hItemInfoTrie, "1103_slot", 0, false);
+	SetTrieValue(hItemInfoTrie, "1103_quality", 6, false);
+	SetTrieValue(hItemInfoTrie, "1103_level", 5, false);
+	SetTrieString(hItemInfoTrie, "1103_attribs", "619 ; 1 ; 424 ; 0.66 ; 106 ; 1.20 ; 15 ; 0", false);
+	SetTrieValue(hItemInfoTrie, "1103_ammo", 32, false);
+
+//Classic
+	SetTrieString(hItemInfoTrie, "1098_classname", "tf_weapon_sniperrifle_classic", false);
+	SetTrieValue(hItemInfoTrie, "1098_index", 1098, false);
+	SetTrieValue(hItemInfoTrie, "1098_slot", 0, false);
+	SetTrieValue(hItemInfoTrie, "1098_quality", 6, false);
+	SetTrieValue(hItemInfoTrie, "1098_level", 5, false);
+	SetTrieString(hItemInfoTrie, "1098_attribs", "2030 ; 1 ; 392 ; 0.90 ; 306 ; 1 ; 636 ; 1 ; 647 ; 1 ; 144 ; 3", false);
+	SetTrieValue(hItemInfoTrie, "1098_ammo", -1, false);
+
+//Fortified Compound
+	SetTrieString(hItemInfoTrie, "1092_classname", "tf_weapon_compound_bow", false);
+	SetTrieValue(hItemInfoTrie, "1092_index", 1092, false);
+	SetTrieValue(hItemInfoTrie, "1092_slot", 0, false);
+	SetTrieValue(hItemInfoTrie, "1092_quality", 6, false);
+	SetTrieValue(hItemInfoTrie, "1092_level", 10, false);
+	SetTrieString(hItemInfoTrie, "1092_attribs", "37 ; 0.5 ; 328 ; 1.0", false);
+	SetTrieValue(hItemInfoTrie, "1092_ammo", 12, false);
+
+//Snack Attack
+	SetTrieString(hItemInfoTrie, "1102_classname", "tf_weapon_builder", false);
+	SetTrieValue(hItemInfoTrie, "1102_index", 1102, false);
+	SetTrieValue(hItemInfoTrie, "1102_slot", 1, false);
+	SetTrieValue(hItemInfoTrie, "1102_quality", 0, false);
+	SetTrieValue(hItemInfoTrie, "1102_level", 1, false);
+	SetTrieString(hItemInfoTrie, "1102_attribs", "", false);
+	SetTrieValue(hItemInfoTrie, "1102_ammo", -1, false);
+
+//Mutated Milk
+	SetTrieString(hItemInfoTrie, "1121_classname", "tf_weapon_jar_milk", false);
+	SetTrieValue(hItemInfoTrie, "1121_index", 1121, false);
+	SetTrieValue(hItemInfoTrie, "1121_slot", 1, false);
+	SetTrieValue(hItemInfoTrie, "1121_quality", 6, false);
+	SetTrieValue(hItemInfoTrie, "1121_level", 5, false);
+	SetTrieString(hItemInfoTrie, "1121_attribs", "292 ; 4.0", false);
+	SetTrieValue(hItemInfoTrie, "1121_ammo", 1, false);
+
+//Self-Aware Beauty Mark
+	SetTrieString(hItemInfoTrie, "1105_classname", "tf_weapon_jar", false);
+	SetTrieValue(hItemInfoTrie, "1105_index", 1105, false);
+	SetTrieValue(hItemInfoTrie, "1105_slot", 1, false);
+	SetTrieValue(hItemInfoTrie, "1105_quality", 6, false);
+	SetTrieValue(hItemInfoTrie, "1105_level", 5, false);
+	SetTrieString(hItemInfoTrie, "1105_attribs", "56 ; 1.0 ; 292 ; 4.0", false);
+	SetTrieValue(hItemInfoTrie, "1105_ammo", 1, false);
+
+//B.A.S.E. Jumper
+	SetTrieString(hItemInfoTrie, "1101_classname", "tf_weapon_parachute", false);
+	SetTrieValue(hItemInfoTrie, "1101_index", 1101, false);
+	SetTrieValue(hItemInfoTrie, "1101_slot", 1, false);
+	SetTrieValue(hItemInfoTrie, "1101_quality", 6, false);
+	SetTrieValue(hItemInfoTrie, "1101_level", 5, false);
+	SetTrieString(hItemInfoTrie, "1101_attribs", "640 ; 1 ; 116 ; 4 ; 2029 ; 1", false);
+	SetTrieValue(hItemInfoTrie, "1101_ammo", -1, false);
+
+//Tide Turner
+	SetTrieString(hItemInfoTrie, "1099_classname", "tf_wearable_demoshield", false);
+	SetTrieValue(hItemInfoTrie, "1099_index", 1099, false);
+	SetTrieValue(hItemInfoTrie, "1099_slot", 1, false);
+	SetTrieValue(hItemInfoTrie, "1099_quality", 6, false);
+	SetTrieValue(hItemInfoTrie, "1099_level", 5, false);
+	SetTrieString(hItemInfoTrie, "1099_attribs", "60 ; 0.75 ; 64 ; 0.75 ; 2029 ; 1 ; 639 ; 50 ; 2034 ; 1", false);
+	SetTrieValue(hItemInfoTrie, "1099_ammo", -1, false);
+
+//Bread Bite
+	SetTrieString(hItemInfoTrie, "1100_classname", "tf_weapon_fists", false);
+	SetTrieValue(hItemInfoTrie, "1100_index", 1100, false);
+	SetTrieValue(hItemInfoTrie, "1100_slot", 2, false);
+	SetTrieValue(hItemInfoTrie, "1100_quality", 6, false);
+	SetTrieValue(hItemInfoTrie, "1100_level", 10, false);
+	SetTrieString(hItemInfoTrie, "1100_attribs", "128 ; 1.0 ; 107 ; 1.3 ; 414 ; 1.0 ; 1 ; 0.75 ; 144 ; 2.0", false);
+	SetTrieValue(hItemInfoTrie, "1100_ammo", -1, false);
+
+//Gold Frying Pan
+	SetTrieString(hItemInfoTrie, "1071_classname", "tf_weapon_wrench", false);
+	SetTrieValue(hItemInfoTrie, "1071_index", 1071, false);
+	SetTrieValue(hItemInfoTrie, "1071_slot", 2, false);
+	SetTrieValue(hItemInfoTrie, "1071_quality", 6, false);
+	SetTrieValue(hItemInfoTrie, "1071_level", 10, false);
+	SetTrieString(hItemInfoTrie, "1071_attribs", "150 ; 1", false);
+	SetTrieValue(hItemInfoTrie, "1071_ammo", -1, false);
 }
 stock AddCustomHardcodedToTrie(Handle:trie)
 {
@@ -6757,7 +6881,7 @@ stock AddCustomHardcodedToTrie(Handle:trie)
 	SetTrieValue(trie, "2228_slot", 0);
 	SetTrieValue(trie, "2228_quality", 10);
 	SetTrieValue(trie, "2228_level", 5);
-	SetTrieString(trie, "2228_attribs", "2 ; 5.0 ; 99 ; 3.0 ; 3 ; 0.25 ; 104 ; 0.3 ; 77 ; 0.0 ; 16 ; 0.0");
+	SetTrieString(trie, "2228_attribs", "2 ; 5.0 ; 99 ; 3.0 ; 521 ; 1.0 ; 3 ; 0.25 ; 104 ; 0.3 ; 77 ; 0.0 ; 16 ; 0.0"); 
 	SetTrieValue(trie, "2228_ammo", 0);
 	SetTrieString(trie, "2228_model", "models/advancedweaponiser/fbomb/c_fbomb.mdl");
 	SetTrieString(trie, "2228_viewmodel", "models/advancedweaponiser/fbomb/c_fbomb.mdl");
@@ -7952,8 +8076,7 @@ public SickleClimbWalls(client)
 		if (!IsClientInGame(healer)) continue;
 		if (!IsPlayerAlive(healer)) continue;
 		new sec = GetPlayerWeaponSlot(healer, TFWeaponSlot_Secondary);
-		GetEdictClassname(sec, classname, sizeof(classname));
-		if (IsValidEntity(sec) && GetEdictClassname(sec, classname, sizeof(classname)) && StrEqual(classname, "tf_weapon_medigun", false)) //it's a medigun
+		if (IsValidEntity(sec) && GetEdictClassname(sec, classname, sizeof(classname)) && StrEqual(classname, "tf_weapon_medigun", false))	//it's a medigun 
 		{
 			if (GetEntProp(sec, Prop_Send, "m_iItemDefinitionIndex") != 411 || client != GetEntPropEnt(sec, Prop_Send, "m_hHealingTarget"))
 			{
