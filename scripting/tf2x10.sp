@@ -339,13 +339,13 @@ LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
 						i++;
 					}
 					while(KvGotoNextKey(hKeyValues, false));
-					KvGoBack(hKeyValues);
+						KvGoBack(hKeyValues);
 					
 					Format(tmpID, sizeof(tmpID), "%s__%s_size", rawname, strBuffer);
 					SetTrieValue(g_hItemInfoTrie, tmpID, i);
 				}
 				while(KvGotoNextKey(hKeyValues));
-				KvGoBack(hKeyValues);
+					KvGoBack(hKeyValues);
 				
 				SetTrieValue(g_hItemInfoTrie, strBuffer, 1);
 			}
@@ -528,17 +528,6 @@ public OnMapStart() {
 	if (!GetConVarBool(g_cvarEnabled))
 		return;
 	
-	/*decl String:mapName[64];
-	GetCurrentMap(mapName, sizeof(mapName));
-	
-	if(StrContains(mapName, "mvm_") == 0 &&
-	(StrContains(mapName, "_titans") == -1 ||
-	StrContains(mapName, "_omnipotence") == -1))
-	{
-	PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] x10 is disabled. Choose a non-Valve mission, please!");
-	SetConVarBool(g_cvarEnabled, false);
-	}*/
-	
 	DetectGameDescSetting();
 }
 
@@ -690,13 +679,13 @@ public TF2_OnConditionRemoved(client, TFCond:condition) {
 	if(condition == TFCond_Zoomed && g_fChargeBegin[client] != 0.0) {
 		g_fChargeBegin[client] = 0.0;
 		if(g_hGenericTimer[client] != INVALID_HANDLE)
-		KillTimer(g_hGenericTimer[client]);
+			KillTimer(g_hGenericTimer[client]);
 	}
 	
 	if(condition == TFCond_Taunting && g_iDalokohSecs[client] != 0) {
 		g_iDalokohSecs[client] = 0;
 		if(g_hGenericTimer[client] != INVALID_HANDLE)
-		KillTimer(g_hGenericTimer[client]);
+			KillTimer(g_hGenericTimer[client]);
 	}
 }
 
@@ -952,15 +941,6 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 		
 		TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
 	}
-	
-	/*this won't work, damageForce is not applied by reference, only static
-	if (g_bTakesHeads[client] && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 482) {
-	new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
-	
-	damageForce[0] *= (heads + 1);
-	damageForce[1] *= (heads + 1);
-	damageForce[2] *= (heads + 1);
-	}*/
 	
 	return Plugin_Continue;
 }
@@ -1261,9 +1241,8 @@ stock GetPlayerWeaponSlot_Wearable(client, slot)
 
 stock FindEntityByClassname2(startEnt, const String:classname[])
 {
-	/* If startEnt isn't valid shifting it back to the nearest valid one */
 	while (startEnt > -1 && !IsValidEntity(startEnt)) startEnt--;
-	return FindEntityByClassname(startEnt, classname);
+		return FindEntityByClassname(startEnt, classname);
 }
 
 stock RemovePlayerBack(client)
