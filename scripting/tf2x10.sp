@@ -714,10 +714,11 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	if (!GetConVarBool(g_cvarEnabled) || !IsValidClient(client) || !IsPlayerAlive(client))
 		return Plugin_Continue;
 	
-	new meleeweapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	
-	if (IsValidEntity(meleeweapon) && GetEntProp(meleeweapon, Prop_Send, "m_iItemDefinitionIndex") == 307) {
-		new detonated = GetEntProp(meleeweapon, Prop_Send, "m_iDetonated");
+	if (index == 307) {
+		new detonated = GetEntProp(activeWep, Prop_Send, "m_iDetonated");
 		
 		if (detonated == 0) {
 			SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
@@ -725,10 +726,14 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		}
 		
 		if (g_iCabers[client] > 1 && detonated == 1) {
-			SetEntProp(meleeweapon, Prop_Send, "m_iDetonated", 0);
+			SetEntProp(activeWep, Prop_Send, "m_iDetonated", 0);
 			g_iCabers[client]--;
 		}
+	} else if (index == 19 || index == 206 || index == 1007) {
+		new iClip = GetEntProp(activeWep, Prop_Send, "m_iClip1");
+		if (iClip >= 10) buttons &= ~IN_ATTACK;
 	}
+		
 	
 	if (g_iRazorbackCount[client] > 1) {
 		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
