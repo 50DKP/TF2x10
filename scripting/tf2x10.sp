@@ -50,7 +50,8 @@ new bool:g_bVSHRunning = false;
 new Float:g_fChargeBegin[MAXPLAYERS + 1] = 0.0;
 new Float:g_fHeadScalingCap = 0.0;
 
-new Handle:g_hGenericTimer[MAXPLAYERS + 1];
+new Handle:g_hDalokohTimer[MAXPLAYERS + 1];
+new Handle:g_hBazaarTimer[MAXPLAYERS + 1];
 new Handle:g_hHudText;
 new Handle:g_hItemInfoTrie;
 new Handle:g_hSdkGetMaxHealth;
@@ -596,11 +597,11 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 	
 	if(condition == TFCond_Zoomed && index == 402) {
 		g_fChargeBegin[client] = GetGameTime();
-		g_hGenericTimer[client] = CreateTimer(0.1, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		g_hBazaarTimer[client] = CreateTimer(0.0, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
 	if(condition == TFCond_Taunting && (index == 159 || index == 433) && (!g_bVSHRunning || !g_bFF2Running || !g_bHiddenRunning)) {
-		g_hGenericTimer[client] = CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		g_hDalokohTimer[client] = CreateTimer(0.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
@@ -610,7 +611,7 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	
 	if(index != 402 || g_fChargeBegin[client] == 0.0 || !IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep)) {
-		g_hGenericTimer[client] = INVALID_HANDLE;
+		g_hBazaarTimer[client] = INVALID_HANDLE;
 		return Plugin_Stop; 
 	}
 	
@@ -637,7 +638,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep) || !TF2_IsPlayerInCondition(client, TFCond_Taunting)) {
 		g_iDalokohSecs[client] = 0;
-		g_hGenericTimer[client] = INVALID_HANDLE;
+		g_hDalokohTimer[client] = INVALID_HANDLE;
 		return Plugin_Stop;
 	}
 	
@@ -678,14 +679,14 @@ public TF2_OnConditionRemoved(client, TFCond:condition) {
 	
 	if(condition == TFCond_Zoomed && g_fChargeBegin[client] != 0.0) {
 		g_fChargeBegin[client] = 0.0;
-		if(g_hGenericTimer[client] != INVALID_HANDLE)
-			KillTimer(g_hGenericTimer[client]);
+		if(g_hBazaarTimer[client] != INVALID_HANDLE)
+			KillTimer(g_hBazaarTimer[client]);
 	}
 	
 	if(condition == TFCond_Taunting && g_iDalokohSecs[client] != 0) {
 		g_iDalokohSecs[client] = 0;
-		if(g_hGenericTimer[client] != INVALID_HANDLE)
-			KillTimer(g_hGenericTimer[client]);
+		if(g_hDalokohTimer[client] != INVALID_HANDLE)
+			KillTimer(g_hDalokohTimer[client]);
 	}
 }
 
