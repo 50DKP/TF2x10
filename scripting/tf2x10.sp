@@ -633,7 +633,9 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	new client = GetClientOfUserId(userid);
 	new activeWep = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
+	new meleeWep = IsValidClient(client) ? GetPlayerWeaponSlot(client, TFWeaponSlot_Melee) : -1;
 	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
+	new meleeIndex = IsValidEntity(meleeWep) ? GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	new health = GetClientHealth(client);
 	new newHealth;
 	
@@ -655,6 +657,9 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 			if(newHealth > DALOKOH_MAXHEALTH)
 				newHealth = DALOKOH_MAXHEALTH;
 			
+			if(meleeIndex == 310)
+				newHealth = 650;
+			
 			TF2_SetHealth(client, newHealth);
 		}
 		
@@ -663,6 +668,9 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 			
 			if(newHealth > DALOKOH_MAXHEALTH)
 				newHealth = DALOKOH_MAXHEALTH;
+			
+			if(meleeIndex == 310)
+				newHealth = 650;
 			
 			TF2_SetHealth(client, newHealth);
 		}
