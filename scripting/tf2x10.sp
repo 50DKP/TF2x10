@@ -602,12 +602,12 @@ Gameplay: Event-Specific
 public TF2_OnConditionAdded(client, TFCond:condition) {
 	if(!GetConVarBool(g_cvarEnabled)) return;
 	
-	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	new activeWep = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
 	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	
 	if(condition == TFCond_Zoomed && index == 402) {
 		g_fChargeBegin[client] = GetGameTime();
-		g_hGenericTimer[client] = CreateTimer(0.01, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		g_hGenericTimer[client] = CreateTimer(0.1, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
 	if(condition == TFCond_Taunting && (index == 159 || index == 433) && (!g_bVSHRunning || !g_bFF2Running || !g_bHiddenRunning)) {
@@ -617,10 +617,10 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 
 public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 	new client = GetClientOfUserId(userid);
-	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	new activeWep = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
 	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	
-	if(index != 402 || g_fChargeBegin[client] == 0.0) {
+	if(index != 402 || g_fChargeBegin[client] == 0.0 || !IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep)) {
 		g_hGenericTimer[client] = INVALID_HANDLE;
 		return Plugin_Stop; 
 	}
@@ -642,7 +642,7 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 
 public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	new client = GetClientOfUserId(userid);
-	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	new activeWep = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
 	new health = GetClientHealth(client);
 	new newHealth;
 	
