@@ -633,6 +633,7 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	new client = GetClientOfUserId(userid);
 	new activeWep = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
+	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	new health = GetClientHealth(client);
 	new newHealth;
 	
@@ -642,26 +643,29 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 		return Plugin_Stop;
 	}
 	
-	g_iDalokohSecs[client]++;
-	
-	if (g_iDalokohSecs[client] == 1) {
-		CreateTimer(0.01, Timer_GiveBuffHealth, activeWep, TIMER_FLAG_NO_MAPCHANGE);
-	} else if (g_iDalokohSecs[client] == 4) {
-		newHealth = health + DALOKOH_LASTHEALTH;
+	if(index == 159 || index == 433)
+	{
+		g_iDalokohSecs[client]++;
 		
-		if(newHealth > DALOKOH_MAXHEALTH)
-			newHealth = DALOKOH_MAXHEALTH;
+		if (g_iDalokohSecs[client] == 1) {
+			CreateTimer(0.0, Timer_GiveBuffHealth, activeWep, TIMER_FLAG_NO_MAPCHANGE);
+		} else if (g_iDalokohSecs[client] == 4) {
+			newHealth = health + DALOKOH_LASTHEALTH;
+			
+			if(newHealth > DALOKOH_MAXHEALTH)
+				newHealth = DALOKOH_MAXHEALTH;
+			
+			TF2_SetHealth(client, newHealth);
+		}
 		
-		TF2_SetHealth(client, newHealth);
-	}
-	
-	if (GetClientHealth(client) < DALOKOH_MAXHEALTH && g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3) {
-		newHealth = g_iDalokohSecs[client] == 3 ? health + DALOKOH_HEALTHPERSEC : health + DALOKOH_HEALTHPERSEC - 50;
-		
-		if(newHealth > DALOKOH_MAXHEALTH)
-			newHealth = DALOKOH_MAXHEALTH;
-		
-		TF2_SetHealth(client, newHealth);
+		if (GetClientHealth(client) < DALOKOH_MAXHEALTH && g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3) {
+			newHealth = g_iDalokohSecs[client] == 3 ? health + DALOKOH_HEALTHPERSEC : health + DALOKOH_HEALTHPERSEC - 50;
+			
+			if(newHealth > DALOKOH_MAXHEALTH)
+				newHealth = DALOKOH_MAXHEALTH;
+			
+			TF2_SetHealth(client, newHealth);
+		}
 	}
 	
 	return Plugin_Continue;
