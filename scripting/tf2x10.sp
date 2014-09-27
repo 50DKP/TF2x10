@@ -15,7 +15,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.3"
+#define PLUGIN_VERSION	"1.3.1"
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -636,7 +636,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	new meleeWep = IsValidClient(client) ? GetPlayerWeaponSlot(client, TFWeaponSlot_Melee) : -1;
 	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	new meleeIndex = IsValidEntity(meleeWep) ? GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
-	new health = GetClientHealth(client);
+	new health = IsValidClient(client) ? GetClientHealth(client) : -1;
 	new newHealth;
 	
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep) || !TF2_IsPlayerInCondition(client, TFCond_Taunting)) {
