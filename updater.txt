@@ -4,18 +4,18 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.3"
-			"Previous"	"1.2"
+			"Latest"	"1.3.1"
+			"Previous"	"1.3"
 		}
 		
-		"Notes"	"All version updates are in BitBucket now."
+		"Notes"	"All version updates are in BitBucket."
 	}
 	
 	"Files"
 	{
 		"Plugin"	"Path_SM/configs/x10.default.txt"
 		"Plugin"	"Path_SM/configs/x10.vshff2.txt"
-		"Plugin"	"Path_SM/gamedata/tf2.attributes.txt"
 		"Plugin"	"Path_SM/plugins/tf2x10.smx"
+		"Source"	"Path_SM/scripting/tf2x10.sp"
 	}
 }

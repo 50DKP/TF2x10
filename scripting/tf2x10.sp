@@ -340,13 +340,13 @@ LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
 						i++;
 					}
 					while(KvGotoNextKey(hKeyValues, false));
-						KvGoBack(hKeyValues);
+					KvGoBack(hKeyValues);
 					
 					Format(tmpID, sizeof(tmpID), "%s__%s_size", rawname, strBuffer);
 					SetTrieValue(g_hItemInfoTrie, tmpID, i);
 				}
 				while(KvGotoNextKey(hKeyValues));
-					KvGoBack(hKeyValues);
+				KvGoBack(hKeyValues);
 				
 				SetTrieValue(g_hItemInfoTrie, strBuffer, 1);
 			}
@@ -636,7 +636,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	new meleeWep = IsValidClient(client) ? GetPlayerWeaponSlot(client, TFWeaponSlot_Melee) : -1;
 	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	new meleeIndex = IsValidEntity(meleeWep) ? GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
-	new health = IsValidClient(client) ? GetClientHealth(client) : -1;
+	new health = GetClientHealth(client);
 	new newHealth;
 	
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep) || !TF2_IsPlayerInCondition(client, TFCond_Taunting)) {
@@ -1260,7 +1260,7 @@ stock GetPlayerWeaponSlot_Wearable(client, slot)
 stock FindEntityByClassname2(startEnt, const String:classname[])
 {
 	while (startEnt > -1 && !IsValidEntity(startEnt)) startEnt--;
-		return FindEntityByClassname(startEnt, classname);
+	return FindEntityByClassname(startEnt, classname);
 }
 
 stock RemovePlayerBack(client)
