@@ -15,7 +15,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.3.1"
+#define PLUGIN_VERSION	"1.3.2"
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -551,18 +551,6 @@ public OnClientPutInServer(client) {
 		ResetVariables(client);
 		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 		SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
-	}
-	
-	//TF2x10-wide ban for player(s). See ban description.
-	decl String:steamid[20], String:ipaddr[20];
-	GetClientAuthString(client, steamid, sizeof(steamid));
-	
-	if(GetClientIP(client, ipaddr, sizeof(ipaddr))) {
-		if(StrEqual(steamid, "STEAM_0:1:25092722")) {
-			BanIdentity(ipaddr, 0, BANFLAG_IP, "Accused of shutting down servers and DDoSing. Ask UltiMario or Blue if there are any more questions.", "Server is full.");
-		} else if(StrEqual(steamid, "STEAM_0:0:22085237")) {
-			BanIdentity(ipaddr, 0, BANFLAG_IP, "Harassment.", "Server is full.");
-		}
 	}
 }
 
