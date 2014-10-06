@@ -15,7 +15,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.3.2"
+#define PLUGIN_VERSION	"1.3.3"
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -50,8 +50,6 @@ new bool:g_bVSHRunning = false;
 new Float:g_fChargeBegin[MAXPLAYERS + 1] = 0.0;
 new Float:g_fHeadScalingCap = 0.0;
 
-new Handle:g_hDalokohTimer[MAXPLAYERS + 1];
-new Handle:g_hBazaarTimer[MAXPLAYERS + 1];
 new Handle:g_hHudText;
 new Handle:g_hItemInfoTrie;
 new Handle:g_hSdkGetMaxHealth;
@@ -340,13 +338,13 @@ LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
 						i++;
 					}
 					while(KvGotoNextKey(hKeyValues, false));
-					KvGoBack(hKeyValues);
+						KvGoBack(hKeyValues);
 					
 					Format(tmpID, sizeof(tmpID), "%s__%s_size", rawname, strBuffer);
 					SetTrieValue(g_hItemInfoTrie, tmpID, i);
 				}
 				while(KvGotoNextKey(hKeyValues));
-				KvGoBack(hKeyValues);
+					KvGoBack(hKeyValues);
 				
 				SetTrieValue(g_hItemInfoTrie, strBuffer, 1);
 			}
@@ -585,23 +583,28 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 	
 	if(condition == TFCond_Zoomed && index == 402) {
 		g_fChargeBegin[client] = GetGameTime();
-		g_hBazaarTimer[client] = CreateTimer(0.0, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.0, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
 	if(condition == TFCond_Taunting && (index == 159 || index == 433) && (!g_bVSHRunning || !g_bFF2Running || !g_bHiddenRunning)) {
-		g_hDalokohTimer[client] = CreateTimer(0.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
 public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 	new client = GetClientOfUserId(userid);
-	new activeWep = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
-	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	
-	if(index != 402 || g_fChargeBegin[client] == 0.0 || !IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep)) {
-		g_hBazaarTimer[client] = INVALID_HANDLE;
-		return Plugin_Stop; 
-	}
+	if(!IsValidClient(client)) return Plugin_Stop;
+	if(!IsPlayerAlive(client)) return Plugin_Stop;
+	if(!TF2_IsPlayerInCondition(client, TFCond_Zoomed)) return Plugin_Stop;
+	
+	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	
+	if(!IsValidEntity(activeWep)) return Plugin_Stop;
+	
+	new index = GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex");
+	
+	if(index != 402) return Plugin_Stop;
 	
 	new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
 	
@@ -620,58 +623,52 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 
 public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	new client = GetClientOfUserId(userid);
-	new activeWep = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
-	new meleeWep = IsValidClient(client) ? GetPlayerWeaponSlot(client, TFWeaponSlot_Melee) : -1;
-	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
-	new meleeIndex = IsValidEntity(meleeWep) ? GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
-	new health = GetClientHealth(client);
-	new newHealth;
 	
-	if(!IsValidClient(client) || !IsPlayerAlive(client) || !IsValidEntity(activeWep) || !TF2_IsPlayerInCondition(client, TFCond_Taunting)) {
-		g_iDalokohSecs[client] = 0;
-		g_hDalokohTimer[client] = INVALID_HANDLE;
-		return Plugin_Stop;
+	if(!IsValidClient(client)) return Plugin_Stop;
+	if(!IsPlayerAlive(client)) return Plugin_Stop;
+	if(!TF2_IsPlayerInCondition(client, TFCond_Taunting)) return Plugin_Stop;
+	
+	new health = GetClientHealth(client), newHealth;
+	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	new meleeWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+	
+	if(!IsValidEntity(activeWep) || !IsValidEntity(meleeWep)) return Plugin_Stop;
+	
+	new index = GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex");
+	
+	if(index != 159 && index != 433) return Plugin_Stop;
+	
+	new meleeIndex = GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex");
+	
+	g_iDalokohSecs[client]++;
+	
+	if (g_iDalokohSecs[client] == 1) {
+		TF2Attrib_SetByName(activeWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-300));
+	} else if (g_iDalokohSecs[client] == 4) {
+		newHealth = health + DALOKOH_LASTHEALTH;
+		
+		if(newHealth > DALOKOH_MAXHEALTH)
+			newHealth = DALOKOH_MAXHEALTH;
+		
+		if(meleeIndex == 310)
+			newHealth = 650;
+		
+		TF2_SetHealth(client, newHealth);
 	}
 	
-	if(index == 159 || index == 433)
-	{
-		g_iDalokohSecs[client]++;
+	if (GetClientHealth(client) < DALOKOH_MAXHEALTH && g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3) {
+		newHealth = g_iDalokohSecs[client] == 3 ? health + DALOKOH_HEALTHPERSEC : health + DALOKOH_HEALTHPERSEC - 50;
 		
-		if (g_iDalokohSecs[client] == 1) {
-			CreateTimer(0.0, Timer_GiveBuffHealth, activeWep, TIMER_FLAG_NO_MAPCHANGE);
-		} else if (g_iDalokohSecs[client] == 4) {
-			newHealth = health + DALOKOH_LASTHEALTH;
-			
-			if(newHealth > DALOKOH_MAXHEALTH)
-				newHealth = DALOKOH_MAXHEALTH;
-			
-			if(meleeIndex == 310)
-				newHealth = 650;
-			
-			TF2_SetHealth(client, newHealth);
-		}
+		if(newHealth > DALOKOH_MAXHEALTH)
+			newHealth = DALOKOH_MAXHEALTH;
 		
-		if (GetClientHealth(client) < DALOKOH_MAXHEALTH && g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3) {
-			newHealth = g_iDalokohSecs[client] == 3 ? health + DALOKOH_HEALTHPERSEC : health + DALOKOH_HEALTHPERSEC - 50;
-			
-			if(newHealth > DALOKOH_MAXHEALTH)
-				newHealth = DALOKOH_MAXHEALTH;
-			
-			if(meleeIndex == 310)
-				newHealth = 650;
-			
-			TF2_SetHealth(client, newHealth);
-		}
+		if(meleeIndex == 310)
+			newHealth = 650;
+		
+		TF2_SetHealth(client, newHealth);
 	}
 	
 	return Plugin_Continue;
-}
-
-public Action:Timer_GiveBuffHealth(Handle:timer, any:activeWep) {
-	if(IsValidEntity(activeWep))
-		TF2Attrib_SetByName(activeWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-300));
-	
-	return Plugin_Stop;
 }
 
 public TF2_OnConditionRemoved(client, TFCond:condition) {
@@ -679,14 +676,10 @@ public TF2_OnConditionRemoved(client, TFCond:condition) {
 	
 	if(condition == TFCond_Zoomed && g_fChargeBegin[client] != 0.0) {
 		g_fChargeBegin[client] = 0.0;
-		if(g_hBazaarTimer[client] != INVALID_HANDLE)
-			KillTimer(g_hBazaarTimer[client]);
 	}
 	
 	if(condition == TFCond_Taunting && g_iDalokohSecs[client] != 0) {
 		g_iDalokohSecs[client] = 0;
-		if(g_hDalokohTimer[client] != INVALID_HANDLE)
-			KillTimer(g_hDalokohTimer[client]);
 	}
 }
 
@@ -729,7 +722,7 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		new iClip = GetEntProp(activeWep, Prop_Send, "m_iClip1");
 		if (iClip >= 10) buttons &= ~IN_ATTACK;
 	}
-		
+	
 	
 	if (g_iRazorbackCount[client] > 1) {
 		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
@@ -1248,7 +1241,7 @@ stock GetPlayerWeaponSlot_Wearable(client, slot)
 stock FindEntityByClassname2(startEnt, const String:classname[])
 {
 	while (startEnt > -1 && !IsValidEntity(startEnt)) startEnt--;
-	return FindEntityByClassname(startEnt, classname);
+		return FindEntityByClassname(startEnt, classname);
 }
 
 stock RemovePlayerBack(client)
