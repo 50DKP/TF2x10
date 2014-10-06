@@ -15,7 +15,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.3.3"
+#define PLUGIN_VERSION	"1.3.4"
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -629,21 +629,21 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	if(!TF2_IsPlayerInCondition(client, TFCond_Taunting)) return Plugin_Stop;
 	
 	new health = GetClientHealth(client), newHealth;
-	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	new secondaryWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
 	new meleeWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
 	
-	if(!IsValidEntity(activeWep) || !IsValidEntity(meleeWep)) return Plugin_Stop;
+	if(!IsValidEntity(secondaryWep) || !IsValidEntity(meleeWep)) return Plugin_Stop;
 	
-	new index = GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex");
+	new secondaryIndex = GetEntProp(secondaryWep, Prop_Send, "m_iItemDefinitionIndex");
 	
-	if(index != 159 && index != 433) return Plugin_Stop;
+	if(secondaryIndex != 159 && secondaryIndex != 433) return Plugin_Stop;
 	
 	new meleeIndex = GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex");
 	
 	g_iDalokohSecs[client]++;
 	
 	if (g_iDalokohSecs[client] == 1) {
-		TF2Attrib_SetByName(activeWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-300));
+		TF2Attrib_SetByName(secondaryWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-300));
 	} else if (g_iDalokohSecs[client] == 4) {
 		newHealth = health + DALOKOH_LASTHEALTH;
 		
@@ -656,7 +656,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 		TF2_SetHealth(client, newHealth);
 	}
 	
-	if (GetClientHealth(client) < DALOKOH_MAXHEALTH && g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3) {
+	if(GetClientHealth(client) < DALOKOH_MAXHEALTH && g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3) {
 		newHealth = g_iDalokohSecs[client] == 3 ? health + DALOKOH_HEALTHPERSEC : health + DALOKOH_HEALTHPERSEC - 50;
 		
 		if(newHealth > DALOKOH_MAXHEALTH)
