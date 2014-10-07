@@ -15,7 +15,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.3.5"
+#define PLUGIN_VERSION	"1.3.6"
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -50,6 +50,7 @@ new bool:g_bVSHRunning = false;
 new Float:g_fChargeBegin[MAXPLAYERS + 1] = 0.0;
 new Float:g_fHeadScalingCap = 0.0;
 
+new Handle:g_hClassicTimer[MAXPLAYERS + 1];
 new Handle:g_hHudText;
 new Handle:g_hItemInfoTrie;
 new Handle:g_hSdkGetMaxHealth;
@@ -586,13 +587,9 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 		CreateTimer(0.0, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
-	if(condition == TFCond_Zoomed && index == 1098) {
-		CreateTimer(0.3, Timer_ClassicCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-	}
-	
 	if(condition == TFCond_Taunting && (index == 159 || index == 433) && (!g_bVSHRunning || !g_bFF2Running || !g_bHiddenRunning)) {
 		CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-	}
+	}									
 }
 
 public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
@@ -641,6 +638,7 @@ public Action:Timer_ClassicCharge(Handle:hTimer, any:userid) {
 	if(index != 1098) return Plugin_Stop;
 	
 	SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", 150.0);
+	g_hClassicTimer[client] = INVALID_HANDLE;
 	
 	return Plugin_Continue;
 }
@@ -742,11 +740,22 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 			SetEntProp(activeWep, Prop_Send, "m_iDetonated", 0);
 			g_iCabers[client]--;
 		}
-	} else if (index == 19 || index == 206 || index == 1007) {
+	} 
+	
+	else if (index == 19 || index == 206 || index == 1007) {
 		new iClip = GetEntProp(activeWep, Prop_Send, "m_iClip1");
 		if (iClip >= 10) buttons &= ~IN_ATTACK;
-	}
+	} 
 	
+	else if (index == 1098 && TF2_IsPlayerInCondition(client, TFCond_Zoomed)) {
+		if(buttons & IN_ATTACK) {
+			g_hClassicTimer[client] = CreateTimer(0.3, Timer_ClassicCharge, GetClientUserId(client));	
+		} 
+		else if(buttons & ~IN_ATTACK && g_hClassicTimer[client] != INVALID_HANDLE) {
+			KillTimer(g_hClassicTimer[client]);
+			g_hClassicTimer[client] = INVALID_HANDLE;
+		}
+	}
 	
 	if (g_iRazorbackCount[client] > 1) {
 		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
