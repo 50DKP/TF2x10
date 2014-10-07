@@ -15,7 +15,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.3.6"
+#define PLUGIN_VERSION	"1.3.7"
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -45,6 +45,7 @@ new bool:g_bHasManmelter[MAXPLAYERS + 1] = false;
 new bool:g_bHeadScaling = false;
 new bool:g_bHiddenRunning = false;
 new bool:g_bTakesHeads[MAXPLAYERS + 1] = false;
+new bool:g_bChargingClassic[MAXPLAYERS + 1] = false;
 new bool:g_bVSHRunning = false;
 
 new Float:g_fChargeBegin[MAXPLAYERS + 1] = 0.0;
@@ -266,7 +267,7 @@ HookAllEvents() {
 	HookEvent("arena_win_panel", event_round_end, EventHookMode_PostNoCopy);
 	HookEvent("object_destroyed", event_object_destroyed, EventHookMode_Post);
 	HookEvent("object_removed", event_object_remove, EventHookMode_Post);
-	HookEvent("player_death", event_player_death,  EventHookMode_Post);
+	HookEvent("player_death", event_player_death, EventHookMode_Post);
 	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), Event_PlayerShieldBlocked); 
 	HookEvent("post_inventory_application", event_postinventory, EventHookMode_Post);
 	HookEvent("teamplay_restart_round", event_round_end, EventHookMode_PostNoCopy);
@@ -549,6 +550,7 @@ public OnClientPutInServer(client) {
 		ResetVariables(client);
 		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 		SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+		SDKHook(client, SDKHook_PreThink, OnPreThink);
 	}
 }
 
@@ -557,6 +559,7 @@ public OnClientDisconnect(client) {
 		ResetVariables(client);
 		SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 		SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+		SDKUnhook(client, SDKHook_PreThink, OnPreThink);
 	}
 }
 
@@ -584,10 +587,6 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 	if(condition == TFCond_Zoomed && index == 402) {
 		g_fChargeBegin[client] = GetGameTime();
 		CreateTimer(0.0, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-	}
-	
-	if(condition == TFCond_Charging && index == 1098) {
-		CreateTimer(0.0, Timer_ClassicCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
 	if(condition == TFCond_Taunting && (index == 159 || index == 433) && (!g_bVSHRunning || !g_bFF2Running || !g_bHiddenRunning)) {
@@ -621,30 +620,6 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 		charge = 150.0;
 	
 	SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", charge);
-	
-	return Plugin_Continue;
-}
-
-public Action:Timer_ClassicCharge(Handle:hTimer, any:userid) {
-	new client = GetClientOfUserId(userid);
-	
-	if(!IsValidClient(client)) return Plugin_Stop;
-	if(!IsPlayerAlive(client)) return Plugin_Stop;
-	if(!TF2_IsPlayerInCondition(client, TFCond_Charging)) return Plugin_Stop;
-	
-	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	
-	if(!IsValidEntity(activeWep)) return Plugin_Stop;
-	
-	new index = GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex");
-	
-	if(index != 1098) return Plugin_Stop;
-	
-	new Float: charge = GetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage") * 10;
-	
-	SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", charge);
-	
-	if(charge == 150.0) return Plugin_Stop;
 	
 	return Plugin_Continue;
 }
@@ -751,7 +726,16 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	else if (index == 19 || index == 206 || index == 1007) {
 		new iClip = GetEntProp(activeWep, Prop_Send, "m_iClip1");
 		if (iClip >= 10) buttons &= ~IN_ATTACK;
-	} 
+	}
+	
+	else if (index == 1098) {
+		if(buttons & IN_ATTACK) {
+			g_bChargingClassic[client] = true;
+		} else {
+			g_bChargingClassic[client] = false;
+		}
+		
+	}
 	
 	if (g_iRazorbackCount[client] > 1) {
 		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
@@ -944,6 +928,15 @@ TF2_SpawnMedipack(client, bool:cmd = false) {
 
 public bool:MedipackTraceFilter(ent, contentMask) {
 	return (ent != _medPackTraceFilteredEnt);
+}
+
+public OnPreThink(client) {
+	if(g_bChargingClassic[client]) {
+		new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if(IsValidEntity(activeWep)) {
+			SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", GetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage") * 10);
+		}
+	}
 }
 
 public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damagetype, &weapon, Float:damageForce[3], Float:damagePosition[3], damagecustom) {
