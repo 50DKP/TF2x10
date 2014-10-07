@@ -50,7 +50,6 @@ new bool:g_bVSHRunning = false;
 new Float:g_fChargeBegin[MAXPLAYERS + 1] = 0.0;
 new Float:g_fHeadScalingCap = 0.0;
 
-new Handle:g_hClassicTimer[MAXPLAYERS + 1];
 new Handle:g_hHudText;
 new Handle:g_hItemInfoTrie;
 new Handle:g_hSdkGetMaxHealth;
@@ -587,6 +586,10 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 		CreateTimer(0.0, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
+	if(condition == TFCond_Charging && index == 1098) {
+		CreateTimer(0.0, Timer_ClassicCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
 	if(condition == TFCond_Taunting && (index == 159 || index == 433) && (!g_bVSHRunning || !g_bFF2Running || !g_bHiddenRunning)) {
 		CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}									
@@ -627,7 +630,7 @@ public Action:Timer_ClassicCharge(Handle:hTimer, any:userid) {
 	
 	if(!IsValidClient(client)) return Plugin_Stop;
 	if(!IsPlayerAlive(client)) return Plugin_Stop;
-	if(!TF2_IsPlayerInCondition(client, TFCond_Zoomed)) return Plugin_Stop;
+	if(!TF2_IsPlayerInCondition(client, TFCond_Charging)) return Plugin_Stop;
 	
 	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	
@@ -637,8 +640,11 @@ public Action:Timer_ClassicCharge(Handle:hTimer, any:userid) {
 	
 	if(index != 1098) return Plugin_Stop;
 	
-	SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", 150.0);
-	g_hClassicTimer[client] = INVALID_HANDLE;
+	new Float: charge = GetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage") * 10;
+	
+	SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", charge);
+	
+	if(charge == 150.0) return Plugin_Stop;
 	
 	return Plugin_Continue;
 }
@@ -746,16 +752,6 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		new iClip = GetEntProp(activeWep, Prop_Send, "m_iClip1");
 		if (iClip >= 10) buttons &= ~IN_ATTACK;
 	} 
-	
-	else if (index == 1098 && TF2_IsPlayerInCondition(client, TFCond_Zoomed)) {
-		if(buttons & IN_ATTACK) {
-			g_hClassicTimer[client] = CreateTimer(0.3, Timer_ClassicCharge, GetClientUserId(client));	
-		} 
-		else if(buttons & ~IN_ATTACK && g_hClassicTimer[client] != INVALID_HANDLE) {
-			KillTimer(g_hClassicTimer[client]);
-			g_hClassicTimer[client] = INVALID_HANDLE;
-		}
-	}
 	
 	if (g_iRazorbackCount[client] > 1) {
 		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
