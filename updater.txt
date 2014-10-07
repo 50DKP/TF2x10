@@ -4,8 +4,8 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.3.4"
-			"Previous"	"1.3.3"
+			"Latest"	"1.3.5"
+			"Previous"	"1.3.4"
 		}
 		
 		"Notes"	"All version updates are in BitBucket."

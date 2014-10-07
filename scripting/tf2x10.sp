@@ -15,7 +15,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.3.4"
+#define PLUGIN_VERSION	"1.3.5"
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -586,6 +586,10 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 		CreateTimer(0.0, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 	
+	if(condition == TFCond_Zoomed && index == 1098) {
+		CreateTimer(0.3, Timer_ClassicCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
 	if(condition == TFCond_Taunting && (index == 159 || index == 433) && (!g_bVSHRunning || !g_bFF2Running || !g_bHiddenRunning)) {
 		CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
@@ -616,7 +620,27 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 	if(charge > 150)
 		charge = 150.0;
 	
-	SetEntPropFloat(GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"), Prop_Send, "m_flChargedDamage", charge);
+	SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", charge);
+	
+	return Plugin_Continue;
+}
+
+public Action:Timer_ClassicCharge(Handle:hTimer, any:userid) {
+	new client = GetClientOfUserId(userid);
+	
+	if(!IsValidClient(client)) return Plugin_Stop;
+	if(!IsPlayerAlive(client)) return Plugin_Stop;
+	if(!TF2_IsPlayerInCondition(client, TFCond_Zoomed)) return Plugin_Stop;
+	
+	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	
+	if(!IsValidEntity(activeWep)) return Plugin_Stop;
+	
+	new index = GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex");
+	
+	if(index != 1098) return Plugin_Stop;
+	
+	SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", 150.0);
 	
 	return Plugin_Continue;
 }
