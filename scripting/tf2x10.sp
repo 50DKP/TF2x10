@@ -15,7 +15,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.3.7"
+#define PLUGIN_VERSION	"1.3.8"
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -709,6 +709,12 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	
+	if(buttons & IN_ATTACK && index == 1098) {
+			g_bChargingClassic[client] = true;
+	} else {
+		g_bChargingClassic[client] = false;
+	}
+	
 	if (index == 307) {
 		new detonated = GetEntProp(activeWep, Prop_Send, "m_iDetonated");
 		
@@ -726,15 +732,6 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	else if (index == 19 || index == 206 || index == 1007) {
 		new iClip = GetEntProp(activeWep, Prop_Send, "m_iClip1");
 		if (iClip >= 10) buttons &= ~IN_ATTACK;
-	}
-	
-	else if (index == 1098) {
-		if(buttons & IN_ATTACK) {
-			g_bChargingClassic[client] = true;
-		} else {
-			g_bChargingClassic[client] = false;
-		}
-		
 	}
 	
 	if (g_iRazorbackCount[client] > 1) {
@@ -933,7 +930,9 @@ public bool:MedipackTraceFilter(ent, contentMask) {
 public OnPreThink(client) {
 	if(g_bChargingClassic[client]) {
 		new activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if(IsValidEntity(activeWep)) {
+		new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
+	
+		if(IsValidEntity(activeWep) && index == 1098) {
 			SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", GetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage") * 10);
 		}
 	}
