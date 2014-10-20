@@ -512,57 +512,57 @@
 	}
 	"21" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"208" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"659" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"798" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"807" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"887" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"896" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"905" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"914" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"963" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"972" //Flamethrower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 	"22" //Engineer Pistol
@@ -1336,9 +1336,8 @@
 	}
 	"741" //Rainblower
 	{
-		"airblast cost decreased" ".2" //1/10th airblast cost
+		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"airblast vulnerability multiplier hidden"	"9"	//Big airblast vulnerability increase
 	}
 	"751" //Cleaner's Carbine
 	{
