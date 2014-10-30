@@ -1597,6 +1597,6 @@
 	{
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
-		"attach particle effect static" "3003" //Particle: Fountain of delight
+		"attach particle effect static" "81" //Particle: Bonzo the all gnawing
 	}
 }
