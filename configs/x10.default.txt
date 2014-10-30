@@ -1593,4 +1593,10 @@
 	{
 		"maxammo grenades1 increased" "10" //10 Jarates
 	}
+	"1123" //The Necro Smasher
+	{
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
+		"attach particle effect static" "3003" //Particle: Fountain of delight
+	}
 }
