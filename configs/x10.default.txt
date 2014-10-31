@@ -1602,4 +1602,10 @@
 		"cancel falling damage" "1" //Cancel falling damage
 		"attach particle effect static" "81" //Particle: Bonzo the all gnawing
 	}
+		"30474" //Nostromo Napalmer
+	{
+		"airblast cost decreased" ".1" //1/10th airblast cost
+		"mult airblast refire time" ".1" //10x airblast rate
+	}
+
 }
