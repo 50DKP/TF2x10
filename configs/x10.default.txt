@@ -970,7 +970,7 @@
 		"clip size penalty" "0.2" //-80% Clip Size
 		"damage bonus" "3" //+200% Damage Bonus
 		"Projectile speed increased" "3.5" //+250% projectile speed
-		"blast dmg to self increased" "3.5" //+250% self damage
+		"Blast radius decreased" "0.01" //-99% Explosive Radius
 	}
 	"310" //Warrior's Spirit
 	{
@@ -1007,6 +1007,7 @@
 	{
 		"charge time increased" "5" //+5 seconds of charge time
 		"max health additive penalty" "-30" //-30 HP
+		"kill refills meter"	"1"
 	}
 	"329" //Jag
 	{
@@ -1068,6 +1069,7 @@
 	{
 		"mult charge turn control" "11" //+1000 turn control while charging
 		"max health additive bonus" "250" //+250 health
+		"kill refills meter"	"1"
 	}
 	"406" //Splendid Screen
 	{
@@ -1268,6 +1270,7 @@
 	{
 		"mult charge turn control" "11" //+1000% turning while charging
 		"max health additive bonus" "250" //+250 health
+		"kill refills meter"	"1"
 	}
 	"609" //Scottish Handshake
 	{
@@ -1438,8 +1441,7 @@
 	}
 	"996" //The Loose Cannon
 	{
-		"Projectile speed increased HIDDEN" "6" //Hidden projectile speed bonus
-		"grenade damage reduction on world contact" "0" //No damage if it hits the world
+		"Projectile speed increased HIDDEN" "15" //Hidden projectile speed bonus
 		"apply z velocity on damage" "400" //x10'd the knockback
 	}
 	"997" //The Rescue Ranger
@@ -1566,6 +1568,8 @@
 	{
 		"dmg taken from fire reduced"	"0.5"	//1/2 Fire Damage
 		"dmg taken from blast reduced"	"0.5"	//1/2 Explosive Damage
+		"full charge turn control"	"500"	//10x full turn control
+		"kill refills meter"	"750"	//refill meter on kill
 	}
 	"1100" //The Bread Bite
 	{
@@ -1602,7 +1606,83 @@
 		"cancel falling damage" "1" //Cancel falling damage
 		"attach particle effect static" "81" //Particle: Bonzo the all gnawing
 	}
-		"30474" //Nostromo Napalmer
+	
+	"1141" //Festive Shotgun
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+	
+	"1142" //Festive Revolver
+	{
+		"clip size bonus" "10" //10x Loaded Ammo
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+	
+	"1143" //Festive Bonesaw
+	{
+		"bleeding duration" "10" //10 Seconds of Bleed
+	}
+	
+	"1144" //Festive Chargin Targe
+	{
+		"dmg taken from fire reduced" "0" //-100% Fire Vulnerability
+		"dmg taken from blast reduced" "0" //-100% Blast Vulnerability
+	}
+	
+	"1145" //Festive Bonk
+	{
+		"effect bar recharge rate increased" "0.38" //-62% Recharge Rate (Results in 2.2 seconds of cooldown rather than 22)
+	}
+	
+	"1146" //Festive Backburner
+	{
+		"airblast cost increased" "10" //10x Airblas cost (200 Amm)
+		"airblast vertical pushback scale" "10" //10X Airblast vertical pushback
+		"airblast pushback scale" "10" //10X airblast horizontal pushback
+	}
+	
+	"1149" //Festive SMG
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+	
+	"1150" //The Quickiebomb Launcher
+	{
+		"sticky arm time bonus" "-0.8" // instant sticky arm
+		"stickybomb charge rate" "0" // Instant sticky charge?
+		"stickybomb fizzle time"	"20" //Stickies fizzle after 20 seconds
+		"clip size penalty"	"0.1" // -99% clip penalty
+		"faster reload rate" "0.167"
+	}
+	
+	"1151" //The Iron Bomber
+	{
+		"Blast radius decreased" "0.01" //-99% Explosive Radius
+		"grenade detonation damage penalty"	"1"
+		"fire rate bonus" "0"
+		"projectile spread angle penalty" "1" //1 Degrees of random deviation
+	}
+	
+	"1153" //The Panic Attack
+	{
+		"panic_attack_negative"	"25"
+		"fire rate bonus with reduced health"	"0.05"
+		"fire rate bonus HIDDEN"	"0.01"
+		"Reload time decreased"	"0.1"
+		"clip size penalty HIDDEN"	"6.66	"
+		"maxammo secondary increased"	"10"
+
+	}
+	
+	"30474" //Nostromo Napalmer
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
