@@ -8,8 +8,8 @@
 #include <tf2items>
 #include <tf2attributes>
 #include <steamtools>
-#include <updater>
 #undef REQUIRE_PLUGIN
+#tryinclude <updater>
 #tryinclude <freak_fortress_2>
 #tryinclude <saxtonhale>
 #define REQUIRE_PLUGIN
@@ -20,7 +20,7 @@
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
-#define UPDATE_URL	"http://isatis.qc.to/tf2x10/raw/default/updater.txt"
+#define UPDATE_URL	"http://isatis.qc.to/tf2x10/raw/default/updater.txt"  //404 :(
 
 #define	KUNAI_DAMAGE	1800
 #define DALOKOH_MAXHEALTH	800
@@ -149,9 +149,9 @@ public OnConfigsExecuted() {
 
 	switch (LoadFileIntoTrie("default", "tf2x10_base_items")) {
 		case -1:
-		SetFailState("Could not find the file configs/x10.default.txt. Aborting.");
+			SetFailState("Could not find the file configs/x10.default.txt. Aborting.");
 		case -2:
-		SetFailState("Your configs/x10.default.txt seems to be corrupt. Aborting.");
+			SetFailState("Your configs/x10.default.txt seems to be corrupt. Aborting.");
 		default: {
 			g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 			g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
@@ -159,8 +159,10 @@ public OnConfigsExecuted() {
 		}
 	}
 
+	#if defined _updater_included
 	if (GetConVarBool(g_cvarAutoUpdate) && LibraryExists("updater"))
 		Updater_AddPlugin(UPDATE_URL);
+	#endif
 }
 
 PrepSDKCalls() {
@@ -194,7 +196,7 @@ PrepSDKCalls() {
 CreateConVars() {
 	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 
-	g_cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells updater.smx to automatically update this plugin. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells Updater to automatically update this plugin.  Only has an effect if Updater is installed.  0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_cvarCritsDiamondback = CreateConVar("tf2x10_crits_diamondback", "10", "Number of crits after successful sap with Diamondback equipped.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
 	g_cvarCritsFJ = CreateConVar("tf2x10_crits_fj", "10", "Number of crits after Frontier kill or for buildings. Half this for assists.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
 	g_cvarCritsManmelter = CreateConVar("tf2x10_crits_manmelter", "10", "Number of crits after Manmelter extinguishes player.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
@@ -452,11 +454,11 @@ public Action:Command_Recache(client, args) {
 	if (GetConVarBool(g_cvarEnabled)) {
 		switch(LoadFileIntoTrie("default", "tf2x10_base_items")) {
 			case -1:
-			ReplyToCommand(client, "[TF2x10] Could not find the file configs/x10.default.txt. Please check and try again.");
+				ReplyToCommand(client, "[TF2x10] Could not find the file configs/x10.default.txt. Please check and try again.");
 			case -2:
-			ReplyToCommand(client, "[TF2x10] Your configs/x10.default.txt seems to be corrupt. Please check and try again.");
+				ReplyToCommand(client, "[TF2x10] Your configs/x10.default.txt seems to be corrupt. Please check and try again.");
 			default:
-			ReplyToCommand(client, "[TF2x10] Weapons recached.");
+				ReplyToCommand(client, "[TF2x10] Weapons recached.");
 		}
 
 		return Plugin_Handled;
@@ -493,7 +495,7 @@ public Action:Command_SetMod(client, args) {
 		if(!StrEqual(g_sSelectedMod, "default"))
 			ReplyToCommand(client, "[TF2x10] Now loading from the configs/x10.%s.txt file, defaulting to configs/x10.default.txt.", g_sSelectedMod);
 		else
-		ReplyToCommand(client, "[TF2x10] Now loading from the configs/x10.default.txt file.");
+			ReplyToCommand(client, "[TF2x10] Now loading from the configs/x10.default.txt file.");
 
 		return Plugin_Handled;
 	}
@@ -515,6 +517,12 @@ public OnAllPluginsLoaded() {
 		g_bFF2Running = false;
 	#endif
 
+	#if defined _saxtonhale_included
+		g_bVSHRunning = LibraryExists("saxtonhale") ? VSH_IsSaxtonHaleModeEnabled() : false;
+	#else
+		g_bVSHRunning = false;
+	#endif
+
 	if(g_bFF2Running || g_bVSHRunning) {
 		g_sSelectedMod = "vshff2";
 		LoadFileIntoTrie(g_sSelectedMod);
@@ -522,9 +530,11 @@ public OnAllPluginsLoaded() {
 }
 
 public OnLibraryAdded(const String:name[]) {
-	if (StrEqual(name, "updater") && GetConVarBool(g_cvarAutoUpdate))
-		Updater_AddPlugin(UPDATE_URL);
-	else if(StrEqual(name, "freak_fortress_2")) {
+	if (StrEqual(name, "updater") && GetConVarBool(g_cvarAutoUpdate)) {
+		#if defined _updater_included
+			Updater_AddPlugin(UPDATE_URL);
+		#endif
+	} else if(StrEqual(name, "freak_fortress_2")) {
 		#if defined _freak_fortress_2_included
 			g_bFF2Running = FF2_IsFF2Enabled();
 		#endif
