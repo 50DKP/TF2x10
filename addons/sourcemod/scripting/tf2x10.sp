@@ -8,8 +8,8 @@
 #include <tf2items>
 #include <tf2attributes>
 #include <steamtools>
+#include <updater>
 #undef REQUIRE_PLUGIN
-#tryinclude <updater>
 #tryinclude <freak_fortress_2>
 #tryinclude <saxtonhale>
 #define REQUIRE_PLUGIN
@@ -20,7 +20,7 @@
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
-#define UPDATE_URL	"http://isatis.qc.to/tf2x10/raw/default/updater.txt"  //404 :(
+#define UPDATE_URL	"http://isatis.qc.to/tf2x10/raw/default/updater.txt"
 
 #define	KUNAI_DAMAGE	1800
 #define DALOKOH_MAXHEALTH	800
@@ -159,10 +159,8 @@ public OnConfigsExecuted() {
 		}
 	}
 
-	#if defined _updater_included
 	if (GetConVarBool(g_cvarAutoUpdate) && LibraryExists("updater"))
 		Updater_AddPlugin(UPDATE_URL);
-	#endif
 }
 
 PrepSDKCalls() {
@@ -196,7 +194,7 @@ PrepSDKCalls() {
 CreateConVars() {
 	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 
-	g_cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells Updater to automatically update this plugin.  Only has an effect if Updater is installed.  0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells Updater to automatically update this plugin.  0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_cvarCritsDiamondback = CreateConVar("tf2x10_crits_diamondback", "10", "Number of crits after successful sap with Diamondback equipped.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
 	g_cvarCritsFJ = CreateConVar("tf2x10_crits_fj", "10", "Number of crits after Frontier kill or for buildings. Half this for assists.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
 	g_cvarCritsManmelter = CreateConVar("tf2x10_crits_manmelter", "10", "Number of crits after Manmelter extinguishes player.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
@@ -531,9 +529,7 @@ public OnAllPluginsLoaded() {
 
 public OnLibraryAdded(const String:name[]) {
 	if (StrEqual(name, "updater") && GetConVarBool(g_cvarAutoUpdate)) {
-		#if defined _updater_included
 			Updater_AddPlugin(UPDATE_URL);
-		#endif
 	} else if(StrEqual(name, "freak_fortress_2")) {
 		#if defined _freak_fortress_2_included
 			g_bFF2Running = FF2_IsFF2Enabled();
