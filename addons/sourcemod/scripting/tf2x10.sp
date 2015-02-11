@@ -16,7 +16,7 @@
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
-#define PLUGIN_VERSION	"1.3.9"
+#define PLUGIN_VERSION	"1.4.0"
 #define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -618,6 +618,18 @@ public TF2_OnConditionAdded(client, TFCond:condition) {
 	}
 }
 
+public TF2_OnConditionRemoved(client, TFCond:condition) {
+	if(!GetConVarBool(g_cvarEnabled)) return;
+
+	if(condition == TFCond_Zoomed && g_fChargeBegin[client] != 0.0) {
+		g_fChargeBegin[client] = 0.0;
+	}
+
+	if(condition == TFCond_Taunting && g_iDalokohSecs[client] != 0) {
+		g_iDalokohSecs[client] = 0;
+	}
+}
+
 public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 	new client = GetClientOfUserId(userid);
 
@@ -698,18 +710,6 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 	return Plugin_Continue;
 }
 
-public TF2_OnConditionRemoved(client, TFCond:condition) {
-	if(!GetConVarBool(g_cvarEnabled)) return;
-
-	if(condition == TFCond_Zoomed && g_fChargeBegin[client] != 0.0) {
-		g_fChargeBegin[client] = 0.0;
-	}
-
-	if(condition == TFCond_Taunting && g_iDalokohSecs[client] != 0) {
-		g_iDalokohSecs[client] = 0;
-	}
-}
-
 public OnGameFrame() {
 	for(new client=1; client < MaxClients; client++) {
 		if (!IsValidClient(client) || !IsPlayerAlive(client))
@@ -721,7 +721,7 @@ public OnGameFrame() {
 			if (fPlayerHeads <= g_fHeadScalingCap)
 				SetEntPropFloat(client, Prop_Send, "m_flHeadScale", fPlayerHeads);
 			else
-			SetEntPropFloat(client, Prop_Send, "m_flHeadScale", g_fHeadScalingCap);
+				SetEntPropFloat(client, Prop_Send, "m_flHeadScale", g_fHeadScalingCap);
 		}
 	}
 }
@@ -782,14 +782,14 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 public Action:event_deflected(Handle:event, const String:name[], bool:dontBroadcast) {
 	#if defined _freak_fortress_2_included
 	if(GetConVarBool(g_cvarEnabled) && g_bFF2Running) {
-		new client = GetClientOfUserId(GetEventInt(event, "userid"));
+		new client = GetClientOfUserId(GetEventInt(event, "ownerid"));
 		new iBossIndex = FF2_GetBossIndex(client);
 
-		new activeWep = GetEntPropEnt(GetClientOfUserId(GetEventInt(event, "ownerid")), Prop_Send, "m_hActiveWeapon");
+		new activeWep = GetEntPropEnt(GetClientOfUserId(GetEventInt(event, "userid")), Prop_Send, "m_hActiveWeapon");
 		new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 
 		if (iBossIndex != -1 && index == 40) { //backburner
-			new Float:fBossCharge = FF2_GetBossCharge(iBossIndex, 0) + 63.0; //work with FF2's deflect to set to 70 in total instead of  7
+			new Float:fBossCharge = FF2_GetBossCharge(iBossIndex, 0) + 63.0; //work with FF2's deflect to set to 70 in total instead of 7
 
 			if(fBossCharge > 100.0)
 				FF2_SetBossCharge(iBossIndex, 0, 100.0);
