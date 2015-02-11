@@ -212,7 +212,7 @@ static const String:strWeaponPrimary[][] =
 	"Fortified Compound",
  	"Classic",
  	"Back Scatter",
- 	"Air Strike" 
+ 	"Air Strike"
 };
 static const iWeaponSecondary[] =
 {
@@ -266,7 +266,7 @@ static const iWeaponSecondary[] =
  	1101,
  	1105,
  	1121,
- 	1102 
+ 	1102
 };
 static const String:strWeaponSecondary[][] =
 {
@@ -320,7 +320,7 @@ static const String:strWeaponSecondary[][] =
 	"B.A.S.E. Jumper",
  	"Self-Aware Beauty Mark",
  	"Mutated Milk",
- 	"Snack Attack" 
+ 	"Snack Attack"
 };
 static const iWeaponMelee[] =
 {
@@ -404,7 +404,7 @@ static const iWeaponMelee[] =
 	954,
 	1013,
  	1100,
- 	1071 
+ 	1071
 };
 static const String:strWeaponMelee[][] =
 {
@@ -488,7 +488,7 @@ static const String:strWeaponMelee[][] =
 	"Memory Maker",
 	"Ham Shank",
  	"Bread Bite",
- 	"Gold Frying Pan" 
+ 	"Gold Frying Pan"
 };
 static const iWeaponCloakary[] =	//so clever at naming these things b/c why not
 {
@@ -1975,7 +1975,7 @@ public GiveRndWeapons(client)
 //				if (IsValidClient(i))
 //				{
 //					decl String:auth[32];
-//					GetClientAuthString(i, auth, sizeof(auth));
+//					GetClientAuthId(i, AuthId_Steam2, auth, sizeof(auth));
 //					if (StrEqual(auth, "STEAM_0:1:19100391", false)) PrintToChat(i, "%d, %d, %d, %d", pri, sec, mel, iRndCloak[client]);
 //				}
 //			}
@@ -2162,7 +2162,7 @@ public Action:Command_CantSee(client, args)
 	{
 		if (GetEntityRenderMode(entity) == RENDER_TRANSCOLOR)
 		{
-			SetEntityRenderMode(entity, RENDER_NORMAL); 
+			SetEntityRenderMode(entity, RENDER_NORMAL);
 			SetEntityRenderColor(entity, 255, 255, 255, 255);
 			ReplyToCommand(client, "[TF2Items]Randomizer x10: Made your active weapon fully visible.");
 		}
@@ -4325,7 +4325,7 @@ stock Handle:PrepareItemHandle(weaponLookupIndex, TFClassType:classbased = TFCla
 			{
 				LogError("Tried to set attribute index to %d on weapon of index %d, attrib string was '%s', count was %d", attrIdx, weaponLookupIndex, weaponAttribs, attribCount);
 				continue;
-			} 
+			}
 			switch (attrIdx)
 			{
 				case 133, 143, 147, 152, 184, 185, 186, 192, 193, 194, 198, 211, 214, 227, 228, 229, 262, 294, 302, 372, 373, 374, 379, 381, 383, 403, 420:
@@ -6881,7 +6881,7 @@ stock AddCustomHardcodedToTrie(Handle:trie)
 	SetTrieValue(trie, "2228_slot", 0);
 	SetTrieValue(trie, "2228_quality", 10);
 	SetTrieValue(trie, "2228_level", 5);
-	SetTrieString(trie, "2228_attribs", "2 ; 5.0 ; 99 ; 3.0 ; 521 ; 1.0 ; 3 ; 0.25 ; 104 ; 0.3 ; 77 ; 0.0 ; 16 ; 0.0"); 
+	SetTrieString(trie, "2228_attribs", "2 ; 5.0 ; 99 ; 3.0 ; 521 ; 1.0 ; 3 ; 0.25 ; 104 ; 0.3 ; 77 ; 0.0 ; 16 ; 0.0");
 	SetTrieValue(trie, "2228_ammo", 0);
 	SetTrieString(trie, "2228_model", "models/advancedweaponiser/fbomb/c_fbomb.mdl");
 	SetTrieString(trie, "2228_viewmodel", "models/advancedweaponiser/fbomb/c_fbomb.mdl");
@@ -7288,7 +7288,7 @@ stock GiveWeaponOfIndex(client, weaponLookupIndex)
 		case 2171:
 		{
 			SetEntProp(entity, Prop_Send, "m_iEntityLevel", (-128+11));
-			GetClientAuthString(client, strSteamID, sizeof(strSteamID));
+			GetClientAuthId(client, AuthId_Steam2, strSteamID, sizeof(strSteamID));
 			if (StrEqual(strSteamID, "STEAM_0:0:17402999") || StrEqual(strSteamID, "STEAM_0:1:35496121")) SetEntProp(entity, Prop_Send, "m_iEntityQuality", 9); //Mecha the Slag's Self-Made Khopesh Climber
 		}
 		case 2197:
@@ -7321,7 +7321,7 @@ stock GiveWeaponOfIndex(client, weaponLookupIndex)
 		case 2058:
 		{
 			SetEntProp(entity, Prop_Send, "m_iEntityLevel", (-128+6));
-			GetClientAuthString(client, strSteamID, sizeof(strSteamID));
+			GetClientAuthId(client, AuthId_Steam2, strSteamID, sizeof(strSteamID));
 //				if (StrEqual(strSteamID, "STEAM_0:1:19100391", false)) SetEntProp(entity, Prop_Send, "m_iEntityQuality", 9); //FlaminSarge's Self-Made Jar of Ants
 			if (StrEqual(strSteamID, "STEAM_0:0:6404564", false) || StrEqual(strSteamID, "STEAM_0:0:1048930", false)) SetEntProp(entity, Prop_Send, "m_iEntityQuality", 9); //Reag and BAT MAN- Self-Made Ant'eh'gen
 		}
@@ -8076,7 +8076,7 @@ public SickleClimbWalls(client)
 		if (!IsClientInGame(healer)) continue;
 		if (!IsPlayerAlive(healer)) continue;
 		new sec = GetPlayerWeaponSlot(healer, TFWeaponSlot_Secondary);
-		if (IsValidEntity(sec) && GetEdictClassname(sec, classname, sizeof(classname)) && StrEqual(classname, "tf_weapon_medigun", false))	//it's a medigun 
+		if (IsValidEntity(sec) && GetEdictClassname(sec, classname, sizeof(classname)) && StrEqual(classname, "tf_weapon_medigun", false))	//it's a medigun
 		{
 			if (GetEntProp(sec, Prop_Send, "m_iItemDefinitionIndex") != 411 || client != GetEntPropEnt(sec, Prop_Send, "m_hHealingTarget"))
 			{
@@ -8502,7 +8502,7 @@ stock bool:TE_SetupTFParticle(String:Name[],
 		LogError("Could not find string table: ParticleEffectNames");
 		return false;
 	}
-	
+
 	// find particle index
 	new String:tmp[256];
 	new count = GetStringTableNumStrings(tblidx);
