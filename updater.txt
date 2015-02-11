@@ -4,13 +4,15 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.3.8"
-			"Previous"	"1.3.7"
+			"Latest"	"1.3.9"
+			"Previous"	"1.3.8"
 		}
-		
-		"Notes"	"All version updates are in BitBucket."
+
+		"Notes"	"Fixed flamethrower issues"
+		"Notes"	"x10'd Necro Smasher, Nostro Napalmer, and Smissmass weapons"
+		"Notes"	"All stock melee reskins now have +20% swing rate"
 	}
-	
+
 	"Files"
 	{
 		"Plugin"	"Path_SM/configs/x10.default.txt"
