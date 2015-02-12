@@ -781,14 +781,13 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 
 public Action:event_deflected(Handle:event, const String:name[], bool:dontBroadcast) {
 	#if defined _freak_fortress_2_included
-	if(GetConVarBool(g_cvarEnabled) && g_bFF2Running) {
-		new client = GetClientOfUserId(GetEventInt(event, "ownerid"));
-		new iBossIndex = FF2_GetBossIndex(client);
+	if(GetConVarBool(g_cvarEnabled) && g_bFF2Running && !GetEventInt(event, "weaponid")) {  //A non-0 weaponid indicates that a projectile got deflected and not a client
+		new iBossIndex = FF2_GetBossIndex(GetClientOfUserId(GetEventInt(event, "ownerid")));
 
 		new activeWep = GetEntPropEnt(GetClientOfUserId(GetEventInt(event, "userid")), Prop_Send, "m_hActiveWeapon");
 		new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 
-		if (iBossIndex != -1 && index == 40) { //backburner
+		if (iBossIndex != -1 && (index == 40 || index == 1146)) { //backburner
 			new Float:fBossCharge = FF2_GetBossCharge(iBossIndex, 0) + 63.0; //work with FF2's deflect to set to 70 in total instead of 7
 
 			if(fBossCharge > 100.0)
