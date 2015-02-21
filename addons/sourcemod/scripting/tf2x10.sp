@@ -986,6 +986,20 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 		TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
 	}
 
+	if (GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 30474 &&
+	WeaponHasAttribute(client, client, "SET BONUS: alien isolation xeno bonus neg") &&
+	WeaponHasAttribute(attacker, attacker, "SET BONUS: alien isolation merc bonus pos"))
+	{
+		damage*=10;
+		return Plugin_Changed;
+	}
+	else if (weapon == GetPlayerWeaponSlot(attacker, TFWeaponSlot_Melee) &&
+	WeaponHasAttribute(client, client, "SET BONUS: alien isolation merc bonus neg") &&
+	WeaponHasAttribute(attacker, attacker, "SET BONUS: alien isolation xeno bonus pos"))
+	{
+		damage*=10;
+		return Plugin_Changed;
+	}
 	return Plugin_Continue;
 }
 
