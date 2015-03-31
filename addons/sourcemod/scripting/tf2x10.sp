@@ -40,9 +40,12 @@ static const Float:g_fBazaarRates[] =
 	0.165 //seconds for 7+ heads
 };
 
+new g_iHeadCap = 40;
+new bool:g_bAprilFools = false;
 new bool:g_bFF2Running = false;
 new bool:g_bHasCaber[MAXPLAYERS + 1] = false;
 new bool:g_bHasManmelter[MAXPLAYERS + 1] = false;
+new bool:g_bHasBazooka[MAXPLAYERS + 1] = false;
 new bool:g_bHeadScaling = false;
 new bool:g_bHiddenRunning = false;
 new bool:g_bTakesHeads[MAXPLAYERS + 1] = false;
@@ -69,6 +72,7 @@ new String:g_sSelectedMod[16] = "default";
 new Handle:g_cvarEnabled;
 new Handle:g_cvarGameDesc;
 new Handle:g_cvarAutoUpdate;
+new Handle:g_cvarHeadCap;
 new Handle:g_cvarHeadScaling;
 new Handle:g_cvarHeadScalingCap;
 new Handle:g_cvarHealthCap;
@@ -153,6 +157,7 @@ public OnConfigsExecuted() {
 		case -2:
 			SetFailState("Your configs/x10.default.txt seems to be corrupt. Aborting.");
 		default: {
+			g_iHeadCap = GetConVarInt(g_cvarHeadCap);
 			g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 			g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
 			CreateTimer(330.0, Timer_ServerRunningX10, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
@@ -200,6 +205,7 @@ CreateConVars() {
 	g_cvarCritsManmelter = CreateConVar("tf2x10_crits_manmelter", "10", "Number of crits after Manmelter extinguishes player.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
 	g_cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", FCVAR_PLUGIN, true, 4.0);
 	g_cvarHeadScaling = CreateConVar("tf2x10_headscaling", "1", "Enable any decapitation weapon (eyelander etc) to grow their head as they gain heads. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_cvarHeadScalingCap = CreateConVar("tf2x10_headscalingcap", "6.0", "The number of heads before head scaling stops growing their head. 6.0 = 24 heads.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
 	g_cvarHealthCap = CreateConVar("tf2x10_healthcap", "2000", "The max health a player can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
@@ -211,6 +217,7 @@ CreateConVars() {
 }
 
 public OnConVarChanged(Handle:convar, const String:oldValue[], const String:newValue[]) {
+	g_iHeadCap = GetConVarInt(g_cvarHeadCap);
 	g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 	g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
 }
@@ -243,6 +250,11 @@ public OnConVarChanged_tf2x10_enable(Handle:convar, const String:oldValue[], con
 
 		if(g_bFF2Running || g_bVSHRunning) {
 			g_sSelectedMod = "vshff2";
+			LoadFileIntoTrie(g_sSelectedMod);
+		}
+
+		if(g_bAprilFools || TF2_IsHolidayActive(TFHoliday_AprilFools)) {
+			g_sSelectedMod = "aprilfools";
 			LoadFileIntoTrie(g_sSelectedMod);
 		}
 	} else {
@@ -525,6 +537,11 @@ public OnAllPluginsLoaded() {
 		g_sSelectedMod = "vshff2";
 		LoadFileIntoTrie(g_sSelectedMod);
 	}
+
+	if(g_bAprilFools || TF2_IsHolidayActive(TFHoliday_AprilFools)) {
+		g_sSelectedMod = "aprilfools";
+		LoadFileIntoTrie(g_sSelectedMod);
+	}
 }
 
 public OnLibraryAdded(const String:name[]) {
@@ -711,17 +728,26 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid) {
 }
 
 public OnGameFrame() {
-	for(new client=1; client < MaxClients; client++) {
+	for(new client=1; client <= MaxClients; client++) {
 		if (!IsValidClient(client) || !IsPlayerAlive(client))
 			continue;
 
-		if (g_bHeadScaling && g_bTakesHeads[client]) {
-			new Float:fPlayerHeads = 1.0 + (GetEntProp(client, Prop_Send, "m_iDecapitations") / 4.0);
+		if (g_bTakesHeads[client]) {
+			new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
+			if(heads > 4) {
+				new Float:speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
+				new Float:newSpeed = heads < g_iHeadCap ? speed + 20.0 : speed;
+				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed > 520.0 ? 520.0 : newSpeed);
+			}
 
-			if (fPlayerHeads <= g_fHeadScalingCap)
-				SetEntPropFloat(client, Prop_Send, "m_flHeadScale", fPlayerHeads);
-			else
-				SetEntPropFloat(client, Prop_Send, "m_flHeadScale", g_fHeadScalingCap);
+			if(g_bHeadScaling) {
+				new Float:fPlayerHeadScale = 1.0 + heads / 4.0);
+
+				if (fPlayerHeadScale <= (g_bAprilFools ? 9999.0 : g_fHeadScalingCap))  //April Fool's 2015: Heads keep getting bigger!
+					SetEntPropFloat(client, Prop_Send, "m_flHeadScale", fPlayerHeadScale);
+				else
+					SetEntPropFloat(client, Prop_Send, "m_flHeadScale", g_fHeadScalingCap);
+			}
 		}
 	}
 }
@@ -776,6 +802,19 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 		}
 	}
 
+	return Plugin_Continue;
+}
+
+public Action:OnGetMaxHealth(client, &maxHealth)
+{
+	if(GetConVarBool(g_cvarEnabled))
+	{
+		new heads = GetEntProp(client, Prop_Data, "m_iDecapitations");
+		if(heads < g_iHeadCap) {
+			maxHealth = GetEntProp(client, Prop_Data, "m_iMaxHealth") + heads * 15;
+			return Plugin_Changed;
+		}
+	}
 	return Plugin_Continue;
 }
 
@@ -849,6 +888,11 @@ public Action:event_pickup_currency(Handle:event, const String:name[], bool:dont
 	return Plugin_Continue;
 }
 
+public Action:TF2_OnIsHolidayActive(TFHoliday_AprilFools, result) {
+	if(result) g_bAprilFools=true;
+	return Plugin_Continue;
+}
+
 /******************************************************************
 
 Gameplay: Damage and Death Only
@@ -866,7 +910,10 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 	new weaponid = IsValidEntity(activewep) ? GetEntProp(activewep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	new customKill = GetEventInt(event, "customkill");
 
-	if(weaponid == 317) {
+
+	if(g_bAprilFools && IsValidClient(attacker) && !g_bHiddenRunning && weaponid == 356) {  //April Fool's 2015: Kunai gives health on ALL kills
+			TF2_SetHealth(attacker, KUNAI_DAMAGE);
+	} else if(weaponid == 317) {
 		TF2_SpawnMedipack(client);
 	} else if(customKill == TF_CUSTOM_BACKSTAB && !g_bHiddenRunning) {
 		if(weaponid == 356) {
@@ -878,6 +925,11 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 				new crits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + GetConVarInt(g_cvarCritsDiamondback) - 1;
 				SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", crits);
 			}
+		}
+	} else if(IsValidClient(attacker) && g_bTakesHeads[attacker]) {
+		new heads = GetEntProp(attacker, Prop_Send, "m_iDecapitations");
+		if(heads > 4) {
+			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		}
 	}
 
@@ -1032,10 +1084,12 @@ ShouldDisableWeapons(client) {
 }
 
 CheckHealthCaps(client) {
-	new cap = GetConVarInt(g_cvarHealthCap);
+	if(!g_bAprilFools) {  //April Fool's 2015: Unlimited health!
+		new cap = GetConVarInt(g_cvarHealthCap);
 
-	if (cap > 0 && GetClientHealth(client) > cap)
-		TF2_SetHealth(client, cap);
+		if (cap > 0 && GetClientHealth(client) > cap)
+			TF2_SetHealth(client, cap);
+	}
 }
 
 public Action:Event_PlayerShieldBlocked(UserMsg:msg_id, Handle:bf, const players[], playersNum, bool:reliable, bool:init) {
@@ -1223,6 +1277,22 @@ Randomizer_CheckAmmo(client, entityIndex) {
 	SetEntData(client, iAmmoTable+iOffset, ammoCount, 4, true);
 }
 
+public OnEntityCreated(entity, const String:classname[])
+{
+	if(StrContains(classname, "item_ammopack")!=-1 || StrEqual(classname, "tf_ammo_pack")) SDKHook(entity, SDKHook_Spawn, OnItemSpawned);
+}
+
+public OnItemSpawned(entity)
+{
+	SDKHook(entity, SDKHook_StartTouch, OnPickup);
+	SDKHook(entity, SDKHook_Touch, OnPickup);
+}
+
+public Action:OnPickup(entity, client)  //Thanks friagram!
+{
+	if(g_bAprilFools && client>0 && client<=MaxClients && g_bHasBazooka[client]) return Plugin_Handled;
+	return Plugin_Continue;
+}
 /******************************************************************
 
 Stock Functions In Gameplay
@@ -1245,14 +1315,24 @@ ResetVariables(client) {
 	g_bHasCaber[client] = false;
 	g_bHasManmelter[client] = false;
 	g_bTakesHeads[client] = false;
+	g_bHasBazooka[client] = false;
 	g_fChargeBegin[client] = 0.0;
+
+	SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 }
 
 UpdateVariables(client) {
+	new primyWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Primary);
 	new secndWep = GetPlayerWeaponSlot_Wearable(client, TFWeaponSlot_Secondary);
 	new meleeWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
 
 	if(!IsValidEntity(secndWep)) secndWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+
+	if(IsValidEntity(primyWep)) {
+		g_bHasBazooka[client] = WeaponHasAttribute(client, primyWep, "auto fires full clip");
+	} else {
+		g_bHasBazooka[client] = false;
+	}
 
 	if(IsValidEntity(secndWep)) {
 		g_iRazorbackCount[client] = WeaponHasAttribute(client, secndWep, "backstab shield") ? 10 : 0;
@@ -1266,7 +1346,7 @@ UpdateVariables(client) {
 		g_bHasCaber[client] = GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") == 307;
 		g_bTakesHeads[client] = WeaponHasAttribute(client, meleeWep, "decapitate type");
 	} else {
-		g_bHasCaber[client] = g_bHasManmelter[client] = g_bTakesHeads[client] = false;
+		g_bHasCaber[client] = g_bHasManmelter[client] = g_bHasBazooka = g_bTakesHeads[client] = false;
 	}
 
 	g_iCabers[client] = g_bHasCaber[client] ? 10 : 0;
