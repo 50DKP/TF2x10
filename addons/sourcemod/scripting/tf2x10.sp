@@ -741,7 +741,7 @@ public OnGameFrame() {
 			}
 
 			if(g_bHeadScaling) {
-				new Float:fPlayerHeadScale = 1.0 + heads / 4.0);
+				new Float:fPlayerHeadScale = 1.0 + heads / 4.0;
 
 				if (fPlayerHeadScale <= (g_bAprilFools ? 9999.0 : g_fHeadScalingCap))  //April Fool's 2015: Heads keep getting bigger!
 					SetEntPropFloat(client, Prop_Send, "m_flHeadScale", fPlayerHeadScale);
@@ -888,8 +888,8 @@ public Action:event_pickup_currency(Handle:event, const String:name[], bool:dont
 	return Plugin_Continue;
 }
 
-public Action:TF2_OnIsHolidayActive(TFHoliday_AprilFools, result) {
-	if(result) g_bAprilFools=true;
+public Action:TF2_OnIsHolidayActive(holiday, result) {
+	if(holiday == TFHoliday_AprilFools && result) g_bAprilFools=true;
 	return Plugin_Continue;
 }
 
@@ -1346,7 +1346,7 @@ UpdateVariables(client) {
 		g_bHasCaber[client] = GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") == 307;
 		g_bTakesHeads[client] = WeaponHasAttribute(client, meleeWep, "decapitate type");
 	} else {
-		g_bHasCaber[client] = g_bHasManmelter[client] = g_bHasBazooka = g_bTakesHeads[client] = false;
+		g_bHasCaber[client] = g_bHasManmelter[client] = g_bHasBazooka[client] = g_bTakesHeads[client] = false;
 	}
 
 	g_iCabers[client] = g_bHasCaber[client] ? 10 : 0;
