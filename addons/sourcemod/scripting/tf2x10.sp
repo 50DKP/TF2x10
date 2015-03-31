@@ -888,7 +888,7 @@ public Action:event_pickup_currency(Handle:event, const String:name[], bool:dont
 	return Plugin_Continue;
 }
 
-public Action:TF2_OnIsHolidayActive(holiday, result) {
+public Action:TF2_OnIsHolidayActive(TFHoliday:holiday, &bool:result) {
 	if(holiday == TFHoliday_AprilFools && result) g_bAprilFools=true;
 	return Plugin_Continue;
 }
