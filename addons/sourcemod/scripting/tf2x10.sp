@@ -538,7 +538,8 @@ public OnAllPluginsLoaded() {
 		LoadFileIntoTrie(g_sSelectedMod);
 	}
 
-	if(g_bAprilFools || TF2_IsHolidayActive(TFHoliday_AprilFools)) {
+	if(g_bAprilFools) {
+		PrintToServer("[TF2x10] Loaded April Fools config");
 		g_sSelectedMod = "aprilfools";
 		LoadFileIntoTrie(g_sSelectedMod);
 	}
@@ -738,6 +739,7 @@ public OnGameFrame() {
 				new Float:speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
 				new Float:newSpeed = heads < g_iHeadCap ? speed + 20.0 : speed;
 				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed > 520.0 ? 520.0 : newSpeed);
+				PrintToServer("[TF2x10] %i heads %f speed", heads, newSpeed);
 			}
 
 			if(g_bHeadScaling) {
