@@ -1344,7 +1344,7 @@ UpdateVariables(client) {
 	if(!IsValidEntity(secndWep)) secndWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
 
 	if(IsValidEntity(primyWep)) {
-		PrintToChatAll("%N has the Beggar's Bazooka");
+		PrintToChatAll("%N has the Beggar's Bazooka", client);
 		g_bHasBazooka[client] = GetEntProp(primyWep, Prop_Send, "m_iItemDefinitionIndex") == 730;
 	} else {
 		g_bHasBazooka[client] = false;
