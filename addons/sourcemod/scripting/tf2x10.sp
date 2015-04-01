@@ -133,7 +133,6 @@ public OnPluginStart() {
 	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_tf2x10_setmod", Command_SetMod, ADMFLAG_CHEATS);
 	RegConsoleCmd("sm_x10group", Command_Group);
-	RegConsoleCmd("sm_tf2x10_aprilfools", Command_Test);
 
 	HookAllEvents();
 
@@ -514,11 +513,6 @@ public Action:Command_SetMod(client, args) {
 	return Plugin_Continue;
 }
 
-public Action:Command_Test(client, args) {
-	ReplyToCommand(client, "%i", _:g_bAprilFools);
-	return Plugin_Continue;
-}
-
 /******************************************************************
 
 SourceMod Map/Library Events
@@ -741,12 +735,12 @@ public OnGameFrame() {
 
 		if (g_bTakesHeads[client]) {
 			new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
-			if(heads > 4) {
+			/*if(heads > 4) {
 				new Float:speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
 				new Float:newSpeed = heads < g_iHeadCap ? speed + 20.0 : speed;
 				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed > 520.0 ? 520.0 : newSpeed);
 				PrintToChatAll("[TF2x10] %N %i heads %f speed", client, heads, newSpeed);
-			}
+			}*/
 
 			if(g_bHeadScaling) {
 				new Float:fPlayerHeadScale = 1.0 + heads / 4.0;
@@ -813,7 +807,7 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	return Plugin_Continue;
 }
 
-public Action:OnGetMaxHealth(client, &maxHealth)
+/*public Action:OnGetMaxHealth(client, &maxHealth)
 {
 	if(GetConVarBool(g_cvarEnabled))
 	{
@@ -824,7 +818,7 @@ public Action:OnGetMaxHealth(client, &maxHealth)
 		}
 	}
 	return Plugin_Continue;
-}
+}*/
 
 public Action:event_deflected(Handle:event, const String:name[], bool:dontBroadcast) {
 	#if defined _freak_fortress_2_included
@@ -937,12 +931,12 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 				SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", crits);
 			}
 		}
-	} else if(IsValidClient(attacker) && g_bTakesHeads[attacker]) {
+	}/* else if(IsValidClient(attacker) && g_bTakesHeads[attacker]) {
 		new heads = GetEntProp(attacker, Prop_Send, "m_iDecapitations");
 		if(heads > 4) {
 			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		}
-	}
+	}*/
 
 	if(IsValidEntity(inflictor_entindex)) {
 		decl String:inflictorName[32];
@@ -1301,10 +1295,9 @@ public OnItemSpawned(entity)
 
 public Action:OnPickup(entity, client)
 {
-	if(IsValidClient(client)) PrintToChatAll("If 1, %N has a Beggar's Bazooka: %i", client, _:g_bHasBazooka[client]);
-	if(g_bAprilFools && client>0 && client<=MaxClients && g_bHasBazooka[client]) {
+	if(g_bAprilFools && IsValidClient(client) && g_bHasBazooka[client]) {
 		PrintToChatAll("Stopped ammo pickup");
-		return Plugin_Handled;
+		return Plugin_Stop;
 	}
 	return Plugin_Continue;
 }
@@ -1333,7 +1326,7 @@ ResetVariables(client) {
 	g_bHasBazooka[client] = false;
 	g_fChargeBegin[client] = 0.0;
 
-	SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+	//SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 }
 
 UpdateVariables(client) {
