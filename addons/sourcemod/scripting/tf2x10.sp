@@ -862,12 +862,15 @@ public Action:event_object_destroyed(Handle:event, const String:name[], bool:don
 }
 
 public Action:event_object_remove(Handle:event, const String:name[], bool:dontBroadcast) {
+	if(!GetConVarBool(g_cvarEnabled)) return Plugin_Continue;
+
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
-	new entity = GetPlayerWeaponSlot(client, TFWeaponSlot_Primary);
+	if(!IsValidClient(client)) return Plugin_Continue;
 
-	if (!IsValidEntity(entity)) return Plugin_Continue;
+	new weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Primary);
+	if (!IsValidEntity(weapon)) return Plugin_Continue;
 
-	if(WeaponHasAttribute(client, entity, "mod sentry killed revenge") && GetEventInt(event, "objecttype") == 2)
+	if(WeaponHasAttribute(client, weapon, "mod sentry killed revenge") && GetEventInt(event, "objecttype") == 2)
 	{
 		new crits = GetEntProp(client, Prop_Send, "m_iRevengeCrits") + g_iBuildingsDestroyed[client];
 		SetEntProp(client, Prop_Send, "m_iRevengeCrits", crits);
