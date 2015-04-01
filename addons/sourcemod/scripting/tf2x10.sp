@@ -916,7 +916,7 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 	new customKill = GetEventInt(event, "customkill");
 
 
-	if(/*g_bAprilFools*/ TF2_IsHolidayActive(TFHoliday_AprilFools) && !g_bHiddenRunning && weaponid == 356) {  //April Fool's 2015: Kunai gives health on ALL kills
+	if(/*g_bAprilFools*/ TF2_IsHolidayActive(TFHoliday_AprilFools) && weaponid == 356) {  //April Fool's 2015: Kunai gives health on ALL kills
 		TF2_SetHealth(attacker, KUNAI_DAMAGE);
 	} else if(weaponid == 317) {
 		TF2_SpawnMedipack(client);
@@ -1337,7 +1337,6 @@ UpdateVariables(client) {
 
 	if(IsValidEntity(primyWep)) {
 		g_bHasBazooka[client] = GetEntProp(primyWep, Prop_Send, "m_iItemDefinitionIndex") == 730;
-		if(g_bHasBazooka[client]) PrintToChatAll("%N has the Beggar's Bazooka", client);
 	} else {
 		g_bHasBazooka[client] = false;
 	}
