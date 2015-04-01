@@ -133,6 +133,7 @@ public OnPluginStart() {
 	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_tf2x10_setmod", Command_SetMod, ADMFLAG_CHEATS);
 	RegConsoleCmd("sm_x10group", Command_Group);
+	RegConsoleCmd("sm_tf2x10_aprilfools", Command_Test);
 
 	HookAllEvents();
 
@@ -254,7 +255,6 @@ public OnConVarChanged_tf2x10_enable(Handle:convar, const String:oldValue[], con
 		}
 
 		if(g_bAprilFools || TF2_IsHolidayActive(TFHoliday_AprilFools)) {
-			PrintToServer("[TF2x10] Using April Fools config");
 			g_sSelectedMod = "aprilfools";
 			LoadFileIntoTrie(g_sSelectedMod);
 		}
@@ -514,6 +514,11 @@ public Action:Command_SetMod(client, args) {
 	return Plugin_Continue;
 }
 
+public Action:Command_Test(client, args) {
+	ReplyToCommand(client, "%i", _:g_bAprilFools);
+	return Plugin_Continue;
+}
+
 /******************************************************************
 
 SourceMod Map/Library Events
@@ -540,7 +545,6 @@ public OnAllPluginsLoaded() {
 	}
 
 	if(g_bAprilFools) {
-		PrintToServer("[TF2x10] Loaded April Fools config");
 		g_sSelectedMod = "aprilfools";
 		LoadFileIntoTrie(g_sSelectedMod);
 	}
@@ -571,6 +575,7 @@ public OnMapStart() {
 	if (!GetConVarBool(g_cvarEnabled))
 		return;
 
+	if(TF2_IsHolidayActive(TFHoliday_AprilFools)) g_bAprilFools = true;
 	DetectGameDescSetting();
 }
 
@@ -1296,7 +1301,6 @@ public OnItemSpawned(entity)
 
 public Action:OnPickup(entity, client)
 {
-	PrintToChatAll("hi");
 	if(g_bAprilFools && client>0 && client<=MaxClients && g_bHasBazooka[client]) {
 		PrintToChatAll("Stopped ammo pickup");
 		return Plugin_Handled;
