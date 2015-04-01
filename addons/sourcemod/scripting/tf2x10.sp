@@ -1343,7 +1343,7 @@ UpdateVariables(client) {
 	if(!IsValidEntity(secndWep)) secndWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
 
 	if(IsValidEntity(primyWep)) {
-		g_bHasBazooka[client] = GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") == 730;
+		g_bHasBazooka[client] = GetEntProp(primyWep, Prop_Send, "m_iItemDefinitionIndex") == 730;
 	} else {
 		g_bHasBazooka[client] = false;
 	}
