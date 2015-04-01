@@ -745,7 +745,7 @@ public OnGameFrame() {
 				new Float:speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
 				new Float:newSpeed = heads < g_iHeadCap ? speed + 20.0 : speed;
 				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed > 520.0 ? 520.0 : newSpeed);
-				PrintToServer("[TF2x10] %i heads %f speed", heads, newSpeed);
+				PrintToChatAll("[TF2x10] %N %i heads %f speed", client, heads, newSpeed);
 			}
 
 			if(g_bHeadScaling) {
@@ -1301,6 +1301,7 @@ public OnItemSpawned(entity)
 
 public Action:OnPickup(entity, client)
 {
+	if(IsValidClient(client)) PrintToChatAll("If 1, %N has a Beggar's Bazooka: %i", _:g_bHasBazooka[client]);
 	if(g_bAprilFools && client>0 && client<=MaxClients && g_bHasBazooka[client]) {
 		PrintToChatAll("Stopped ammo pickup");
 		return Plugin_Handled;
@@ -1343,6 +1344,7 @@ UpdateVariables(client) {
 	if(!IsValidEntity(secndWep)) secndWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
 
 	if(IsValidEntity(primyWep)) {
+		PrintToChatAll("%N has the Beggar's Bazooka");
 		g_bHasBazooka[client] = GetEntProp(primyWep, Prop_Send, "m_iItemDefinitionIndex") == 730;
 	} else {
 		g_bHasBazooka[client] = false;
