@@ -15,9 +15,9 @@
 #define REQUIRE_PLUGIN
 
 #define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
-#define PLUGIN_AUTHOR	"Isatis, based off InvisGhost's code"
+#define PLUGIN_AUTHOR	"The TF2x10 group"
 #define PLUGIN_VERSION	"1.4.0"
-#define PLUGIN_CONTACT	"http://steamcommunity.com/id/blueisatis/"
+#define PLUGIN_CONTACT	"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
 #define UPDATE_URL	"http://isatis.qc.to/tf2x10/raw/default/updater.txt"
@@ -254,6 +254,7 @@ public OnConVarChanged_tf2x10_enable(Handle:convar, const String:oldValue[], con
 		}
 
 		if(g_bAprilFools || TF2_IsHolidayActive(TFHoliday_AprilFools)) {
+			PrintToServer("[TF2x10] Using April Fools config");
 			g_sSelectedMod = "aprilfools";
 			LoadFileIntoTrie(g_sSelectedMod);
 		}
@@ -1293,9 +1294,13 @@ public OnItemSpawned(entity)
 	SDKHook(entity, SDKHook_Touch, OnPickup);
 }
 
-public Action:OnPickup(entity, client)  //Thanks friagram!
+public Action:OnPickup(entity, client)
 {
-	if(g_bAprilFools && client>0 && client<=MaxClients && g_bHasBazooka[client]) return Plugin_Handled;
+	PrintToChatAll("hi");
+	if(g_bAprilFools && client>0 && client<=MaxClients && g_bHasBazooka[client]) {
+		PrintToChatAll("Stopped ammo pickup");
+		return Plugin_Handled;
+	}
 	return Plugin_Continue;
 }
 /******************************************************************
