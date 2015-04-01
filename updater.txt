@@ -4,19 +4,19 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.3.9"
-			"Previous"	"1.3.8"
+			"Latest"	"1.4.0"
+			"Previous"	"1.3.9"
 		}
 
-		"Notes"	"Fixed flamethrower issues"
-		"Notes"	"x10'd Necro Smasher, Nostro Napalmer, and Smissmass weapons"
-		"Notes"	"All stock melee reskins now have +20% swing rate"
+		"Notes"	"The April Fool's update!"
+		"Notes"	"View Bitbucket or Github for the changelog-I'm too tired to write it out here :("
 	}
 
 	"Files"
 	{
 		"Plugin"	"Path_SM/configs/x10.default.txt"
 		"Plugin"	"Path_SM/configs/x10.vshff2.txt"
+		"Plugin"	"Path_SM/configs/x10.aprilfools.txt"
 		"Plugin"	"Path_SM/plugins/tf2x10.smx"
 		"Source"	"Path_SM/scripting/tf2x10.sp"
 	}

@@ -745,7 +745,7 @@ public OnGameFrame() {
 			if(g_bHeadScaling) {
 				new Float:fPlayerHeadScale = 1.0 + heads / 4.0;
 
-				if (fPlayerHeadScale <= (g_bAprilFools ? 9999.0 : g_fHeadScalingCap))  //April Fool's 2015: Heads keep getting bigger!
+				if (fPlayerHeadScale <= (/*g_bAprilFools*/ TF2_IsHolidayActive(TFHoliday_AprilFools) ? 9999.0 : g_fHeadScalingCap))  //April Fool's 2015: Heads keep getting bigger!
 					SetEntPropFloat(client, Prop_Send, "m_flHeadScale", fPlayerHeadScale);
 				else
 					SetEntPropFloat(client, Prop_Send, "m_flHeadScale", g_fHeadScalingCap);
@@ -916,7 +916,7 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 	new customKill = GetEventInt(event, "customkill");
 
 
-	if(g_bAprilFools && !g_bHiddenRunning && weaponid == 356) {  //April Fool's 2015: Kunai gives health on ALL kills
+	if(/*g_bAprilFools*/ TF2_IsHolidayActive(TFHoliday_AprilFools) && !g_bHiddenRunning && weaponid == 356) {  //April Fool's 2015: Kunai gives health on ALL kills
 		TF2_SetHealth(attacker, KUNAI_DAMAGE);
 	} else if(weaponid == 317) {
 		TF2_SpawnMedipack(client);
@@ -1089,7 +1089,7 @@ ShouldDisableWeapons(client) {
 }
 
 CheckHealthCaps(client) {
-	if(!g_bAprilFools) {  //April Fool's 2015: Unlimited health!
+	if(/*!g_bAprilFools*/ !TF2_IsHolidayActive(TFHoliday_AprilFools)) {  //April Fool's 2015: Unlimited health!
 		new cap = GetConVarInt(g_cvarHealthCap);
 
 		if (cap > 0 && GetClientHealth(client) > cap)
@@ -1295,8 +1295,7 @@ public OnItemSpawned(entity)
 
 public Action:OnPickup(entity, client)
 {
-	if(g_bAprilFools && IsValidClient(client) && g_bHasBazooka[client]) {
-		PrintToChatAll("Stopped ammo pickup");
+	if(/*g_bAprilFools*/ TF2_IsHolidayActive(TFHoliday_AprilFools) && IsValidClient(client) && g_bHasBazooka[client]) {
 		return Plugin_Stop;
 	}
 	return Plugin_Continue;
