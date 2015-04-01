@@ -917,8 +917,8 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 	new customKill = GetEventInt(event, "customkill");
 
 
-	if(g_bAprilFools && IsValidClient(attacker) && !g_bHiddenRunning && weaponid == 356) {  //April Fool's 2015: Kunai gives health on ALL kills
-			TF2_SetHealth(attacker, KUNAI_DAMAGE);
+	if(g_bAprilFools && !g_bHiddenRunning && weaponid == 356) {  //April Fool's 2015: Kunai gives health on ALL kills
+		TF2_SetHealth(attacker, KUNAI_DAMAGE);
 	} else if(weaponid == 317) {
 		TF2_SpawnMedipack(client);
 	} else if(customKill == TF_CUSTOM_BACKSTAB && !g_bHiddenRunning) {
@@ -1044,16 +1044,16 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 		TeleportEntity(client, NULL_VECTOR, ang, NULL_VECTOR);
 	}
 
+	//Alien Isolation bonuses
 	if (GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 30474 &&
-	WeaponHasAttribute(client, client, "SET BONUS: alien isolation xeno bonus neg") &&
-	WeaponHasAttribute(attacker, attacker, "SET BONUS: alien isolation merc bonus pos"))
+	TF2Attrib_GetByDefIndex(client, 694) &&
+	TF2Attrib_GetByDefIndex(attacker, 695))
 	{
 		damage*=10;
 		return Plugin_Changed;
-	}
-	else if (weapon == GetPlayerWeaponSlot(attacker, TFWeaponSlot_Melee) &&
-	WeaponHasAttribute(client, client, "SET BONUS: alien isolation merc bonus neg") &&
-	WeaponHasAttribute(attacker, attacker, "SET BONUS: alien isolation xeno bonus pos"))
+	} else if (weapon == GetPlayerWeaponSlot(attacker, TFWeaponSlot_Melee) &&
+	TF2Attrib_GetByDefIndex(client, 696) &&
+	TF2Attrib_GetByDefIndex(attacker, 693))
 	{
 		damage*=10;
 		return Plugin_Changed;
@@ -1142,7 +1142,7 @@ Gameplay: Player & Item Spawn
 
 public TF2Items_OnGiveNamedItem_Post(client, String:classname[], itemDefinitionIndex, itemLevel, itemQuality, entityIndex) {
 	if (!GetConVarBool(g_cvarEnabled)
-		|| (!GetConVarBool(g_cvarIncludeBots) && IsFakeClient(client))
+	|| (!GetConVarBool(g_cvarIncludeBots) && IsFakeClient(client))
 	|| ShouldDisableWeapons(client)
 	|| !isCompatibleItem(classname, itemDefinitionIndex)
 	|| (itemQuality == 5 && itemDefinitionIndex != 266)
@@ -1339,7 +1339,7 @@ UpdateVariables(client) {
 	if(!IsValidEntity(secndWep)) secndWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
 
 	if(IsValidEntity(primyWep)) {
-		g_bHasBazooka[client] = WeaponHasAttribute(client, primyWep, "auto fires full clip");
+		g_bHasBazooka[client] = GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") == 730;
 	} else {
 		g_bHasBazooka[client] = false;
 	}

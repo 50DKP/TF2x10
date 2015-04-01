@@ -1,4 +1,4 @@
-"tf2x10_base_items"
+"aprilfools"
 {
 	"0" //Bat
 	{
