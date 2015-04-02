@@ -1,9 +1,21 @@
+/*
+TF2x10
+
+Original developers: Isatis and Invisighost
+Current developer: Wliu
+Config updates: Mr. Blue and Ultimario
+
+Alliedmodders thread: https://forums.alliedmods.net/showthread.php?t=249361
+Bitbucket: https://bitbucket.org/missisatis/tf2x10/src
+*/
+
 #pragma semicolon 1
 
 #include <sourcemod>
 #include <sdktools>
 #include <adminmenu>
 #include <sdkhooks>
+//#include <morecolors>  //Next version
 #include <tf2_stocks>
 #include <tf2items>
 #include <tf2attributes>
@@ -14,19 +26,19 @@
 #tryinclude <saxtonhale>
 #define REQUIRE_PLUGIN
 
-#define PLUGIN_NAME	"Multiply a Weapon's Stats by 10"
-#define PLUGIN_AUTHOR	"The TF2x10 group"
-#define PLUGIN_VERSION	"1.4.1"
-#define PLUGIN_CONTACT	"http://steamcommunity.com/group/tf2x10/"
+#define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
+#define PLUGIN_AUTHOR		"The TF2x10 group"
+#define PLUGIN_VERSION		"1.4.2"
+#define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
-#define UPDATE_URL	"http://isatis.qc.to/tf2x10/raw/default/updater.txt"
+#define UPDATE_URL			"http://isatis.qc.to/tf2x10/raw/default/updater.txt"
 
-#define	KUNAI_DAMAGE	1800
-#define DALOKOH_MAXHEALTH	800
+#define KUNAI_DAMAGE			1800
+#define DALOKOH_MAXHEALTH		800
 #define DALOKOH_HEALTHPERSEC	150
-#define DALOKOH_LASTHEALTH	50
-#define MAX_CURRENCY	30000
+#define DALOKOH_LASTHEALTH		50
+#define MAX_CURRENCY			30000
 
 static const Float:g_fBazaarRates[] =
 {
@@ -40,7 +52,7 @@ static const Float:g_fBazaarRates[] =
 	0.165 //seconds for 7+ heads
 };
 
-new g_iHeadCap = 40;
+//new g_iHeadCap = 40;
 new bool:g_bAprilFools = false;
 new bool:g_bFF2Running = false;
 new bool:g_bHasCaber[MAXPLAYERS + 1] = false;
@@ -72,7 +84,7 @@ new String:g_sSelectedMod[16] = "default";
 new Handle:g_cvarEnabled;
 new Handle:g_cvarGameDesc;
 new Handle:g_cvarAutoUpdate;
-new Handle:g_cvarHeadCap;
+//new Handle:g_cvarHeadCap;
 new Handle:g_cvarHeadScaling;
 new Handle:g_cvarHeadScalingCap;
 new Handle:g_cvarHealthCap;
@@ -157,7 +169,7 @@ public OnConfigsExecuted() {
 		case -2:
 			SetFailState("Your configs/x10.default.txt seems to be corrupt. Aborting.");
 		default: {
-			g_iHeadCap = GetConVarInt(g_cvarHeadCap);
+			//g_iHeadCap = GetConVarInt(g_cvarHeadCap);
 			g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 			g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
 			CreateTimer(330.0, Timer_ServerRunningX10, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
@@ -205,7 +217,7 @@ CreateConVars() {
 	g_cvarCritsManmelter = CreateConVar("tf2x10_crits_manmelter", "10", "Number of crits after Manmelter extinguishes player.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
 	g_cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", FCVAR_PLUGIN, true, 4.0);
+	//g_cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", FCVAR_PLUGIN, true, 4.0);
 	g_cvarHeadScaling = CreateConVar("tf2x10_headscaling", "1", "Enable any decapitation weapon (eyelander etc) to grow their head as they gain heads. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_cvarHeadScalingCap = CreateConVar("tf2x10_headscalingcap", "6.0", "The number of heads before head scaling stops growing their head. 6.0 = 24 heads.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
 	g_cvarHealthCap = CreateConVar("tf2x10_healthcap", "2000", "The max health a player can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
@@ -217,7 +229,7 @@ CreateConVars() {
 }
 
 public OnConVarChanged(Handle:convar, const String:oldValue[], const String:newValue[]) {
-	g_iHeadCap = GetConVarInt(g_cvarHeadCap);
+	//g_iHeadCap = GetConVarInt(g_cvarHeadCap);
 	g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 	g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
 }
@@ -391,7 +403,7 @@ LoadFileIntoTrie(const String:rawname[], const String:basename[] = "")
 public Action:Timer_ServerRunningX10(Handle:hTimer) {
 	DetectGameDescSetting();
 
-	PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] Mod by \x07FF5C33UltiMario\x01 and \x073399FFMr. Blue\x01. Plugin development by \x0794DBFFI\x01s\x0794DBFFa\x01t\x0794DBFFi\x01s (based off \x075C5C8AInvisGhost\x01's code).");
+	PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] Mod by \x07FF5C33UltiMario\x01 and \x073399FFMr. Blue\x01. Plugin development by \x07008800Wliu\x01 (based off of \x0794DBFFI\x01s\x0794DBFFa\x01t\x0794DBFFi\x01s's and \x075C5C8AInvisGhost\x01's code).");
 	PrintToChatAll("\x01Join our Steam group for Hale x10, Randomizer x10 and more by typing \x05/x10group\x01!");
 
 	if (!GetConVarBool(g_cvarEnabled))
@@ -745,7 +757,7 @@ public OnGameFrame() {
 			if(g_bHeadScaling) {
 				new Float:fPlayerHeadScale = 1.0 + heads / 4.0;
 
-				if (fPlayerHeadScale <= (/*g_bAprilFools*/ TF2_IsHolidayActive(TFHoliday_AprilFools) ? 9999.0 : g_fHeadScalingCap))  //April Fool's 2015: Heads keep getting bigger!
+				if (fPlayerHeadScale <= (g_bAprilFools ? 9999.0 : g_fHeadScalingCap))  //April Fool's 2015: Heads keep getting bigger!
 					SetEntPropFloat(client, Prop_Send, "m_flHeadScale", fPlayerHeadScale);
 				else
 					SetEntPropFloat(client, Prop_Send, "m_flHeadScale", g_fHeadScalingCap);
@@ -916,7 +928,7 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 	new customKill = GetEventInt(event, "customkill");
 
 
-	if(/*g_bAprilFools*/ TF2_IsHolidayActive(TFHoliday_AprilFools) && weaponid == 356) {  //April Fool's 2015: Kunai gives health on ALL kills
+	if(g_bAprilFools && weaponid == 356) {  //April Fool's 2015: Kunai gives health on ALL kills
 		TF2_SetHealth(attacker, KUNAI_DAMAGE);
 	} else if(weaponid == 317) {
 		TF2_SpawnMedipack(client);
@@ -1089,7 +1101,7 @@ ShouldDisableWeapons(client) {
 }
 
 CheckHealthCaps(client) {
-	if(/*!g_bAprilFools*/ !TF2_IsHolidayActive(TFHoliday_AprilFools)) {  //April Fool's 2015: Unlimited health!
+	if(!g_bAprilFools) {  //April Fool's 2015: Unlimited health!
 		new cap = GetConVarInt(g_cvarHealthCap);
 
 		if (cap > 0 && GetClientHealth(client) > cap)
@@ -1295,9 +1307,7 @@ public OnItemSpawned(entity)
 
 public Action:OnPickup(entity, client)
 {
-	if(/*g_bAprilFools*/ TF2_IsHolidayActive(TFHoliday_AprilFools) && IsValidClient(client) && g_bHasBazooka[client]) {
-		return Plugin_Stop;
-	}
+	if(g_bAprilFools && IsValidClient(client) && g_bHasBazooka[client]) return Plugin_Stop;
 	return Plugin_Continue;
 }
 /******************************************************************
