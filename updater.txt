@@ -4,19 +4,19 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.4.1"
-			"Previous"	"1.4.0"
+			"Latest"	"1.4.2"
+			"Previous"	"1.4.1"
 		}
 
-		"Notes"	"Remove some accidental debug"
+		"Notes"			"Fix crashes?  Hopefully?"
 	}
 
 	"Files"
 	{
-		"Plugin"	"Path_SM/configs/x10.default.txt"
-		"Plugin"	"Path_SM/configs/x10.vshff2.txt"
-		"Plugin"	"Path_SM/configs/x10.aprilfools.txt"
-		"Plugin"	"Path_SM/plugins/tf2x10.smx"
-		"Source"	"Path_SM/scripting/tf2x10.sp"
+		"Plugin"		"Path_SM/configs/x10.default.txt"
+		"Plugin"		"Path_SM/configs/x10.vshff2.txt"
+		"Plugin"		"Path_SM/configs/x10.aprilfools.txt"
+		"Plugin"		"Path_SM/plugins/tf2x10.smx"
+		"Source"		"Path_SM/scripting/tf2x10.sp"
 	}
 }
