@@ -684,6 +684,7 @@
 		"minigun spinup time increased" "1.6" //60% slower rev-up
 		"heal on hit for rapidfire" "30" //+30 Health on Hit
 		"fire rate penalty" "1.50" //25% slower firing rate
+		//TODO 200% DAMAGE RESISTANCE WHILE SPUN UP
 	}
 	"42" //Sandvich
 	{
@@ -715,7 +716,7 @@
 	"56" //Huntsman
 	{
 		"hidden primary max ammo bonus" "5" //10x Primary Ammo
-		"disable fancy class select anim" "1" //Disables certain class animations 
+		"disable fancy class select anim" "1" //Disables certain class animations
 		"faster reload rate" "0.8" //-20% Reload speed
 	}
 	"57" //Razorback
@@ -729,7 +730,8 @@
 	"59" //Dead Ringer
 	{
 		"mult cloak meter consume rate" "7" //+600% Drain
-		"mult cloak meter regen rate" "9" //+800% Regen
+		"mult cloak meter regen rate" "6" //+500% Regen
+		//TODO MOVE SPEED
 	}
 	"60" //Cloak and Dagger
 	{
@@ -751,6 +753,8 @@
 	"128" //Equalizer
 	{
 		"damage bonus" "1.5" //+50% Damage
+		"provide on active" "1" //Only when active
+		"health from healers reduced" "0.01" //1% heal from medics
 	}
 	"129" //Buff Banner
 	{
@@ -781,7 +785,7 @@
 	{
 		"clip size penalty" "0.25" //
 		"maxammo primary increased" "3.5" //+250% max primary ammo
-	}	
+	}
 	"142" //Gunslinger
 	{
 		"max health additive bonus" "250" //+250 Health
@@ -801,7 +805,11 @@
 	"155" //Southern Hospitality
 	{
 		"bleeding duration" "50" //50 Seconds of Bleed
-		"dmg taken from fire increased" "3" //+200% Fire 
+		"dmg taken from fire increased" "3" //+200% Fire
+	}
+	"158" //Dalokohs Bar
+	{
+		//TODO 100 SECOND COOL DOWN
 	}
 	"160" //Vintage Lugermorph
 	{
@@ -903,8 +911,9 @@
 	}
 	"232" //Bushwacka
 	{
-		"damage bonus" "1.35" //+35% Damage (aka 
-		"dmg taken from fire increased" "3" //+200% Fire Vulnerability
+		"provide on active" "1" //Only when active
+		"damage bonus" "1.35" //+35% Damage
+		"dmg taken increased" "3" //+200% Fire Vulnerability
 		"crit mod disabled" "0" //No Random Crits
 	}
 	"237" //Rocket Jumper
@@ -955,7 +964,7 @@
 		"provide on active" "1" //Only while active
 		"health regen" "30" //+30HP Per second
 		"damage penalty" "0" //-100% Damage
-	}	
+	}
 	"305" //Crusader's Crossbow
 	{
 		"crit kill will gib"	"1"	//Just putting a dummy stat in here to keep the crossbow's place until a better fix is devised.
@@ -964,11 +973,11 @@
 	"307" //Ullapool Caber
 	{
 		"SET BONUS: dmg taken from fire reduced set bonus" "0" //-100% Fire Vulnerability
-	}	
+	}
 	"308" //Loch n' Load
 	{
 		"clip size penalty" "0.2" //-80% Clip Size
-		"damage bonus" "3" //+200% Damage Bonus
+		"dmg bonus vs buildings" "3" //+200% Damage bonus vs buildings
 		"Projectile speed increased" "3.5" //+250% projectile speed
 		"Blast radius decreased" "0.01" //-99% Explosive Radius
 	}
@@ -977,6 +986,7 @@
 		"damage bonus" "4" //+300% Damage
 		"max health additive penalty" "-200" //-200 HP
 		"dmg taken from crit reduced" "0.5" //-50% Damage from crits
+		"heal on hit for slowfire" "100" //+100 health/hit
 	}
 	"311" //Buffalo Steak Sandvich
 	{
@@ -987,6 +997,7 @@
 		"damage bonus" "3" //+200% Damage
 		"minigun spinup time increased" "6" //+500% spin-up time
 		"aiming movespeed decreased" "0.01" //-99% move speed while spun-up
+		//TODO 200% DAMAGE RESISTANCE WHILE SPUN UP
 	}
 	"317" //Candy Cane
 	{
@@ -1007,11 +1018,13 @@
 	{
 		"charge time increased" "5" //+5 seconds of charge time
 		"max health additive penalty" "-30" //-30 HP
-		"kill refills meter"	"1"
+		"melee kill refills meter" "1"
 	}
 	"329" //Jag
 	{
 		"Construction rate increased" "4" //+300% Build Speed
+		"melee attack rate bonus" "0.0" //+100% faster melee attack speed  TODO MAKE THIS 150%
+		"Repair rate decreased" "0.0" //-100% repair rate  TODO MAKE THIS 200%
 		"damage penalty" "0" //-100% Damage
 	}
 	"331" //Fists of Steel
@@ -1035,7 +1048,8 @@
 	}
 	"351" //Detonator
 	{
-		"blast dmg to self increased" "1"
+		"blast dmg to self increased" "5.0"  //+500% self-damage penalty
+		"dmg penalty vs players" "0.95" //-95% damage
 		"self dmg push force increased" "10" //+100% Self Knockback
 	}
 	"354" //Concheror
@@ -1043,7 +1057,7 @@
 		"increase buff duration HIDDEN" "10" //10x Banner duration
 		"health regen" "20" //+20HP Per second
 	}
-	"355" //Fan-o-War
+	"355" //Fan o' War
 	{
 		"damage penalty" "0.04" //-96% damage
 		"deploy time decreased" "0.7" //30% faster weapon switch
@@ -1067,9 +1081,10 @@
 	}
 	"405" //Ali Baba's Wee Booties
 	{
-		"mult charge turn control" "11" //+1000 turn control while charging
+		"mult charge turn control" "11" //+1000% turning while charging
+		"move speed bonus" "2" //+100% speed increase
 		"max health additive bonus" "250" //+250 health
-		"kill refills meter"	"1"
+		"melee kill refills meter" "1"
 	}
 	"406" //Splendid Screen
 	{
@@ -1093,6 +1108,7 @@
 	{
 		"mod see enemy health" "1" //See Enemy Health
 		"mod stun waist high airborne" "10" //Stun them if you hit them in the nuts while airborne
+		"fire rate penalty" "0.25" //-75% firing speed
 	}
 	"414" //Liberty Launcher
 	{
@@ -1100,6 +1116,7 @@
 		"centerfire projectile" "1" //Center Fire
 		"no self blast dmg" "2" //No rocket jump damage
 		"damage penalty" "0.75" //25% less damage
+		"clip size bonus" "2.5" //+250% clip bonus
 	}
 	"415" //Reserve Shooter
 	{
@@ -1120,16 +1137,19 @@
 	{
 		"minigun spinup time decreased" "0" //-100% Spin-up time
 		"fire rate penalty" "3" //-200% Firing Rate
+		"weapon spread bonus" "0.2" //+80% more accurate (down from 200%)
 	}
 	"425" //Family Business
 	{
 		"damage penalty" "0.7" //-30% Damage
 		"clip size bonus" "1.8" //+80% clip size
+		"fire rate bonus" "0.1" //+90% firing speed (down from 150%)
 	}
 	"426" //Eviction Notice
 	{
 		"damage penalty" "0.25" //-80% damage
 		"fire rate bonus" "0.25" //+80% firing rate
+		//TODO 3 SECOND MOVE SPEED BONUS ON HIT
 	}
 	"441" //Cow Mangler 5000
 	{
@@ -1148,7 +1168,7 @@
 		"melee range multiplier" "8" //+700% range
 	}
 	"448" //Soda Popper
-	{	
+	{
 		"Reload time decreased" "0.5" //+50% reload speed
 		"fire rate bonus" "0" //+100% firing speed
 		"clip size penalty" "0.2" //-80% clip size
@@ -1177,12 +1197,13 @@
 	"460" //Enforcer
 	{
 		"fire rate penalty" "3" //-200% Firing Rate
-		"damage bonus while undisguised" "3" //+200% Damage while undisguised
+		"damage bonus while disguised" "3" //+200% Damage while disguised
 	}
 	"461" //Big Earner
 	{
 		"add cloak on kill" "100" //+100% Cloak on Kill
 		"max health additive penalty" "-50" //-50 Health
+		//TODO MOVE SPEED
 	}
 	"466" //Maul
 	{
@@ -1226,7 +1247,7 @@
 	}
 	"528" //Short Circuit
 	{
-		"mod ammo per shot" "3" //3 Ammo per use
+		"mod ammo per shot" "1.5" //1.5 ammo per use
 	}
 	"572" //Unarmed Combat
 	{
@@ -1249,6 +1270,11 @@
 		"subtract victim medigun charge on hit" "100" //-100% Ubercharge on hit
 		"subtract victim cloak on hit" "100" //-100% cloak on hit
 	}
+	"589" //Eureka Effect
+	{
+		"Construction rate decreased" "0.0" //-100% construction rate
+		//TODO LESS METAL FROM PICKUPS/DISPENSERS
+	}
 	"593" //Third Degree
 	{
 		"ragdolls become ash" "0" //Remove ragdolls become ash
@@ -1269,14 +1295,15 @@
 	"608" //Bootlegger
 	{
 		"mult charge turn control" "11" //+1000% turning while charging
+		"move speed bonus" "2" //+100% speed increase
 		"max health additive bonus" "250" //+250 health
-		"kill refills meter"	"1"
+		"melee kill refills meter" "1"
 	}
 	"609" //Scottish Handshake
 	{
 		"self dmg push force increased" "4" //+300% Self Knockback
 		"damage force reduction" "0.0033" //+300% Knockback from other sources
-	}	
+	}
 	"638" //Sharp Dresser
 	{
 		"fire rate bonus" ".1" //+90% firing speed
@@ -1296,8 +1323,9 @@
 	"649" //Spycicle
 	{
 		"melts in fire" "150" //150 seconds to regain knife
-		"become fireproof on hit by fire" "20" //20 Seconds of fire invulnerability
-	}	
+		"become fireproof on hit by fire" "10" //20 seconds of fire invulnerability
+		"afterburn immunity" "700" //700 seconds of afterburn invulnerability
+	}
 	"656" //Holiday Punch
 	{
 		"crit mod disabled hidden" "100" //100% crit chance
@@ -1334,8 +1362,9 @@
 	}
 	"740" //Scorch Shot
 	{
-		"damage penalty" "0.05" //-50% Damage
+		"damage penalty" "0.05" //-95% Damage
 		"Blast radius increased" "10" //10 Times Explosive Radius
+		//TODO KNOCKBACK
 	}
 	"741" //Rainblower
 	{
@@ -1362,14 +1391,16 @@
 	}
 	"773" //Pretty Boy's Pocket Pistol
 	{
-		"max health additive bonus" "150" //+150 Health
+		"provide on active" "1" //Only when active
 		"fire rate penalty" "3.5" //-250% Firing Rate
-		"dmg taken from fire increased" "6" //+500% Fire vulnerability
+		"heal on hit for slowfire" "30" //+30 health/hit
+		"dmg taken increased" "3" //+200% damage vulnerability
 	}
 	"775" //Escape Plan
 	{
 		"move speed bonus" "1.1" //+10% speed bonus
 		"provide on active" "1" //Effects only present while active
+		"health from healers reduced" "0.01" //1% heal from medics
 	}
 	"810" //Red Tape Recorder
 	{
@@ -1430,7 +1461,7 @@
 		"fire rate bonus" "0.9" //+10% Firing Rate
 		"damage bonus" "1.1" //+10% Damage
 	}
-	"947" //The Quackenbirdt. 
+	"947" //The Quackenbirdt.
 	{
 		"mult decloak rate" ".1" //10x decloak speed
 		"mult cloak rate" "-.9" //10x cloak speed
@@ -1478,7 +1509,7 @@
 	{
 		"clip size penalty" "0.25" //Remove the penalty
 		"maxammo primary increased" "3.5" //+250% max primary ammo
-	}	
+	}
 	"1005" //Festive Huntsman
 	{
 		"hidden primary max ammo bonus" "5" //10x Primary Ammo
@@ -1545,18 +1576,18 @@
 		"move speed bonus" "4" //+300% Walk Speed
 		"damage penalty" "0" //-100% Damage
 		"attach particle effect static" "2" //Flaming bits
-	}	
+	}
 	"1085" //Festive Black Box
 	{
-		"heal on hit for rapidfire" "150" //+150 Health on hit
+		"heal on hit for rapidfire" "200" //+200 Health on hit
 		"clip size penalty" "0.25" //-75% Clip Size
 		"SET BONUS: dmg from sentry reduced" "-1" //-200% Damage from sentries
 		"SET BONUS: calling card on kill"	"3"		//Tankbuster Calling Card
-	}	
+	}
 	"1092" //The Fortified Compound
 	{
 		"hidden primary max ammo bonus" "5" //10x Primary Ammo
-		"disable fancy class select anim" "1" //Disables certain class animations 
+		"disable fancy class select anim" "1" //Disables certain class animations
 		"faster reload rate" "0.8" //-20% Reload speed
 	}
 	"1098" //The Classic
@@ -1589,9 +1620,8 @@
 	"1104" //The Air Strike
 	{
 		"no self blast dmg" "2" //No rocket jump damage
-		"rocketjump attackrate bonus"	"0.0015"
+		"rocketjump attackrate bonus" "0.0015"
 		"Blast radius decreased" "0.01" //-99% Explosive Radius
-		"clip size penalty"	"0.25"
 		"clipsize increase on kill"	"79"
 		"maxammo primary increased" "10" //+900% max primary ammo
 	}
@@ -1606,7 +1636,7 @@
 		"cancel falling damage" "1" //Cancel falling damage
 		"attach particle effect static" "81" //Particle: Bonzo the all gnawing
 	}
-	
+
 	"1141" //Festive Shotgun
 	{
 		"Reload time decreased" "0.9" //-10% reload speed
@@ -1615,36 +1645,36 @@
 		"damage bonus" "1.1" //+10% Damage
 		"maxammo secondary increased" "10" //10x ammo
 	}
-	
+
 	"1142" //Festive Revolver
 	{
 		"clip size bonus" "10" //10x Loaded Ammo
 		"maxammo secondary increased" "10" //10x max primary ammo
 	}
-	
+
 	"1143" //Festive Bonesaw
 	{
 		"bleeding duration" "10" //10 Seconds of Bleed
 	}
-	
+
 	"1144" //Festive Chargin Targe
 	{
 		"dmg taken from fire reduced" "0" //-100% Fire Vulnerability
 		"dmg taken from blast reduced" "0" //-100% Blast Vulnerability
 	}
-	
+
 	"1145" //Festive Bonk
 	{
 		"effect bar recharge rate increased" "0.38" //-62% Recharge Rate (Results in 2.2 seconds of cooldown rather than 22)
 	}
-	
+
 	"1146" //Festive Backburner
 	{
 		"airblast cost increased" "10" //10x Airblas cost (200 Amm)
 		"airblast vertical pushback scale" "10" //10X Airblast vertical pushback
 		"airblast pushback scale" "10" //10X airblast horizontal pushback
 	}
-	
+
 	"1149" //Festive SMG
 	{
 		"Reload time decreased" "0.9" //-10% reload speed
@@ -1653,7 +1683,7 @@
 		"damage bonus" "1.1" //+10% Damage
 		"maxammo secondary increased" "10" //10x ammo
 	}
-	
+
 	"1150" //The Quickiebomb Launcher
 	{
 		"sticky arm time bonus" "-0.8" // instant sticky arm
@@ -1662,15 +1692,14 @@
 		"clip size penalty"	"0.1" // -99% clip penalty
 		"faster reload rate" "0.167"
 	}
-	
+
 	"1151" //The Iron Bomber
 	{
 		"Blast radius decreased" "0.01" //-99% Explosive Radius
-		"grenade detonation damage penalty"	"1"
 		"fire rate bonus" "0"
 		"projectile spread angle penalty" "1" //1 Degrees of random deviation
 	}
-	
+
 	"1153" //The Panic Attack
 	{
 		"panic_attack_negative"	"25"
@@ -1681,7 +1710,7 @@
 		"maxammo secondary increased"	"10"
 
 	}
-	
+
 	"30474" //Nostromo Napalmer
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost

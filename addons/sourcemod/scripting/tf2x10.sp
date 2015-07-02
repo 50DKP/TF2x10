@@ -34,7 +34,7 @@ Bitbucket: https://bitbucket.org/missisatis/tf2x10/src
 
 #define UPDATE_URL			"http://isatis.qc.to/tf2x10/raw/default/updater.txt"
 
-#define KUNAI_DAMAGE			1800
+#define KUNAI_DAMAGE			2100
 #define DALOKOH_MAXHEALTH		800
 #define DALOKOH_HEALTHPERSEC	150
 #define DALOKOH_LASTHEALTH		50
