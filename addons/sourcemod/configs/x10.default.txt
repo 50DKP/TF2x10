@@ -1703,18 +1703,17 @@
 	"1153" //The Panic Attack
 	{
 		"panic_attack_negative"	"25"
-		"fire rate bonus with reduced health"	"0.05"
-		"fire rate bonus HIDDEN"	"0.01"
-		"Reload time decreased"	"0.1"
-		"clip size penalty HIDDEN"	"6.66	"
-		"maxammo secondary increased"	"10"
-
+		"fire rate bonus with reduced health" "0.05"
+		"fire rate bonus HIDDEN" "0.01" //99% faster firing speed
+		"Reload time decreased"	"0.1" //90% faster reload speed
+		"clip size penalty HIDDEN" "6.66"
+		"maxammo secondary increased" "10"
+		"switch from wep deploy time decreased" "0.1" //90% faster weapon switch to the Panic Attack TODO MAKE SURE THIS IS RIGHT
 	}
 
 	"30474" //Nostromo Napalmer
 	{
-		"airblast cost decreased" ".1" //1/10th airblast cost
-		"mult airblast refire time" ".1" //10x airblast rate
+		"airblast cost decreased" "0.1" //-90% airblast cost
+		"mult airblast refire time" "0.1" //10x airblast rate
 	}
-
 }
