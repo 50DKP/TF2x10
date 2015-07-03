@@ -684,7 +684,7 @@
 		"minigun spinup time increased" "1.6" //60% slower rev-up
 		"heal on hit for rapidfire" "30" //+30 Health on Hit
 		"fire rate penalty" "1.50" //25% slower firing rate
-		//TODO 200% DAMAGE RESISTANCE WHILE SPUN UP
+		"spunup_damage_resistance" "0.1" //90% damage resistance while spun-up
 	}
 	"42" //Sandvich
 	{
@@ -731,7 +731,6 @@
 	{
 		"mult cloak meter consume rate" "7" //+600% Drain
 		"mult cloak meter regen rate" "6" //+500% Regen
-		//TODO MOVE SPEED
 	}
 	"60" //Cloak and Dagger
 	{
@@ -997,7 +996,7 @@
 		"damage bonus" "3" //+200% Damage
 		"minigun spinup time increased" "6" //+500% spin-up time
 		"aiming movespeed decreased" "0.01" //-99% move speed while spun-up
-		//TODO 200% DAMAGE RESISTANCE WHILE SPUN UP
+		"spunup_damage_resistance" "0.1" //90% damage resistance while spun-up
 	}
 	"317" //Candy Cane
 	{
@@ -1023,8 +1022,8 @@
 	"329" //Jag
 	{
 		"Construction rate increased" "4" //+300% Build Speed
-		"melee attack rate bonus" "0.0" //+100% faster melee attack speed  TODO MAKE THIS 150%
-		"Repair rate decreased" "0.0" //-100% repair rate  TODO MAKE THIS 200%
+		"melee attack rate bonus" "0.0" //+100% faster melee attack speed
+		"Repair rate decreased" "0.0" //-100% repair rate
 		"damage penalty" "0" //-100% Damage
 	}
 	"331" //Fists of Steel
@@ -1149,7 +1148,7 @@
 	{
 		"damage penalty" "0.25" //-80% damage
 		"fire rate bonus" "0.25" //+80% firing rate
-		//TODO 3 SECOND MOVE SPEED BONUS ON HIT
+		"speed_boost_on_hit" "30" //30 second speed bonus on hit
 	}
 	"441" //Cow Mangler 5000
 	{
@@ -1203,7 +1202,7 @@
 	{
 		"add cloak on kill" "100" //+100% Cloak on Kill
 		"max health additive penalty" "-50" //-50 Health
-		//TODO MOVE SPEED
+		"speed_boost_on_kill" "30" //30 second speed boost on kill
 	}
 	"466" //Maul
 	{
@@ -1273,7 +1272,7 @@
 	"589" //Eureka Effect
 	{
 		"Construction rate decreased" "0.0" //-100% construction rate
-		//TODO LESS METAL FROM PICKUPS/DISPENSERS
+		"metal_pickup_decreased" "0.0" //-100% ammo from ammo packs and dispensers
 	}
 	"593" //Third Degree
 	{
@@ -1363,8 +1362,7 @@
 	"740" //Scorch Shot
 	{
 		"damage penalty" "0.05" //-95% Damage
-		"Blast radius increased" "10" //10 Times Explosive Radius
-		//TODO KNOCKBACK
+		"Blast radius increased" "10" //10x Explosive Radius
 	}
 	"741" //Rainblower
 	{
