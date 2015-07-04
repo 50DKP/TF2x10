@@ -927,7 +927,6 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 	new weaponid = IsValidEntity(activewep) ? GetEntProp(activewep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 	new customKill = GetEventInt(event, "customkill");
 
-
 	if(g_bAprilFools && weaponid == 356) {  //April Fool's 2015: Kunai gives health on ALL kills
 		TF2_SetHealth(attacker, KUNAI_DAMAGE);
 	} else if(weaponid == 317) {
@@ -950,6 +949,10 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 		}
 	}*/
 
+	if(GetEventInt(event, "death_flags") & TF_DEATHFLAG_DEADRINGER) {
+		TF2_AddCondition(client, TFCond_SpeedBuffAlly, 30.0);  //Speed boost * 10
+	}
+
 	if(IsValidEntity(inflictor_entindex)) {
 		decl String:inflictorName[32];
 		GetEdictClassname(inflictor_entindex, inflictorName, sizeof(inflictorName));
@@ -960,7 +963,7 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 			if(GetEventInt(event, "assister") < 1)
 				g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + critsFJ - 2;
 			else
-			g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToNearest(critsFJ / 2.0) - 2;
+				g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToNearest(critsFJ / 2.0) - 2;
 		}
 	}
 
