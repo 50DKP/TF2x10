@@ -4,11 +4,11 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.4.2"
-			"Previous"	"1.4.1"
+			"Latest"	"1.4.3"
+			"Previous"	"1.4.2"
 		}
 
-		"Notes"			"Fix crashes?  Hopefully?"
+		"Notes"			"Gunmettlex10"
 	}
 
 	"Files"

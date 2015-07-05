@@ -28,7 +28,7 @@ Bitbucket: https://bitbucket.org/missisatis/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.4.2"
+#define PLUGIN_VERSION		"1.4.3"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -42,14 +42,13 @@ Bitbucket: https://bitbucket.org/missisatis/tf2x10/src
 
 static const Float:g_fBazaarRates[] =
 {
-	9.9, //seconds for 0 heads
-	6.6, //seconds for 1 head
+	16.5, //seconds for 0 heads
+	8.25, //seconds for 1 head
 	3.3, //seconds for 2 heads
-	2.2, //seconds for 3 heads
-	1.1, //seconds for 4 heads
-	0.66, //seconds for 5 heads
-	0.33, //seconds for 6 heads
-	0.165 //seconds for 7+ heads
+	1.32, //seconds for 3 heads
+	0.66, //seconds for 4 heads
+	0.44, //seconds for 5 heads
+	0.33 //seconds for 6+ heads
 };
 
 //new g_iHeadCap = 40;
@@ -209,19 +208,19 @@ PrepSDKCalls() {
 }
 
 CreateConVars() {
-	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 
-	g_cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells Updater to automatically update this plugin.  0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarCritsDiamondback = CreateConVar("tf2x10_crits_diamondback", "10", "Number of crits after successful sap with Diamondback equipped.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
-	g_cvarCritsFJ = CreateConVar("tf2x10_crits_fj", "10", "Number of crits after Frontier kill or for buildings. Half this for assists.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
-	g_cvarCritsManmelter = CreateConVar("tf2x10_crits_manmelter", "10", "Number of crits after Manmelter extinguishes player.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
-	g_cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	//g_cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", FCVAR_PLUGIN, true, 4.0);
-	g_cvarHeadScaling = CreateConVar("tf2x10_headscaling", "1", "Enable any decapitation weapon (eyelander etc) to grow their head as they gain heads. 0 = off, 1 = on.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarHeadScalingCap = CreateConVar("tf2x10_headscalingcap", "6.0", "The number of heads before head scaling stops growing their head. 6.0 = 24 heads.", FCVAR_PLUGIN, true, 0.0, false, 100.0);
-	g_cvarHealthCap = CreateConVar("tf2x10_healthcap", "2000", "The max health a player can have. -1 to disable.", FCVAR_PLUGIN, true, -1.0, false, 10000.0);
-	g_cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells Updater to automatically update this plugin.  0 = off, 1 = on.", _, true, 0.0, true, 1.0);
+	g_cvarCritsDiamondback = CreateConVar("tf2x10_crits_diamondback", "10", "Number of crits after successful sap with Diamondback equipped.", _, true, 0.0, false);
+	g_cvarCritsFJ = CreateConVar("tf2x10_crits_fj", "10", "Number of crits after Frontier kill or for buildings. Half this for assists.", _, true, 0.0, false);
+	g_cvarCritsManmelter = CreateConVar("tf2x10_crits_manmelter", "10", "Number of crits after Manmelter extinguishes player.", _, true, 0.0, false);
+	g_cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", _, true, 0.0, true, 1.0);
+	g_cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable.", _, true, 0.0, true, 1.0);
+	//g_cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", _, true, 4.0);
+	g_cvarHeadScaling = CreateConVar("tf2x10_headscaling", "1", "Enable any decapitation weapon (eyelander etc) to grow their head as they gain heads. 0 = off, 1 = on.", _, true, 0.0, true, 1.0);
+	g_cvarHeadScalingCap = CreateConVar("tf2x10_headscalingcap", "6.0", "The number of heads before head scaling stops growing their head. 6.0 = 24 heads.", _, true, 0.0, false);
+	g_cvarHealthCap = CreateConVar("tf2x10_healthcap", "2100", "The max health a player can have. -1 to disable.", _, true, -1.0, false);
+	g_cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", _, true, 0.0, true, 1.0);
 
 	HookConVarChange(g_cvarEnabled, OnConVarChanged_tf2x10_enable);
 	HookConVarChange(g_cvarHeadScaling, OnConVarChanged);
@@ -677,8 +676,8 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid) {
 
 	new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
 
-	if(heads > 7)
-		heads = 7;
+	if(heads > sizeof(g_fBazaarRates) - 1)
+		heads = sizeof(g_fBazaarRates) - 1;
 
 	new Float:charge = ((GetGameTime() - g_fChargeBegin[client]) / g_fBazaarRates[heads]) * 150;
 
