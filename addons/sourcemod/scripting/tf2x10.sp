@@ -264,7 +264,7 @@ public OnConVarChanged_tf2x10_enable(Handle:convar, const String:oldValue[], con
 			LoadFileIntoTrie(g_sSelectedMod);
 		}
 
-		if(g_bAprilFools || TF2_IsHolidayActive(TFHoliday_AprilFools)) {
+		if(g_bAprilFools) {
 			g_sSelectedMod = "aprilfools";
 			LoadFileIntoTrie(g_sSelectedMod);
 		}
@@ -580,7 +580,6 @@ public OnMapStart() {
 	if (!GetConVarBool(g_cvarEnabled))
 		return;
 
-	if(TF2_IsHolidayActive(TFHoliday_AprilFools)) g_bAprilFools = true;
 	DetectGameDescSetting();
 }
 
@@ -1058,13 +1057,14 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 	}
 
 	//Alien Isolation bonuses
-	if (GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 30474 &&
+	new bool:validWeapon = !StrContains(classname, "tf_weapon", false);
+	if (validWeapon && GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 30474 &&
 	TF2Attrib_GetByDefIndex(client, 694) &&
 	TF2Attrib_GetByDefIndex(attacker, 695))
 	{
 		damage*=10;
 		return Plugin_Changed;
-	} else if (weapon == GetPlayerWeaponSlot(attacker, TFWeaponSlot_Melee) &&
+	} else if (validWeapon && weapon == GetPlayerWeaponSlot(attacker, TFWeaponSlot_Melee) &&
 	TF2Attrib_GetByDefIndex(client, 696) &&
 	TF2Attrib_GetByDefIndex(attacker, 693))
 	{
