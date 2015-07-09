@@ -1041,11 +1041,11 @@ public Action:OnTakeDamage(client, &attacker, &inflictor, &Float:damage, &damage
 		return Plugin_Changed;
 	}
 
-	decl String:class[19];
-	if (!IsValidEntity(weapon) || !GetEdictClassname(weapon, class, sizeof(class)))
+	decl String:classname[64];
+	if (!IsValidEntity(weapon) || !GetEdictClassname(weapon, classname, sizeof(classname)))
 		return Plugin_Continue;
 
-	if (StrEqual(class, "tf_weapon_bat_fish") && damagecustom != TF_CUSTOM_BLEEDING &&
+	if (StrEqual(classname, "tf_weapon_bat_fish") && damagecustom != TF_CUSTOM_BLEEDING &&
 	damagecustom != TF_CUSTOM_BURNING && damagecustom != TF_CUSTOM_BURNING_ARROW &&
 	damagecustom != TF_CUSTOM_BURNING_FLARE && attacker != client && IsPlayerAlive(client))
 	{
