@@ -728,12 +728,13 @@
 	}
 	"59" //Dead Ringer
 	{
-		"mult cloak meter consume rate" "7" //+600% Drain
-		"mult cloak meter regen rate" "9" //+800% Regen
+		"cloak consume rate decreased" "0.9" //Less cloak drain on activatre
+		"mult cloak meter regen rate" "8" //+700% Regen
 	}
 	"60" //Cloak and Dagger
 	{
 		"mult cloak meter regen rate" "11" //+1000% Regen
+		"ReducedCloakFromAmmo"	"0.25"	//Less cloak from metal
 	}
 	"61" //Ambassador
 	{
@@ -751,6 +752,7 @@
 	"128" //Equalizer
 	{
 		"damage bonus" "1.5" //+50% Damage
+		"reduced_healing_from_medics" "0"	//No Medic Healing
 	}
 	"129" //Buff Banner
 	{
@@ -884,7 +886,7 @@
 	}
 	"228" //Black Box
 	{
-		"heal on hit for rapidfire" "150" //+150 Health on hit
+		"health on radius damage" "200" //+200 Health on radius damage
 		"clip size penalty" "0.25" //-75% Clip Size
 		"SET BONUS: dmg from sentry reduced" "-1" //-200% Damage from sentries
 		"SET BONUS: calling card on kill"	"3"		//Tankbuster Calling Card
@@ -904,7 +906,7 @@
 	"232" //Bushwacka
 	{
 		"damage bonus" "1.35" //+35% Damage (aka
-		"dmg taken from fire increased" "3" //+200% Fire Vulnerability
+		"dmg taken increased" "3" //+200% Damage Vulnerability
 		"crit mod disabled" "0" //No Random Crits
 	}
 	"237" //Rocket Jumper
@@ -968,7 +970,7 @@
 	"308" //Loch n' Load
 	{
 		"clip size penalty" "0.2" //-80% Clip Size
-		"damage bonus" "3" //+200% Damage Bonus
+		"dmg bonus vs buildings" "3" //+200% Damage Bonus against Buildings
 		"Projectile speed increased" "3.5" //+250% projectile speed
 		"Blast radius decreased" "0.01" //-99% Explosive Radius
 	}
@@ -977,6 +979,7 @@
 		"damage bonus" "4" //+300% Damage
 		"max health additive penalty" "-200" //-200 HP
 		"dmg taken from crit reduced" "0.5" //-50% Damage from crits
+		"heal on hit for rapidfire"	"100"	//100 Health on Hit
 	}
 	"311" //Buffalo Steak Sandvich
 	{
@@ -1012,7 +1015,9 @@
 	"329" //Jag
 	{
 		"Construction rate increased" "4" //+300% Build Speed
+		"fire rate bonus"	"0.25"	//75% Fire Rate Bonus
 		"damage penalty" "0" //-100% Damage
+		"Repair rate decreased"	"0"	//-100% Repair Rate
 	}
 	"331" //Fists of Steel
 	{
@@ -1035,7 +1040,7 @@
 	}
 	"351" //Detonator
 	{
-		"blast dmg to self increased" "1"
+		"blast dmg to self increased" "2"
 		"self dmg push force increased" "10" //+100% Self Knockback
 	}
 	"354" //Concheror
@@ -1045,7 +1050,7 @@
 	}
 	"355" //Fan-o-War
 	{
-		"damage penalty" "0.04" //-96% damage
+		"damage penalty" "0.06" //-94% damage
 		"deploy time decreased" "0.7" //30% faster weapon switch
 	}
 	"356" //Conniver's Kunai
@@ -1069,6 +1074,7 @@
 	{
 		"mult charge turn control" "11" //+1000 turn control while charging
 		"max health additive bonus" "250" //+250 health
+		"move speed bonus"	"2"	//+100% Move Speed Bonus
 		"kill refills meter"	"1"
 	}
 	"406" //Splendid Screen
@@ -1093,6 +1099,7 @@
 	{
 		"mod see enemy health" "1" //See Enemy Health
 		"mod stun waist high airborne" "10" //Stun them if you hit them in the nuts while airborne
+		"fire rate penalty" "2" //100% slower firing speed
 	}
 	"414" //Liberty Launcher
 	{
@@ -1100,6 +1107,7 @@
 		"centerfire projectile" "1" //Center Fire
 		"no self blast dmg" "2" //No rocket jump damage
 		"damage penalty" "0.75" //25% less damage
+		"clip size bonus"	"3.5"	//250% Clip Size Bonus
 	}
 	"415" //Reserve Shooter
 	{
@@ -1120,16 +1128,19 @@
 	{
 		"minigun spinup time decreased" "0" //-100% Spin-up time
 		"fire rate penalty" "3" //-200% Firing Rate
+		"weapon spread bonus"	"0"	//No Spread
 	}
 	"425" //Family Business
 	{
 		"damage penalty" "0.7" //-30% Damage
 		"clip size bonus" "1.8" //+80% clip size
+		"fire rate bonus"	"-0.5"	//150% Fire Rate Bonus
 	}
 	"426" //Eviction Notice
 	{
 		"damage penalty" "0.25" //-80% damage
 		"fire rate bonus" "0.25" //+80% firing rate
+		"speed_boost_on_hit"	"30"	//30 Second Speed Boost on Hit
 	}
 	"441" //Cow Mangler 5000
 	{
@@ -1177,12 +1188,13 @@
 	"460" //Enforcer
 	{
 		"fire rate penalty" "3" //-200% Firing Rate
-		"damage bonus while undisguised" "3" //+200% Damage while undisguised
+		"damage bonus while disguised" "3" //+200% Damage while disguised
 	}
 	"461" //Big Earner
 	{
 		"add cloak on kill" "100" //+100% Cloak on Kill
 		"max health additive penalty" "-50" //-50 Health
+		"speed_boost_on_kill"	"30"	//30 Second Speed Boost on Kill
 	}
 	"466" //Maul
 	{
@@ -1249,6 +1261,11 @@
 		"subtract victim medigun charge on hit" "100" //-100% Ubercharge on hit
 		"subtract victim cloak on hit" "100" //-100% cloak on hit
 	}
+	"589" //Eureka Effect
+	{
+		"Construction rate decreased" "0.3"	//70% Decreased Construction Rate
+		"metal_pickup_decreased"	"0.3"	//70% Decreased Metal from Pickups and Dispensers
+	}
 	"593" //Third Degree
 	{
 		"ragdolls become ash" "0" //Remove ragdolls become ash
@@ -1270,6 +1287,7 @@
 	{
 		"mult charge turn control" "11" //+1000% turning while charging
 		"max health additive bonus" "250" //+250 health
+		"move speed bonus"	"2"	//+100% Move Speed Bonus
 		"kill refills meter"	"1"
 	}
 	"609" //Scottish Handshake
@@ -1286,7 +1304,6 @@
 	{
 		"health regen" "10" //+10HP Per second
 		"aiming knockback resistance" "0.01" //-99% Knockback while aiming
-		"dmg taken increased" "3" //+200% damage
 	}
 	"648" //Wrap Assassin
 	{
@@ -1334,7 +1351,7 @@
 	}
 	"740" //Scorch Shot
 	{
-		"damage penalty" "0.05" //-50% Damage
+		"damage penalty" "0.05" //-95% Damage
 		"Blast radius increased" "10" //10 Times Explosive Radius
 	}
 	"741" //Rainblower
@@ -1358,18 +1375,20 @@
 	"772" //Baby Face's Blaster
 	{
 		"move speed penalty" "0.8" //-20% Speed
-		"hype resets on jump" "3" //1/10th hype reset
+		"hype resets on jump" "7" //1/10th hype reset
+		"lose hype on take damage"	"0.4"	//1/10th hype lost on damage
 	}
 	"773" //Pretty Boy's Pocket Pistol
 	{
-		"max health additive bonus" "150" //+150 Health
 		"fire rate penalty" "3.5" //-250% Firing Rate
-		"dmg taken from fire increased" "6" //+500% Fire vulnerability
+		"heal on hit for rapidfire"	"30"	//30 Health Per Hit
+		"dmg taken increased" "6" //+500% Damage Vulnerability
 	}
 	"775" //Escape Plan
 	{
 		"move speed bonus" "1.1" //+10% speed bonus
 		"provide on active" "1" //Effects only present while active
+		"reduced_healing_from_medics" "0"	//No Medic Healing
 	}
 	"810" //Red Tape Recorder
 	{
@@ -1455,6 +1474,7 @@
 	{
 		"ubercharge rate bonus" "6" //Ubercharge Rate Bonus
 		"overheal fill rate reduced" "0.01" //Overheal Rate Reduced
+		"ubercharge overheal rate penalty"	"1"	//-100% Uber Build Penalty when healing overhealed patient
 	}
 	"1000" //Festive Axtinguisher
 	{
@@ -1548,7 +1568,7 @@
 	}
 	"1085" //Festive Black Box
 	{
-		"heal on hit for rapidfire" "150" //+150 Health on hit
+		"health on radius damage" "200" //+200 Health on radius damage
 		"clip size penalty" "0.25" //-75% Clip Size
 		"SET BONUS: dmg from sentry reduced" "-1" //-200% Damage from sentries
 		"SET BONUS: calling card on kill"	"3"		//Tankbuster Calling Card
@@ -1568,6 +1588,7 @@
 	{
 		"dmg taken from fire reduced"	"0.5"	//1/2 Fire Damage
 		"dmg taken from blast reduced"	"0.5"	//1/2 Explosive Damage
+		"lose demo charge on damage when charging"	"10"	//Lose 10 points of charge when damaged while charging
 		"full charge turn control"	"500"	//10x full turn control
 		"kill refills meter"	"750"	//refill meter on kill
 	}
@@ -1591,7 +1612,6 @@
 		"no self blast dmg" "2" //No rocket jump damage
 		"rocketjump attackrate bonus"	"0.0015"
 		"Blast radius decreased" "0.01" //-99% Explosive Radius
-		"clip size penalty"	"0.25"
 		"clipsize increase on kill"	"79"
 		"maxammo primary increased" "10" //+900% max primary ammo
 	}
@@ -1599,6 +1619,12 @@
 	{
 		"maxammo grenades1 increased" "10" //10 Jarates
 	}
+
+	"1121" //Mutated Milk
+	{
+		"effect bar recharge rate increased" "0.1" //10x Faster recharge speed
+	}
+
 	"1123" //The Necro Smasher
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
@@ -1657,7 +1683,8 @@
 	"1150" //The Quickiebomb Launcher
 	{
 		"sticky arm time bonus" "-0.8" // instant sticky arm
-		"stickybomb charge rate" "0" // Instant sticky charge?
+		"stickybomb_charge_damage_increase"	"3.5"	//+250% Damage Increase based on sticky charge when fired
+		"stickybomb charge rate" "0.01" // Instant sticky charge?
 		"stickybomb fizzle time"	"20" //Stickies fizzle after 20 seconds
 		"clip size penalty"	"0.1" // -99% clip penalty
 		"faster reload rate" "0.167"
@@ -1666,8 +1693,7 @@
 	"1151" //The Iron Bomber
 	{
 		"Blast radius decreased" "0.01" //-99% Explosive Radius
-		"grenade detonation damage penalty"	"1"
-		"fire rate bonus" "0"
+		"fire rate bonus" "0" //Instant Fire entire clip
 		"projectile spread angle penalty" "1" //1 Degrees of random deviation
 	}
 
@@ -1677,9 +1703,374 @@
 		"fire rate bonus with reduced health"	"0.05"
 		"fire rate bonus HIDDEN"	"0.01"
 		"Reload time decreased"	"0.1"
-		"clip size penalty HIDDEN"	"6.66	"
-		"maxammo secondary increased"	"10"
+		"clip size penalty HIDDEN"	"6.67"
+		"maxammo secondary increased"	"1.5"
+		"single wep deploy time decreased"	"-4"
 
+	}
+
+	"15000" //Sniper Rifle Reskin
+	{
+		"faster reload rate" "0.9" //-10% reload speed
+		"fire rate bonus" "0.9" //+10% firing speed
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15001" //SMG Reskin
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+
+	"15002" //Scattergun Reskin
+	{
+		"Reload time decreased" "0.5" //+50% reload speed
+	}
+
+	"15003" //Shotgun Reskin
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+
+	"15004" //Minigun Reskin
+	{
+		"aiming movespeed increased" "1.5" //+50% movement speed while revved
+	}
+
+	"15005" //Flamethrower Reskin
+	{
+		"airblast cost decreased" ".1" //1/10th airblast cost
+		"mult airblast refire time" ".1" //10x airblast rate
+	}
+
+	"15006" //Rocket Launcher Reskin
+	{
+		"rocket jump damage reduction" "0.5" //-100% Self Damage while rocket jumping
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15007" //Sniper Rifle Reskin
+	{
+		"faster reload rate" "0.9" //-10% reload speed
+		"fire rate bonus" "0.9" //+10% firing speed
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15008" //Medigun Reskin
+	{
+		"overheal decay bonus" "10" //10x longer overheal
+	}
+
+	"15009" //Stickybomb Launcher Reskin
+	{
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+
+	"15010" //Medigun Reskin
+	{
+		"overheal decay bonus" "10" //10x longer overheal
+	}
+
+	"15011" //Revolver Reskin
+	{
+		"clip size bonus" "10" //10x Loaded Ammo
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+
+	"15012" //Stickybomb Launcher Reskin
+	{
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+
+	"15013" //Pistol Reskin
+	{
+		"Reload time decreased" "0.1" //10x faster reload
+	}
+
+	"15014" //Rocket Launcher Reskin
+	{
+		"rocket jump damage reduction" "0.5" //-100% Self Damage while rocket jumping
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15015" //Scattergun Reskin
+	{
+		"Reload time decreased" "0.5" //+50% reload speed
+	}
+
+	"15016" //Shotgun Reskin
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+
+	"15017" //Flamethrower Reskin
+	{
+		"airblast cost decreased" ".1" //1/10th airblast cost
+		"mult airblast refire time" ".1" //10x airblast rate
+	}
+
+	"15018" //Pistol Reskin
+	{
+		"Reload time decreased" "0.1" //10x faster reload
+	}
+
+	"15019" //Sniper Rifle Reskin
+	{
+		"faster reload rate" "0.9" //-10% reload speed
+		"fire rate bonus" "0.9" //+10% firing speed
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15020" //Minigun Reskin
+	{
+		"aiming movespeed increased" "1.5" //+50% movement speed while revved
+	}
+
+	"15021" //Scattergun Reskin
+	{
+		"Reload time decreased" "0.5" //+50% reload speed
+	}
+
+	"15022" //SMG Reskin
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+
+	"15023" //Sniper Rifle Reskin
+	{
+		"faster reload rate" "0.9" //-10% reload speed
+		"fire rate bonus" "0.9" //+10% firing speed
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15024" //Stickybomb Launcher Reskin
+	{
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+
+	"15025" //Medigun Reskin
+	{
+		"overheal decay bonus" "10" //10x longer overheal
+	}
+
+	"15026" //Minigun Reskin
+	{
+		"aiming movespeed increased" "1.5" //+50% movement speed while revved
+	}
+
+	"15027" //Revolver Reskin
+	{
+		"clip size bonus" "10" //10x Loaded Ammo
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+
+	"15028" //Rocket Launcher Reskin
+	{
+		"rocket jump damage reduction" "0.5" //-100% Self Damage while rocket jumping
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15029" //Scattergun Reskin
+	{
+		"Reload time decreased" "0.5" //+50% reload speed
+	}
+
+	"15030" //Flamethrower Reskin
+	{
+		"airblast cost decreased" ".1" //1/10th airblast cost
+		"mult airblast refire time" ".1" //10x airblast rate
+	}
+
+	"15031" //Minigun Reskin
+	{
+		"aiming movespeed increased" "1.5" //+50% movement speed while revved
+	}
+
+	"15032" //SMG Reskin
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+
+	"15033" //Sniper Rifle Reskin
+	{
+		"faster reload rate" "0.9" //-10% reload speed
+		"fire rate bonus" "0.9" //+10% firing speed
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15034" //Flamethrower Reskin
+	{
+		"airblast cost decreased" ".1" //1/10th airblast cost
+		"mult airblast refire time" ".1" //10x airblast rate
+	}
+
+	"15035" //Pistol Reskin
+	{
+		"Reload time decreased" "0.1" //10x faster reload
+	}
+
+	"15036" //Scattergun Reskin
+	{
+		"Reload time decreased" "0.5" //+50% reload speed
+	}
+
+	"15037" //SMG Reskin
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+
+	"15038" //Stickybomb Launcher Reskin
+	{
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+
+	"15039" //Medigun Reskin
+	{
+		"overheal decay bonus" "10" //10x longer overheal
+	}
+
+	"15040" //Minigun Reskin
+	{
+		"aiming movespeed increased" "1.5" //+50% movement speed while revved
+	}
+
+	"15041" //Pistol Reskin
+	{
+		"Reload time decreased" "0.1" //10x faster reload
+	}
+
+	"15042" //Revolver Reskin
+	{
+		"clip size bonus" "10" //10x Loaded Ammo
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+
+	"15043" //Rocket Launcher Reskin
+	{
+		"rocket jump damage reduction" "0.5" //-100% Self Damage while rocket jumping
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15044" //Shotgun Reskin
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+
+	"15045" //Stickybomb Launcher Reskin
+	{
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+
+	"15046" //Pistol Reskin
+	{
+		"Reload time decreased" "0.1" //10x faster reload
+	}
+
+	"15047" //Shotgun Reskin
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+
+	"15048" //Stickybomb Launcher Reskin
+	{
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+
+	"15049" //Flamethrower Reskin
+	{
+		"airblast cost decreased" ".1" //1/10th airblast cost
+		"mult airblast refire time" ".1" //10x airblast rate
+	}
+
+	"15050" //Medigun Reskin
+	{
+		"overheal decay bonus" "10" //10x longer overheal
+	}
+
+	"15051" //Revolver Reskin
+	{
+		"clip size bonus" "10" //10x Loaded Ammo
+		"maxammo secondary increased" "10" //10x max primary ammo
+	}
+
+	"15052" //Rocket Launcher Reskin
+	{
+		"rocket jump damage reduction" "0.5" //-100% Self Damage while rocket jumping
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15053" //Scattergun Reskin
+	{
+		"Reload time decreased" "0.5" //+50% reload speed
+	}
+
+	"15054" //Flamethrower Reskin
+	{
+		"airblast cost decreased" ".1" //1/10th airblast cost
+		"mult airblast refire time" ".1" //10x airblast rate
+	}
+
+	"15055" //Minigun Reskin
+	{
+		"aiming movespeed increased" "1.5" //+50% movement speed while revved
+	}
+
+	"15056" //Pistol Reskin
+	{
+		"Reload time decreased" "0.1" //10x faster reload
+	}
+
+	"15057" //Rocket Launcher Reskin
+	{
+		"rocket jump damage reduction" "0.5" //-100% Self Damage while rocket jumping
+		"maxammo primary increased" "10" //10x ammo
+	}
+
+	"15058" //SMG Reskin
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+
+	"15059" //Sniper Rifle Reskin
+	{
+		"faster reload rate" "0.9" //-10% reload speed
+		"fire rate bonus" "0.9" //+10% firing speed
+		"maxammo primary increased" "10" //10x ammo
 	}
 
 	"30474" //Nostromo Napalmer

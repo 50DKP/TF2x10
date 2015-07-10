@@ -9,6 +9,9 @@
 		}
 
 		"Notes"			"Gunmettlex10"
+		"Notes"			"Possibly fixed Quickiebomb Launcher crashes"
+		"Notes"			"Fixed console error spam related to m_iItemDefinitionIndex"
+		"Notes"			"Fixed 'stack memory leaked by natives' errors"
 	}
 
 	"Files"

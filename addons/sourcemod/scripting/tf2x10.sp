@@ -557,7 +557,7 @@ public OnAllPluginsLoaded() {
 
 public OnLibraryAdded(const String:name[]) {
 	if (StrEqual(name, "updater") && GetConVarBool(g_cvarAutoUpdate)) {
-			Updater_AddPlugin(UPDATE_URL);
+		Updater_AddPlugin(UPDATE_URL);
 	} else if(StrEqual(name, "freak_fortress_2")) {
 		#if defined _freak_fortress_2_included
 			g_bFF2Running = FF2_IsFF2Enabled();
