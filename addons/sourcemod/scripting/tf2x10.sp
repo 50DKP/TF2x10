@@ -28,11 +28,11 @@ Bitbucket: https://bitbucket.org/missisatis/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.4.3"
+#define PLUGIN_VERSION		"1.4.4"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
-#define UPDATE_URL			"http://isatis.qc.to/tf2x10/raw/default/updater.txt"
+#define UPDATE_URL			"http://ff2.50dkp.com/updater/tf2x10/update.txt"
 
 #define KUNAI_DAMAGE			2100
 #define DALOKOH_MAXHEALTH		800
@@ -91,6 +91,8 @@ new Handle:g_cvarIncludeBots;
 new Handle:g_cvarCritsFJ;
 new Handle:g_cvarCritsDiamondback;
 new Handle:g_cvarCritsManmelter;
+
+new tf_feign_death_duration;
 
 public Plugin:myinfo =
 {
@@ -171,6 +173,10 @@ public OnConfigsExecuted() {
 			//g_iHeadCap = GetConVarInt(g_cvarHeadCap);
 			g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 			g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
+
+			tf_feign_death_duration=GetConVarInt(FindConVar("tf_feign_death_duration"));
+			SetConVarInt(FindConVar("tf_feign_death_duration"), tf_feign_death_duration * 10);
+
 			CreateTimer(330.0, Timer_ServerRunningX10, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
@@ -433,6 +439,7 @@ public AdminMenu_Recache(Handle:topmenu, TopMenuAction:action, TopMenuObject:obj
 public Action:Command_Enable(client, args) {
 	if (!GetConVarBool(g_cvarEnabled)) {
 		ServerCommand("tf2x10_enabled 1");
+		SetConVarInt(FindConVar("tf_feign_death_duration"), tf_feign_death_duration * 10);
 		ReplyToCommand(client, "[TF2x10] Multiply A Weapon's Stats by 10 Plugin is now enabled.");
 	} else {
 		ReplyToCommand(client, "[TF2x10] Multiply A Weapon's Stats by 10 Plugin is already enabled.");
@@ -443,6 +450,7 @@ public Action:Command_Enable(client, args) {
 public Action:Command_Disable(client, args) {
 	if (GetConVarBool(g_cvarEnabled)) {
 		ServerCommand("tf2x10_enabled 0");
+		SetConVarInt(FindConVar("tf_feign_death_duration"), tf_feign_death_duration);
 		ReplyToCommand(client, "[TF2x10] Multiply A Weapon's Stats by 10 Plugin is now disabled.");
 	} else {
 		ReplyToCommand(client, "[TF2x10] Multiply A Weapon's Stats by 10 Plugin is already disabled.");
@@ -587,8 +595,10 @@ public OnMapEnd() {
 	decl String:sDescription[16];
 	GetGameDescription(sDescription, sizeof(sDescription));
 
-	if (GetConVarBool(g_cvarEnabled) && GetConVarBool(g_cvarGameDesc) && StrContains(sDescription, "TF2x10 ") != -1)
+	if (GetConVarBool(g_cvarEnabled) && GetConVarBool(g_cvarGameDesc) && StrContains(sDescription, "TF2x10 ") != -1) {
 		Steam_SetGameDescription("Team Fortress");
+		SetConVarInt(FindConVar("tf_feign_death_duration"), tf_feign_death_duration);
+	}
 }
 
 /******************************************************************

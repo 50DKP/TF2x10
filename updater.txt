@@ -4,14 +4,14 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.4.3"
-			"Previous"	"1.4.2"
+			"Latest"	"1.4.4"
+			"Previous"	"1.4.3"
 		}
 
-		"Notes"			"Gunmettlex10"
-		"Notes"			"Possibly fixed Quickiebomb Launcher crashes"
-		"Notes"			"Fixed console error spam related to m_iItemDefinitionIndex"
-		"Notes"			"Fixed 'stack memory leaked by natives' errors"
+		"Notes"			"Changed Updater URL to avoid a Bitbucket cutoff date"
+		"Notes"			"Added missed Scorch Shot knockback attribute"
+		"Notes"			"Nerfed Quickiebomb launcher"
+		"Notes"			"Future-proofed Dead Ringer's speed boost"
 	}
 
 	"Files"

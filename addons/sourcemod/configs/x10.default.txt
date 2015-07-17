@@ -1353,6 +1353,7 @@
 	{
 		"damage penalty" "0.05" //-95% Damage
 		"Blast radius increased" "10" //10 Times Explosive Radius
+		"self dmg push force decreased"	"-2.5"	//-350% knockback!
 	}
 	"741" //Rainblower
 	{
@@ -1683,7 +1684,7 @@
 	"1150" //The Quickiebomb Launcher
 	{
 		"sticky arm time bonus" "-0.8" // instant sticky arm
-		"stickybomb_charge_damage_increase"	"3.5"	//+250% Damage Increase based on sticky charge when fired
+		"stickybomb_charge_damage_increase"	"2"	//Damage increase
 		"stickybomb charge rate" "0.01" // Instant sticky charge?
 		"stickybomb fizzle time"	"20" //Stickies fizzle after 20 seconds
 		"clip size penalty"	"0.1" // -99% clip penalty
