@@ -173,9 +173,7 @@ public OnConfigsExecuted() {
 			//g_iHeadCap = GetConVarInt(g_cvarHeadCap);
 			g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 			g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
-
-			tf_feign_death_duration=GetConVarInt(FindConVar("tf_feign_death_duration"));
-			SetConVarInt(FindConVar("tf_feign_death_duration"), tf_feign_death_duration * 10);
+			tf_feign_death_duration = GetConVarInt(FindConVar("tf_feign_death_duration"));
 
 			CreateTimer(330.0, Timer_ServerRunningX10, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 		}
@@ -231,12 +229,14 @@ CreateConVars() {
 	HookConVarChange(g_cvarEnabled, OnConVarChanged_tf2x10_enable);
 	HookConVarChange(g_cvarHeadScaling, OnConVarChanged);
 	HookConVarChange(g_cvarHeadScalingCap, OnConVarChanged);
+	HookConVarChange(FindConVar("tf_feign_death_duration"), OnConVarChanged);
 }
 
 public OnConVarChanged(Handle:convar, const String:oldValue[], const String:newValue[]) {
 	//g_iHeadCap = GetConVarInt(g_cvarHeadCap);
 	g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 	g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
+	tf_feign_death_duration = GetConVarInt(FindConVar("tf_feign_death_duration"));
 }
 
 public OnConVarChanged_tf2x10_enable(Handle:convar, const String:oldValue[], const String:newValue[]) {
@@ -439,7 +439,6 @@ public AdminMenu_Recache(Handle:topmenu, TopMenuAction:action, TopMenuObject:obj
 public Action:Command_Enable(client, args) {
 	if (!GetConVarBool(g_cvarEnabled)) {
 		ServerCommand("tf2x10_enabled 1");
-		SetConVarInt(FindConVar("tf_feign_death_duration"), tf_feign_death_duration * 10);
 		ReplyToCommand(client, "[TF2x10] Multiply A Weapon's Stats by 10 Plugin is now enabled.");
 	} else {
 		ReplyToCommand(client, "[TF2x10] Multiply A Weapon's Stats by 10 Plugin is already enabled.");
@@ -450,7 +449,6 @@ public Action:Command_Enable(client, args) {
 public Action:Command_Disable(client, args) {
 	if (GetConVarBool(g_cvarEnabled)) {
 		ServerCommand("tf2x10_enabled 0");
-		SetConVarInt(FindConVar("tf_feign_death_duration"), tf_feign_death_duration);
 		ReplyToCommand(client, "[TF2x10] Multiply A Weapon's Stats by 10 Plugin is now disabled.");
 	} else {
 		ReplyToCommand(client, "[TF2x10] Multiply A Weapon's Stats by 10 Plugin is already disabled.");
@@ -597,7 +595,6 @@ public OnMapEnd() {
 
 	if (GetConVarBool(g_cvarEnabled) && GetConVarBool(g_cvarGameDesc) && StrContains(sDescription, "TF2x10 ") != -1) {
 		Steam_SetGameDescription("Team Fortress");
-		SetConVarInt(FindConVar("tf_feign_death_duration"), tf_feign_death_duration);
 	}
 }
 
@@ -956,6 +953,10 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		}
 	}*/
+
+	if(GetEventInt(event, "death_flags") & TF_DEATHFLAG_DEADRINGER) {
+		TF2_AddCondition(client, TFCond_SpeedBuffAlly, tf_feign_death_duration * 10);  //Speed boost * 10
+	}
 
 	if(IsValidEntity(inflictor_entindex)) {
 		decl String:inflictorName[32];
