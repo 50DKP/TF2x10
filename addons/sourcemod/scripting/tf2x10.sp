@@ -957,10 +957,6 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 		}
 	}*/
 
-	if(GetEventInt(event, "death_flags") & TF_DEATHFLAG_DEADRINGER) {
-		TF2_AddCondition(client, TFCond_SpeedBuffAlly, 30.0);  //Speed boost * 10
-	}
-
 	if(IsValidEntity(inflictor_entindex)) {
 		decl String:inflictorName[32];
 		GetEdictClassname(inflictor_entindex, inflictorName, sizeof(inflictorName));
