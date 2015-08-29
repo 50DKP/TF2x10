@@ -1688,7 +1688,6 @@
 		"stickybomb charge rate" "0.01" // Instant sticky charge?
 		"stickybomb fizzle time"	"20" //Stickies fizzle after 20 seconds
 		"clip size penalty"	"0.1" // -99% clip penalty
-		"faster reload rate" "0.167"
 	}
 
 	"1151" //The Iron Bomber
