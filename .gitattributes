@@ -1,0 +1,7 @@
+#Standardize ALL the things
+
+#Text files!  Don't include Markdown (.md) files because they're special(TM)
+*.sp	text eol=lf whitespace=trailing-space,space-before-tab,tabwidth=4	diff=cpp
+*.inc	text eol=lf whitespace=trailing-space,space-before-tab,tabwidth=4	diff=cpp
+*.txt	text eol=lf whitespace=trailing-space,space-before-tab,tabwidth=4
+*.cfg	text eol=lf whitespace=trailing-space,space-before-tab,tabwidth=4
