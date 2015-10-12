@@ -1,8 +1,8 @@
 /*
 TF2x10
 
-Original developers: Isatis and Invisighost
 Current developer: Wliu
+Original developers: Isatis and Invisighost
 Config updates: Mr. Blue and Ultimario
 
 Alliedmodders thread: https://forums.alliedmods.net/showthread.php?p=2338136
@@ -29,7 +29,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.4.5"
+#define PLUGIN_VERSION		"1.5.0"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -780,6 +780,7 @@ public TF2_OnConditionRemoved(client, TFCond:condition)
 		if(condition == TFCond_Taunting && g_iDalokohSecs[client])
 		{
 			g_iDalokohSecs[client] = 0;
+			SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		}
 	}
 }
@@ -829,37 +830,41 @@ public Action:Timer_BazaarCharge(Handle:hTimer, any:userid)
 public Action:Timer_DalokohX10(Handle:timer, any:userid)
 {
 	new client = GetClientOfUserId(userid);
-
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || !TF2_IsPlayerInCondition(client, TFCond_Taunting))
 	{
 		return Plugin_Stop;
 	}
 
-	new health = GetClientHealth(client), newHealth;
-	new secondaryWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
-	new meleeWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+	new health = GetClientHealth(client);
+	new newHealth;
 
-	if(!IsValidEntity(secondaryWep) || !IsValidEntity(meleeWep))
+	new weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+	if(!IsValidEntity(weapon))
 	{
 		return Plugin_Stop;
 	}
 
-	new secondaryIndex = GetEntProp(secondaryWep, Prop_Send, "m_iItemDefinitionIndex");
-
-	if(secondaryIndex != 159 && secondaryIndex != 433)
+	new secondary = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+	if(secondary != 159 && secondary != 433)
 	{
 		return Plugin_Stop;
 	}
 
-	new meleeIndex = GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex");
+	weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+	if(!IsValidEntity(weapon))
+	{
+		return Plugin_Stop;
+	}
+
+	new melee = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
 
 	g_iDalokohSecs[client]++;
-
-	if (g_iDalokohSecs[client] == 1)
+	if(g_iDalokohSecs[client] == 1)
 	{
-		TF2Attrib_SetByName(secondaryWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-300));
+		SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+		//TF2Attrib_SetByName(secondaryWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-300));  //Disabled due to Invasion crashes
 	}
-	else if (g_iDalokohSecs[client] == 4)
+	else if(g_iDalokohSecs[client] == 4)
 	{
 		newHealth = health + DALOKOH_LASTHEALTH;
 
@@ -868,7 +873,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 			newHealth = DALOKOH_MAXHEALTH;
 		}
 
-		if(meleeIndex == 310)
+		if(melee == 310)
 		{
 			newHealth = 650;
 		}
@@ -876,7 +881,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 		TF2_SetHealth(client, newHealth);
 	}
 
-	if(GetClientHealth(client) < DALOKOH_MAXHEALTH && g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3)
+	if(health < DALOKOH_MAXHEALTH && g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3)
 	{
 		newHealth = g_iDalokohSecs[client] == 3 ? health + DALOKOH_HEALTHPERSEC : health + DALOKOH_HEALTHPERSEC - 50;
 
@@ -885,7 +890,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 			newHealth = DALOKOH_MAXHEALTH;
 		}
 
-		if(meleeIndex == 310)
+		if(melee == 310)
 		{
 			newHealth = 650;
 		}
@@ -1003,19 +1008,25 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	return Plugin_Continue;
 }
 
-/*public Action:OnGetMaxHealth(client, &maxHealth)
+public Action:OnGetMaxHealth(client, &maxHealth)
 {
 	if(GetConVarBool(g_cvarEnabled))
 	{
-		new heads = GetEntProp(client, Prop_Data, "m_iDecapitations");
+		if(g_iDalokohSecs[client])
+		{
+			maxHealth = DALOKOH_MAXHEALTH - 300;
+			return Plugin_Changed;
+		}
+
+		/*new heads = GetEntProp(client, Prop_Data, "m_iDecapitations");
 		if(heads < g_iHeadCap)
 		{
 			maxHealth = GetEntProp(client, Prop_Data, "m_iMaxHealth") + heads * 15;
 			return Plugin_Changed;
-		}
+		}*/
 	}
 	return Plugin_Continue;
-}*/
+}
 
 public Action:event_deflected(Handle:event, const String:name[], bool:dontBroadcast)
 {
@@ -1199,6 +1210,11 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 				g_iBuildingsDestroyed[attacker] = g_iBuildingsDestroyed[attacker] + RoundToNearest(critsFJ / 2.0) - 2;
 			}
 		}
+	}
+
+	if(g_iDalokohSecs[client])
+	{
+		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	}
 
 	ResetVariables(client);

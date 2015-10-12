@@ -1,10 +1,10 @@
-## Multiply A Weapon Stats by 10: The Plugin [![Build Status](http://198.27.69.149/jenkins/buildStatus/icon?job=TF2x10)](http://198.27.69.149/jenkins/job/TF2x10/)
+## Multiply A Weapon Stats by 10: The Plugin [![Build Status](http://ff2.50dkp.com/jenkins/buildStatus/icon?job=TF2x10)](http://ff2.50dkp.com/jenkins/job/TF2x10/)
 It's in the name! All weapon stats multipled by 10. Everything about that (un)balanced goodness that you can run on your own TF2 server.
 
 Join our group for a list of servers running the latest and greatest: http://steamcommunity.com/groups/tf2x10
 
 ### Requirements
-* SourceMod 1.6+ (working on 1.7)
+* SourceMod 1.6+
 * TF2Items
 * TF2Attributes
 * SteamTools
@@ -104,4 +104,4 @@ FlaminSarge - for putting up with me and for some code examples I took (e.g. loa
 
 Place all three folders in your `addons/sourcemod/` folder. Launch, and go!
 
-If you are having any issues with the plugin itself, please post in the [AlliedModders thread](https://forums.alliedmods.net/showthread.php?t=249361) instead of contacting anyone on the x10 team individually so we can better help you. Thanks!
+If you are having any issues with the plugin itself, please post in the [AlliedModders thread](https://forums.alliedmods.net/showthread.php?t=270723) instead of contacting anyone on the x10 team individually so we can better help you. Thanks!

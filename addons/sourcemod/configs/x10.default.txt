@@ -2079,4 +2079,20 @@
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 
+	"30665" //The Shooting Star
+	{
+		"sniper full charge damage bonus" "2.5" //+150% Damage at full charge
+	}
+
+	"30666" //The C.A.P.P.E.R
+	{
+		"Reload time decreased" "0.1" //10x faster reload
+	}
+
+	"30667" //Batsaber
+	{
+		"fire rate bonus" "0.9" //+10% Firing Rate
+		"damage bonus" "1.1" //+10% Damage
+	}
+
 }
