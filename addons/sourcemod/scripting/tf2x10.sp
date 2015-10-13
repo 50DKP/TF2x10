@@ -860,7 +860,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 
 	new health = GetClientHealth(client);
 	new newHealth;
-	CPrintoToChatAll("Health is %i", health);
+	CPrintToChatAll("Health is %i", health);
 
 	g_iDalokohSecs[client]++;
 	if(g_iDalokohSecs[client] == 1)
