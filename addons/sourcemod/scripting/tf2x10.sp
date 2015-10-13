@@ -838,9 +838,6 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 		return Plugin_Stop;
 	}
 
-	new health = GetClientHealth(client);
-	new newHealth;
-
 	new weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
 	if(!IsValidEntity(weapon))
 	{
@@ -861,10 +858,13 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 
 	new melee = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
 
+	new health = GetClientHealth(client);
+	new newHealth;
+	CPrintoToChatAll("Health is %i", health);
+
 	g_iDalokohSecs[client]++;
 	if(g_iDalokohSecs[client] == 1)
 	{
-
 		if(!dalokohs[client])
 		{
 			dalokohs[client] = true;
