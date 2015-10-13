@@ -74,6 +74,8 @@ new Handle:g_hSdkGetMaxHealth;
 new Handle:g_hSdkEquipWearable;
 new Handle:g_hTopMenu;
 
+new Handle:dalokohsTimer[MAXPLAYERS + 1];
+
 new g_iBuildingsDestroyed[MAXPLAYERS + 1];
 new g_iCabers[MAXPLAYERS + 1];
 new g_iDalokohSecs[MAXPLAYERS + 1];
