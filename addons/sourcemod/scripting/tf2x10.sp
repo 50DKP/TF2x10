@@ -62,6 +62,7 @@ new bool:g_bHeadScaling;
 new bool:g_bHiddenRunning;
 new bool:g_bTakesHeads[MAXPLAYERS + 1];
 new bool:g_bChargingClassic[MAXPLAYERS + 1];
+new bool:dalokohs[MAXPLAYERS + 1];
 new bool:g_bVSHRunning;
 
 new Float:g_fChargeBegin[MAXPLAYERS + 1];
@@ -729,7 +730,8 @@ public OnClientDisconnect(client)
 	}
 }
 
-public Action:event_round_end(Handle:event, const String:name[], bool:dontBroadcast) {
+public Action:event_round_end(Handle:event, const String:name[], bool:dontBroadcast)
+{
 	if(GetConVarBool(g_cvarEnabled))
 	{
 		for(new client=1; client <= MaxClients; client++)
@@ -753,8 +755,8 @@ public TF2_OnConditionAdded(client, TFCond:condition)
 		return;
 	}
 
-	new activeWep = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
-	new index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
+	new weapon = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
+	new index = IsValidEntity(weapon) ? GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") : -1;
 
 	if(condition == TFCond_Zoomed && index == 402)
 	{
@@ -762,7 +764,7 @@ public TF2_OnConditionAdded(client, TFCond:condition)
 		CreateTimer(0.0, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 
-	if(condition == TFCond_Taunting && (index == 159 || index == 433) && (!g_bVSHRunning || !g_bFF2Running || !g_bHiddenRunning))
+	if(condition == TFCond_Taunting && (index == 159 || index == 433) && !g_bVSHRunning && !g_bFF2Running && !g_bHiddenRunning)
 	{
 		CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
@@ -780,7 +782,6 @@ public TF2_OnConditionRemoved(client, TFCond:condition)
 		if(condition == TFCond_Taunting && g_iDalokohSecs[client])
 		{
 			g_iDalokohSecs[client] = 0;
-			SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		}
 	}
 }
@@ -845,7 +846,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 	}
 
 	new secondary = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
-	if(secondary != 159 && secondary != 433)
+	if(secondary != 159 && secondary != 433)  //Dalokohs Bar, Fishcake
 	{
 		return Plugin_Stop;
 	}
@@ -861,8 +862,22 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 	g_iDalokohSecs[client]++;
 	if(g_iDalokohSecs[client] == 1)
 	{
-		SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
-		//TF2Attrib_SetByName(secondaryWep, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH-300));  //Disabled due to Invasion crashes
+
+		if(!dalokohs[client])
+		{
+			dalokohs[client] = true;
+			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+			CPrintToChatAll("Hooked max health");
+		}
+
+		if(dalokohsTimer[client] != INVALID_HANDLE)
+		{
+			KillTimer(dalokohsTimer[client]);
+			dalokohsTimer[client] = INVALID_HANDLE;
+			CPrintToChatAll("Killed Dalokohs timer");
+		}
+		dalokohsTimer[client] = CreateTimer(30.0, Timer_DalokohsEnd, userid, TIMER_FLAG_NO_MAPCHANGE);
+		//TF2Attrib_SetByName(secondary, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH - 300));  //Disabled due to Invasion crashes
 	}
 	else if(g_iDalokohSecs[client] == 4)
 	{
@@ -901,6 +916,19 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 	return Plugin_Continue;
 }
 
+public Action:Timer_DalokohsEnd(Handle:timer, any:userid)
+{
+	new client = GetClientOfUserId(userid);
+	if(client)
+	{
+		dalokohs[client] = false;
+		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+		dalokohsTimer[client] = INVALID_HANDLE;
+		CPrintToChatAll("Removed health hook; dalokohs timer ended");
+	}
+	return Plugin_Continue;
+}
+
 public OnGameFrame()
 {
 	for(new client=1; client <= MaxClients; client++)
@@ -910,7 +938,7 @@ public OnGameFrame()
 			continue;
 		}
 
-		if (g_bTakesHeads[client])
+		if(g_bTakesHeads[client])
 		{
 			new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
 			/*if(heads > 4)
@@ -1012,7 +1040,7 @@ public Action:OnGetMaxHealth(client, &maxHealth)
 {
 	if(GetConVarBool(g_cvarEnabled))
 	{
-		if(g_iDalokohSecs[client])
+		if(dalokohs[client])
 		{
 			maxHealth = DALOKOH_MAXHEALTH - 300;
 			return Plugin_Changed;
@@ -1142,7 +1170,7 @@ Gameplay: Damage and Death Only
 
 public Action:event_player_death(Handle:event, const String:name[], bool:dontBroadcast)
 {
-	if (!GetConVarBool(g_cvarEnabled))
+	if(!GetConVarBool(g_cvarEnabled))
 	{
 		return Plugin_Continue;
 	}
@@ -1212,9 +1240,14 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 		}
 	}
 
-	if(g_iDalokohSecs[client])
+	if(dalokohs[client])
 	{
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+		if(dalokohsTimer[client] != INVALID_HANDLE)
+		{
+			KillTimer(dalokohsTimer[client]);
+			dalokohsTimer[client] = INVALID_HANDLE;
+		}
 	}
 
 	ResetVariables(client);
@@ -1661,9 +1694,8 @@ ResetVariables(client)
 	g_bHasManmelter[client] = false;
 	g_bTakesHeads[client] = false;
 	g_bHasBazooka[client] = false;
+	dalokohs[client] = false;
 	g_fChargeBegin[client] = 0.0;
-
-	//SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 }
 
 UpdateVariables(client)
