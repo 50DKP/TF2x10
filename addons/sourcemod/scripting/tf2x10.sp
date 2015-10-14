@@ -203,7 +203,7 @@ public OnConfigsExecuted()
 		}
 	}
 
-	if (GetConVarBool(g_cvarAutoUpdate) && LibraryExists("updater"))
+	if(GetConVarBool(g_cvarAutoUpdate) && LibraryExists("updater"))
 	{
 		Updater_AddPlugin(UPDATE_URL);
 	}
@@ -271,9 +271,22 @@ CreateConVars()
 public OnConVarChanged(Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	//g_iHeadCap = GetConVarInt(g_cvarHeadCap);
-	g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
-	g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
-	tf_feign_death_duration = GetConVarInt(FindConVar("tf_feign_death_duration"));
+	if(convar == g_bHeadScaling)
+	{
+		g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
+	}
+	else if(convar == g_fHeadScalingCap)
+	{
+		g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
+	}
+	else if(convar == FindConVar("tf_feign_death_duration"))
+	{
+		tf_feign_death_duration = GetConVarInt(FindConVar("tf_feign_death_duration"));
+	}
+	else if(convar == g_cvarAutoUpdate)
+	{
+		GetConVarInt(g_cvarAutoUpdate) ? Updater_AddPlugin(UPDATE_URL) : Updater_RemovePlugin();
+	}
 }
 
 public OnConVarChanged_tf2x10_enable(Handle:convar, const String:oldValue[], const String:newValue[])
@@ -683,6 +696,10 @@ public OnLibraryRemoved(const String:name[])
 	{
 		g_bVSHRunning = false;
 	}
+	else if(StrEqual(name, "updater"))
+	{
+		Updater_RemovePlugin();
+	}
 }
 
 public OnMapStart()
@@ -860,7 +877,6 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 
 	new health = GetClientHealth(client);
 	new newHealth;
-	CPrintToChatAll("Health is %i", health);
 
 	g_iDalokohSecs[client]++;
 	if(g_iDalokohSecs[client] == 1)
@@ -869,14 +885,12 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 		{
 			dalokohs[client] = true;
 			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
-			CPrintToChatAll("Hooked max health");
 		}
 
 		if(dalokohsTimer[client] != INVALID_HANDLE)
 		{
 			KillTimer(dalokohsTimer[client]);
 			dalokohsTimer[client] = INVALID_HANDLE;
-			CPrintToChatAll("Killed Dalokohs timer");
 		}
 		dalokohsTimer[client] = CreateTimer(30.0, Timer_DalokohsEnd, userid, TIMER_FLAG_NO_MAPCHANGE);
 		//TF2Attrib_SetByName(secondary, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH - 300));  //Disabled due to Invasion crashes
@@ -926,7 +940,6 @@ public Action:Timer_DalokohsEnd(Handle:timer, any:userid)
 		dalokohs[client] = false;
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		dalokohsTimer[client] = INVALID_HANDLE;
-		CPrintToChatAll("Removed health hook; dalokohs timer ended");
 	}
 	return Plugin_Continue;
 }
@@ -1044,7 +1057,7 @@ public Action:OnGetMaxHealth(client, &maxHealth)
 	{
 		if(dalokohs[client])
 		{
-			maxHealth = DALOKOH_MAXHEALTH - 300;
+			maxHealth = DALOKOH_MAXHEALTH;
 			return Plugin_Changed;
 		}
 

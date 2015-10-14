@@ -10,6 +10,7 @@
 
 		"Notes"			"Added Invasion weapons"
 		"Notes"			"Fixed crashes when using the Dalokohs Bar or similar items"
+		"Notes"			"Fixed tf2x10_autoupdate not having any effect"
 
 	}
 
