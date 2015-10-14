@@ -879,7 +879,7 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 	new newHealth, maxHealth;
 	if(index == 310)  //Warrior's Spirit
 	{
-		maxHealth = DALOKOH_MAXHEALTH - 200 + 50;  //Warrior's Spirit subtracts 200 health, but don't forget the 50 bonus from the Dalokohs Bar
+		maxHealth = DALOKOH_MAXHEALTH - 200;  //Warrior's Spirit subtracts 200 health
 	}
 	else
 	{
