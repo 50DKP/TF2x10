@@ -62,7 +62,6 @@ new bool:g_bHeadScaling;
 new bool:g_bHiddenRunning;
 new bool:g_bTakesHeads[MAXPLAYERS + 1];
 new bool:g_bChargingClassic[MAXPLAYERS + 1];
-new bool:dalokohs[MAXPLAYERS + 1];
 new bool:g_bVSHRunning;
 
 new Float:g_fChargeBegin[MAXPLAYERS + 1];
@@ -79,6 +78,7 @@ new Handle:dalokohsTimer[MAXPLAYERS + 1];
 new g_iBuildingsDestroyed[MAXPLAYERS + 1];
 new g_iCabers[MAXPLAYERS + 1];
 new g_iDalokohSecs[MAXPLAYERS + 1];
+new dalokohs[MAXPLAYERS + 1];
 new g_iRazorbackCount[MAXPLAYERS + 1];
 new g_iRevengeCrits[MAXPLAYERS + 1];
 
@@ -861,8 +861,8 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 		return Plugin_Stop;
 	}
 
-	new secondary = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
-	if(secondary != 159 && secondary != 433)  //Dalokohs Bar, Fishcake
+	new index = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+	if(index != 159 && index != 433)  //Dalokohs Bar, Fishcake
 	{
 		return Plugin_Stop;
 	}
@@ -873,17 +873,25 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 		return Plugin_Stop;
 	}
 
-	new melee = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+	index = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
 
 	new health = GetClientHealth(client);
-	new newHealth;
+	new newHealth, maxHealth;
+	if(index == 310)  //Warrior's Spirit
+	{
+		maxHealth = DALOKOH_MAXHEALTH - 200 + 50;  //Warrior's Spirit subtracts 200 health, but don't forget the 50 bonus from the Dalokohs Bar
+	}
+	else
+	{
+		maxHealth = DALOKOH_MAXHEALTH;
+	}
 
 	g_iDalokohSecs[client]++;
 	if(g_iDalokohSecs[client] == 1)
 	{
 		if(!dalokohs[client])
 		{
-			dalokohs[client] = true;
+			dalokohs[client] = maxHealth;
 			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		}
 
@@ -898,37 +906,22 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 	else if(g_iDalokohSecs[client] == 4)
 	{
 		newHealth = health + DALOKOH_LASTHEALTH;
-
-		if(newHealth > DALOKOH_MAXHEALTH)
+		if(newHealth > maxHealth)
 		{
-			newHealth = DALOKOH_MAXHEALTH;
+			newHealth = maxHealth;
 		}
-
-		if(melee == 310)
-		{
-			newHealth = 650;
-		}
-
 		TF2_SetHealth(client, newHealth);
 	}
 
 	if(health < DALOKOH_MAXHEALTH && g_iDalokohSecs[client] >= 1 && g_iDalokohSecs[client] <= 3)
 	{
 		newHealth = g_iDalokohSecs[client] == 3 ? health + DALOKOH_HEALTHPERSEC : health + DALOKOH_HEALTHPERSEC - 50;
-
-		if(newHealth > DALOKOH_MAXHEALTH)
+		if(newHealth > maxHealth)
 		{
-			newHealth = DALOKOH_MAXHEALTH;
+			newHealth = maxHealth;
 		}
-
-		if(melee == 310)
-		{
-			newHealth = 650;
-		}
-
 		TF2_SetHealth(client, newHealth);
 	}
-
 	return Plugin_Continue;
 }
 
@@ -937,7 +930,7 @@ public Action:Timer_DalokohsEnd(Handle:timer, any:userid)
 	new client = GetClientOfUserId(userid);
 	if(client)
 	{
-		dalokohs[client] = false;
+		dalokohs[client] = 0;
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		dalokohsTimer[client] = INVALID_HANDLE;
 	}
@@ -1057,7 +1050,7 @@ public Action:OnGetMaxHealth(client, &maxHealth)
 	{
 		if(dalokohs[client])
 		{
-			maxHealth = DALOKOH_MAXHEALTH;
+			maxHealth = dalokohs[client];
 			return Plugin_Changed;
 		}
 
@@ -1704,12 +1697,12 @@ ResetVariables(client)
 	g_iRazorbackCount[client] = 0;
 	g_iCabers[client] = 0;
 	g_iDalokohSecs[client] = 0;
+	dalokohs[client] = 0;
 	g_iRevengeCrits[client] = 0;
 	g_bHasCaber[client] = false;
 	g_bHasManmelter[client] = false;
 	g_bTakesHeads[client] = false;
 	g_bHasBazooka[client] = false;
-	dalokohs[client] = false;
 	g_fChargeBegin[client] = 0.0;
 }
 
