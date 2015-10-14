@@ -271,11 +271,11 @@ CreateConVars()
 public OnConVarChanged(Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	//g_iHeadCap = GetConVarInt(g_cvarHeadCap);
-	if(convar == g_bHeadScaling)
+	if(convar == g_cvarHeadScaling)
 	{
 		g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 	}
-	else if(convar == g_fHeadScalingCap)
+	else if(convar == g_cvarHeadScalingCap)
 	{
 		g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
 	}
