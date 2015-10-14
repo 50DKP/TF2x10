@@ -879,7 +879,9 @@ public Action:Timer_DalokohX10(Handle:timer, any:userid)
 	new newHealth, maxHealth;
 	if(index == 310)  //Warrior's Spirit
 	{
-		maxHealth = DALOKOH_MAXHEALTH - 200;  //Warrior's Spirit subtracts 200 health
+		new Address:attribute = TF2Attrib_GetByName(index, "max health additive penalty");
+		new healthPenalty = RoundFloat(FloatAbs(TF2Attrib_GetValue(attribute)));  //Absolute value this since it's negative and then make it an int
+		maxHealth = DALOKOH_MAXHEALTH - healthPenalty;  //Warrior's Spirit has a health penalty
 	}
 	else
 	{
