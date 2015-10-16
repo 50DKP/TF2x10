@@ -138,7 +138,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 
 public OnPluginStart()
 {
-	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	CreateConVar("tf2x10_version", PLUGIN_VERSION, "TF2x10 version", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 
 	g_cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells Updater to automatically update this plugin.  0 = off, 1 = on.", _, true, 0.0, true, 1.0);
 	g_cvarCritsDiamondback = CreateConVar("tf2x10_crits_diamondback", "10", "Number of crits after successful sap with Diamondback equipped.", _, true, 0.0, false);
@@ -264,9 +264,9 @@ public OnConfigsExecuted()
 		}
 	}
 
-	if(GetConVarBool(g_cvarAutoUpdate) && LibraryExists("updater"))
+	if(LibraryExists("updater"))
 	{
-		Updater_AddPlugin(UPDATE_URL);
+		GetConVarBool(g_cvarAutoUpdate) ? Updater_AddPlugin(UPDATE_URL) : Updater_RemovePlugin();
 	}
 }
 
@@ -290,7 +290,7 @@ public OnConVarChanged(Handle:convar, const String:oldValue[], const String:newV
 	}
 	else if(convar == g_cvarAutoUpdate)
 	{
-		GetConVarInt(g_cvarAutoUpdate) ? Updater_AddPlugin(UPDATE_URL) : Updater_RemovePlugin();
+		GetConVarBool(g_cvarAutoUpdate) ? Updater_AddPlugin(UPDATE_URL) : Updater_RemovePlugin();
 	}
 }
 
@@ -938,14 +938,14 @@ public OnGameFrame()
 
 		if(g_bTakesHeads[client])
 		{
-			new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
+			/*new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
 			if(heads > 4)
 			{
 				new Float:speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
 				new Float:newSpeed = heads < g_iHeadCap ? speed + 20.0 : speed;
 				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed > 520.0 ? 520.0 : newSpeed);
 				PrintToChatAll("[TF2x10] %N %i heads %f speed", client, heads, newSpeed > 520.0 ? 520.0 : newSpeed);
-			}
+			}*/
 
 			if(g_bHeadScaling)
 			{
