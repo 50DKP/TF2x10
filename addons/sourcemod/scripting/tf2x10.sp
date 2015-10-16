@@ -29,7 +29,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.5.0"
+#define PLUGIN_VERSION		"1.6.0"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -138,13 +138,26 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 
 public OnPluginStart()
 {
-	new Handle:hTopMenu;
+	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 
-	g_hHudText = CreateHudSynchronizer();
-	g_hItemInfoTrie = CreateTrie();
+	g_cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells Updater to automatically update this plugin.  0 = off, 1 = on.", _, true, 0.0, true, 1.0);
+	g_cvarCritsDiamondback = CreateConVar("tf2x10_crits_diamondback", "10", "Number of crits after successful sap with Diamondback equipped.", _, true, 0.0, false);
+	g_cvarCritsFJ = CreateConVar("tf2x10_crits_fj", "10", "Number of crits after Frontier kill or for buildings. Half this for assists.", _, true, 0.0, false);
+	g_cvarCritsManmelter = CreateConVar("tf2x10_crits_manmelter", "10", "Number of crits after Manmelter extinguishes player.", _, true, 0.0, false);
+	g_cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", _, true, 0.0, true, 1.0);
+	g_cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable.", _, true, 0.0, true, 1.0);
+	g_cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", _, true, 4.0);
+	g_cvarHeadScaling = CreateConVar("tf2x10_headscaling", "1", "Enable any decapitation weapon (eyelander etc) to grow their head as they gain heads. 0 = off, 1 = on.", _, true, 0.0, true, 1.0);
+	g_cvarHeadScalingCap = CreateConVar("tf2x10_headscalingcap", "6.0", "The number of heads before head scaling stops growing their head. 6.0 = 24 heads.", _, true, 0.0, false);
+	g_cvarHealthCap = CreateConVar("tf2x10_healthcap", "2100", "The max health a player can have. -1 to disable.", _, true, -1.0, false);
+	g_cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", _, true, 0.0, true, 1.0);
 
-	PrepSDKCalls();
-	CreateConVars();
+	HookConVarChange(g_cvarEnabled, OnConVarChanged_tf2x10_enable);
+	HookConVarChange(g_cvarHeadCap, OnConVarChanged);
+	HookConVarChange(g_cvarHeadScaling, OnConVarChanged);
+	HookConVarChange(g_cvarHeadScalingCap, OnConVarChanged);
+	HookConVarChange(FindConVar("tf_feign_death_duration"), OnConVarChanged);
+
 	AutoExecConfig(true, "plugin.tf2x10");
 
 	RegAdminCmd("sm_tf2x10_disable", Command_Disable, ADMFLAG_CONVARS);
@@ -154,20 +167,68 @@ public OnPluginStart()
 	RegAdminCmd("sm_tf2x10_setmod", Command_SetMod, ADMFLAG_CHEATS);
 	RegConsoleCmd("sm_x10group", Command_Group);
 
-	HookAllEvents();
+	HookEvent("arena_win_panel", event_round_end, EventHookMode_PostNoCopy);
+	HookEvent("object_destroyed", event_object_destroyed, EventHookMode_Post);
+	HookEvent("object_removed", event_object_remove, EventHookMode_Post);
+	HookEvent("player_death", event_player_death, EventHookMode_Post);
+	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), Event_PlayerShieldBlocked);
+	HookEvent("post_inventory_application", event_postinventory, EventHookMode_Post);
+	HookEvent("teamplay_restart_round", event_round_end, EventHookMode_PostNoCopy);
+	HookEvent("teamplay_win_panel", event_round_end, EventHookMode_PostNoCopy);
+	HookEvent("round_end", event_round_end, EventHookMode_PostNoCopy);
+	HookEvent("object_deflected", event_deflected, EventHookMode_Post);
+	HookEvent("mvm_pickup_currency", event_pickup_currency, EventHookMode_Pre);
 
-	for (new client = 1; client <= MaxClients; client++)
+	new Handle:hConf = LoadGameConfigFile("sdkhooks.games");
+	if(hConf == INVALID_HANDLE)
 	{
-		if (IsValidClient(client) && IsClientInGame(client))
+		SetFailState("Cannot find sdkhooks.games gamedata.");
+	}
+
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hConf, SDKConf_Virtual, "GetMaxHealth");
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	g_hSdkGetMaxHealth = EndPrepSDKCall();
+	CloseHandle(hConf);
+
+	if(g_hSdkGetMaxHealth == INVALID_HANDLE)
+	{
+		SetFailState("Failed to set up GetMaxHealth sdkcall. Your SDKHooks is probably outdated.");
+	}
+
+	hConf = LoadGameConfigFile("tf2items.randomizer");
+	if(hConf == INVALID_HANDLE)
+	{
+		SetFailState("Cannot find gamedata/tf2.randomizer.txt. Get the file from [TF2Items] GiveWeapon.");
+	}
+
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(hConf, SDKConf_Virtual, "CTFPlayer::EquipWearable");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	g_hSdkEquipWearable = EndPrepSDKCall();
+	CloseHandle(hConf);
+
+	if(g_hSdkEquipWearable == INVALID_HANDLE)
+	{
+		SetFailState("Failed to set up EquipWearable sdkcall. Get a new gamedata/tf2items.randomizer.txt from [TF2Items] GiveWeapon.");
+	}
+
+	for(new client = 1; client <= MaxClients; client++)
+	{
+		if(IsValidClient(client) && IsClientInGame(client))
 		{
 			UpdateVariables(client);
 		}
 	}
 
-	if (LibraryExists("adminmenu") && (hTopMenu = GetAdminTopMenu()))
+	new Handle:hTopMenu;
+	if(LibraryExists("adminmenu") && (hTopMenu = GetAdminTopMenu()))
 	{
 		OnAdminMenuReady(hTopMenu);
 	}
+
+	g_hHudText = CreateHudSynchronizer();
+	g_hItemInfoTrie = CreateTrie();
 }
 
 public OnConfigsExecuted()
@@ -207,66 +268,6 @@ public OnConfigsExecuted()
 	{
 		Updater_AddPlugin(UPDATE_URL);
 	}
-}
-
-PrepSDKCalls()
-{
-	new Handle:hConf = LoadGameConfigFile("sdkhooks.games");
-	if (hConf == INVALID_HANDLE)
-	{
-		SetFailState("Cannot find sdkhooks.games gamedata.");
-	}
-
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hConf, SDKConf_Virtual, "GetMaxHealth");
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	g_hSdkGetMaxHealth = EndPrepSDKCall();
-	CloseHandle(hConf);
-
-	if (g_hSdkGetMaxHealth == INVALID_HANDLE)
-	{
-		SetFailState("Failed to set up GetMaxHealth sdkcall. Your SDKHooks is probably outdated.");
-	}
-
-	hConf = LoadGameConfigFile("tf2items.randomizer");
-	if (hConf == INVALID_HANDLE)
-	{
-		SetFailState("Cannot find gamedata/tf2.randomizer.txt. Get the file from [TF2Items] GiveWeapon.");
-	}
-
-	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(hConf, SDKConf_Virtual, "CTFPlayer::EquipWearable");
-	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
-	g_hSdkEquipWearable = EndPrepSDKCall();
-	CloseHandle(hConf);
-
-	if (g_hSdkEquipWearable == INVALID_HANDLE)
-	{
-		SetFailState("Failed to set up EquipWearable sdkcall. Get a new gamedata/tf2items.randomizer.txt from [TF2Items] GiveWeapon.");
-	}
-}
-
-CreateConVars()
-{
-	CreateConVar("tf2x10_version", PLUGIN_VERSION, "Version of TF2x10", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-
-	g_cvarAutoUpdate = CreateConVar("tf2x10_autoupdate", "1", "Tells Updater to automatically update this plugin.  0 = off, 1 = on.", _, true, 0.0, true, 1.0);
-	g_cvarCritsDiamondback = CreateConVar("tf2x10_crits_diamondback", "10", "Number of crits after successful sap with Diamondback equipped.", _, true, 0.0, false);
-	g_cvarCritsFJ = CreateConVar("tf2x10_crits_fj", "10", "Number of crits after Frontier kill or for buildings. Half this for assists.", _, true, 0.0, false);
-	g_cvarCritsManmelter = CreateConVar("tf2x10_crits_manmelter", "10", "Number of crits after Manmelter extinguishes player.", _, true, 0.0, false);
-	g_cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", _, true, 0.0, true, 1.0);
-	g_cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable.", _, true, 0.0, true, 1.0);
-	g_cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", _, true, 4.0);
-	g_cvarHeadScaling = CreateConVar("tf2x10_headscaling", "1", "Enable any decapitation weapon (eyelander etc) to grow their head as they gain heads. 0 = off, 1 = on.", _, true, 0.0, true, 1.0);
-	g_cvarHeadScalingCap = CreateConVar("tf2x10_headscalingcap", "6.0", "The number of heads before head scaling stops growing their head. 6.0 = 24 heads.", _, true, 0.0, false);
-	g_cvarHealthCap = CreateConVar("tf2x10_healthcap", "2100", "The max health a player can have. -1 to disable.", _, true, -1.0, false);
-	g_cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", _, true, 0.0, true, 1.0);
-
-	HookConVarChange(g_cvarEnabled, OnConVarChanged_tf2x10_enable);
-	HookConVarChange(g_cvarHeadCap, OnConVarChanged);
-	HookConVarChange(g_cvarHeadScaling, OnConVarChanged);
-	HookConVarChange(g_cvarHeadScalingCap, OnConVarChanged);
-	HookConVarChange(FindConVar("tf_feign_death_duration"), OnConVarChanged);
 }
 
 public OnConVarChanged(Handle:convar, const String:oldValue[], const String:newValue[])
@@ -368,21 +369,6 @@ DetectGameDescSetting()
 	{
 		Steam_SetGameDescription("Team Fortress");
 	}
-}
-
-HookAllEvents()
-{
-	HookEvent("arena_win_panel", event_round_end, EventHookMode_PostNoCopy);
-	HookEvent("object_destroyed", event_object_destroyed, EventHookMode_Post);
-	HookEvent("object_removed", event_object_remove, EventHookMode_Post);
-	HookEvent("player_death", event_player_death, EventHookMode_Post);
-	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), Event_PlayerShieldBlocked);
-	HookEvent("post_inventory_application", event_postinventory, EventHookMode_Post);
-	HookEvent("teamplay_restart_round", event_round_end, EventHookMode_PostNoCopy);
-	HookEvent("teamplay_win_panel", event_round_end, EventHookMode_PostNoCopy);
-	HookEvent("round_end", event_round_end, EventHookMode_PostNoCopy);
-	HookEvent("object_deflected", event_deflected, EventHookMode_Post);
-	HookEvent("mvm_pickup_currency", event_pickup_currency, EventHookMode_Pre);
 }
 
 public OnAdminMenuReady(Handle:topmenu)
@@ -958,7 +944,7 @@ public OnGameFrame()
 				new Float:speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
 				new Float:newSpeed = heads < g_iHeadCap ? speed + 20.0 : speed;
 				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed > 520.0 ? 520.0 : newSpeed);
-				PrintToChatAll("[TF2x10] %N %i heads %f speed", client, heads, newSpeed);
+				PrintToChatAll("[TF2x10] %N %i heads %f speed", client, heads, newSpeed > 520.0 ? 520.0 : newSpeed);
 			}
 
 			if(g_bHeadScaling)
@@ -1056,7 +1042,7 @@ public Action:OnGetMaxHealth(client, &maxHealth)
 			return Plugin_Changed;
 		}
 
-		new heads = GetEntProp(client, Prop_Data, "m_iDecapitations");
+		new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
 		if(heads > 4 && heads < g_iHeadCap)
 		{
 			maxHealth = GetEntProp(client, Prop_Data, "m_iMaxHealth") + heads * 15;
