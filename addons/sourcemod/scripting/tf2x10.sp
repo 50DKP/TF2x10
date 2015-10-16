@@ -52,7 +52,7 @@ static const Float:g_fBazaarRates[] =
 	0.33 //seconds for 6+ heads
 };
 
-//new g_iHeadCap = 40;
+new g_iHeadCap = 40;
 new bool:g_bAprilFools;
 new bool:g_bFF2Running;
 new bool:g_bHasCaber[MAXPLAYERS + 1];
@@ -87,7 +87,7 @@ new String:g_sSelectedMod[16] = "default";
 new Handle:g_cvarEnabled;
 new Handle:g_cvarGameDesc;
 new Handle:g_cvarAutoUpdate;
-//new Handle:g_cvarHeadCap;
+new Handle:g_cvarHeadCap;
 new Handle:g_cvarHeadScaling;
 new Handle:g_cvarHeadScalingCap;
 new Handle:g_cvarHealthCap;
@@ -194,7 +194,7 @@ public OnConfigsExecuted()
 		}
 		default:
 		{
-			//g_iHeadCap = GetConVarInt(g_cvarHeadCap);
+			g_iHeadCap = GetConVarInt(g_cvarHeadCap);
 			g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 			g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
 			tf_feign_death_duration = GetConVarInt(FindConVar("tf_feign_death_duration"));
@@ -256,13 +256,14 @@ CreateConVars()
 	g_cvarCritsManmelter = CreateConVar("tf2x10_crits_manmelter", "10", "Number of crits after Manmelter extinguishes player.", _, true, 0.0, false);
 	g_cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", _, true, 0.0, true, 1.0);
 	g_cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable.", _, true, 0.0, true, 1.0);
-	//g_cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", _, true, 4.0);
+	g_cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", _, true, 4.0);
 	g_cvarHeadScaling = CreateConVar("tf2x10_headscaling", "1", "Enable any decapitation weapon (eyelander etc) to grow their head as they gain heads. 0 = off, 1 = on.", _, true, 0.0, true, 1.0);
 	g_cvarHeadScalingCap = CreateConVar("tf2x10_headscalingcap", "6.0", "The number of heads before head scaling stops growing their head. 6.0 = 24 heads.", _, true, 0.0, false);
 	g_cvarHealthCap = CreateConVar("tf2x10_healthcap", "2100", "The max health a player can have. -1 to disable.", _, true, -1.0, false);
 	g_cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", _, true, 0.0, true, 1.0);
 
 	HookConVarChange(g_cvarEnabled, OnConVarChanged_tf2x10_enable);
+	HookConVarChange(g_cvarHeadCap, OnConVarChanged);
 	HookConVarChange(g_cvarHeadScaling, OnConVarChanged);
 	HookConVarChange(g_cvarHeadScalingCap, OnConVarChanged);
 	HookConVarChange(FindConVar("tf_feign_death_duration"), OnConVarChanged);
@@ -270,8 +271,11 @@ CreateConVars()
 
 public OnConVarChanged(Handle:convar, const String:oldValue[], const String:newValue[])
 {
-	//g_iHeadCap = GetConVarInt(g_cvarHeadCap);
-	if(convar == g_cvarHeadScaling)
+	if(convar == g_cvarHeadCap)
+	{
+		g_iHeadCap = GetConVarInt(g_cvarHeadCap);
+	}
+	else if(convar == g_cvarHeadScaling)
 	{
 		g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
 	}
@@ -941,7 +945,7 @@ public OnGameFrame()
 {
 	for(new client=1; client <= MaxClients; client++)
 	{
-		if (!IsValidClient(client) || !IsPlayerAlive(client))
+		if(!IsValidClient(client) || !IsPlayerAlive(client))
 		{
 			continue;
 		}
@@ -949,19 +953,18 @@ public OnGameFrame()
 		if(g_bTakesHeads[client])
 		{
 			new heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
-			/*if(heads > 4)
+			if(heads > 4)
 			{
 				new Float:speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
 				new Float:newSpeed = heads < g_iHeadCap ? speed + 20.0 : speed;
 				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed > 520.0 ? 520.0 : newSpeed);
 				PrintToChatAll("[TF2x10] %N %i heads %f speed", client, heads, newSpeed);
-			}*/
+			}
 
 			if(g_bHeadScaling)
 			{
 				new Float:fPlayerHeadScale = 1.0 + heads / 4.0;
-
-				if (fPlayerHeadScale <= (g_bAprilFools ? 9999.0 : g_fHeadScalingCap))  //April Fool's 2015: Heads keep getting bigger!
+				if(fPlayerHeadScale <= (g_bAprilFools ? 9999.0 : g_fHeadScalingCap))  //April Fool's 2015: Heads keep getting bigger!
 				{
 					SetEntPropFloat(client, Prop_Send, "m_flHeadScale", fPlayerHeadScale);
 				}
@@ -976,7 +979,7 @@ public OnGameFrame()
 
 public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:angles[3], &weapon)
 {
-	if (!GetConVarBool(g_cvarEnabled) || !IsValidClient(client) || !IsPlayerAlive(client))
+	if(!GetConVarBool(g_cvarEnabled) || !IsValidClient(client) || !IsPlayerAlive(client))
 	{
 		return Plugin_Continue;
 	}
@@ -987,48 +990,47 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 	if(buttons & IN_ATTACK && index == 1098)
 	{
 		g_bChargingClassic[client] = true;
-	} else
+	}
+	else
 	{
 		g_bChargingClassic[client] = false;
 	}
 
-	if (index == 307)
+	if(index == 307)
 	{
 		new detonated = GetEntProp(activeWep, Prop_Send, "m_iDetonated");
-
-		if (detonated == 0)
+		if(detonated == 0)
 		{
 			SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
 			ShowSyncHudText(client, g_hHudText, "Cabers: %d", g_iCabers[client]);
 		}
 
-		if (g_iCabers[client] > 1 && detonated == 1)
+		if(g_iCabers[client] > 1 && detonated == 1)
 		{
 			SetEntProp(activeWep, Prop_Send, "m_iDetonated", 0);
 			g_iCabers[client]--;
 		}
 	}
 
-	else if (index == 19 || index == 206 || index == 1007)
+	else if(index == 19 || index == 206 || index == 1007)
 	{
 		new iClip = GetEntProp(activeWep, Prop_Send, "m_iClip1");
-		if (iClip >= 10)
+		if(iClip >= 10)
 		{
 			buttons &= ~IN_ATTACK;
 		}
 	}
 
-	if (g_iRazorbackCount[client] > 1)
+	if(g_iRazorbackCount[client] > 1)
 	{
 		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
 		ShowSyncHudText(client, g_hHudText, "Razorbacks: %d", g_iRazorbackCount[client]);
 	}
 
-	if (g_bHasManmelter[client])
+	if(g_bHasManmelter[client])
 	{
 		new revengeCrits = GetEntProp(client, Prop_Send, "m_iRevengeCrits");
-
-		if (revengeCrits > g_iRevengeCrits[client])
+		if(revengeCrits > g_iRevengeCrits[client])
 		{
 			new newCrits = ((revengeCrits - g_iRevengeCrits[client]) * GetConVarInt(g_cvarCritsManmelter)) + revengeCrits - 1;
 			SetEntProp(client, Prop_Send, "m_iRevengeCrits", newCrits);
@@ -1054,12 +1056,12 @@ public Action:OnGetMaxHealth(client, &maxHealth)
 			return Plugin_Changed;
 		}
 
-		/*new heads = GetEntProp(client, Prop_Data, "m_iDecapitations");
-		if(heads < g_iHeadCap)
+		new heads = GetEntProp(client, Prop_Data, "m_iDecapitations");
+		if(heads > 4 && heads < g_iHeadCap)
 		{
 			maxHealth = GetEntProp(client, Prop_Data, "m_iMaxHealth") + heads * 15;
 			return Plugin_Changed;
-		}*/
+		}
 	}
 	return Plugin_Continue;
 }
@@ -1214,14 +1216,6 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 			}
 		}
 	}
-	/*else if(IsValidClient(attacker) && g_bTakesHeads[attacker])
-	{
-		new heads = GetEntProp(attacker, Prop_Send, "m_iDecapitations");
-		if(heads > 4)
-		{
-			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
-		}
-	}*/
 
 	if(GetEventInt(event, "death_flags") & TF_DEATHFLAG_DEADRINGER)
 	{
@@ -1256,6 +1250,11 @@ public Action:event_player_death(Handle:event, const String:name[], bool:dontBro
 			KillTimer(dalokohsTimer[client]);
 			dalokohsTimer[client] = INVALID_HANDLE;
 		}
+	}
+
+	if(g_bTakesHeads[client])
+	{
+		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	}
 
 	ResetVariables(client);
@@ -1556,7 +1555,8 @@ bool:isCompatibleItem(String:classname[], iItemDefinitionIndex)
 		iItemDefinitionIndex == 642));
 }
 
-public Action:event_postinventory(Handle:event, const String:name[], bool:dontBroadcast) {
+public Action:event_postinventory(Handle:event, const String:name[], bool:dontBroadcast)
+{
 	if (!GetConVarBool(g_cvarEnabled))
 	{
 		return Plugin_Continue;
@@ -1741,6 +1741,10 @@ UpdateVariables(client)
 	{
 		g_bHasCaber[client] = GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") == 307;
 		g_bTakesHeads[client] = WeaponHasAttribute(client, meleeWep, "decapitate type");
+		if(g_bTakesHeads[client])
+		{
+			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+		}
 	}
 	else
 	{
