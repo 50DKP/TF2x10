@@ -74,7 +74,8 @@ Handle g_hHudText;
 Handle g_hItemInfoTrie;
 Handle g_hSdkGetMaxHealth;
 Handle g_hSdkEquipWearable;
-Handle g_hTopMenu;
+
+TopMenu g_hTopMenu;
 
 Handle dalokohsTimer[MAXPLAYERS + 1];
 
@@ -87,17 +88,17 @@ int g_iRevengeCrits[MAXPLAYERS + 1];
 
 char g_sSelectedMod[16] = "default";
 
-Handle g_cvarEnabled;
-Handle g_cvarGameDesc;
-Handle g_cvarAutoUpdate;
-Handle g_cvarHeadCap;
-Handle g_cvarHeadScaling;
-Handle g_cvarHeadScalingCap;
-Handle g_cvarHealthCap;
-Handle g_cvarIncludeBots;
-Handle g_cvarCritsFJ;
-Handle g_cvarCritsDiamondback;
-Handle g_cvarCritsManmelter;
+ConVar g_cvarEnabled;
+ConVar g_cvarGameDesc;
+ConVar g_cvarAutoUpdate;
+ConVar g_cvarHeadCap;
+ConVar g_cvarHeadScaling;
+ConVar g_cvarHeadScalingCap;
+ConVar g_cvarHealthCap;
+ConVar g_cvarIncludeBots;
+ConVar g_cvarCritsFJ;
+ConVar g_cvarCritsDiamondback;
+ConVar g_cvarCritsManmelter;
 
 int tf_feign_death_duration;
 
@@ -155,11 +156,11 @@ public void OnPluginStart()
 	g_cvarHealthCap = CreateConVar("tf2x10_healthcap", "2100", "The max health a player can have. -1 to disable.", _, true, -1.0, false);
 	g_cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", _, true, 0.0, true, 1.0);
 
-	HookConVarChange(g_cvarEnabled, OnConVarChanged_tf2x10_enable);
-	HookConVarChange(g_cvarHeadCap, OnConVarChanged);
-	HookConVarChange(g_cvarHeadScaling, OnConVarChanged);
-	HookConVarChange(g_cvarHeadScalingCap, OnConVarChanged);
-	HookConVarChange(FindConVar("tf_feign_death_duration"), OnConVarChanged);
+	g_cvarEnabled.AddChangeHook(OnConVarChanged_tf2x10_enable);
+	g_cvarHeadCap.AddChangeHook(OnConVarChanged);
+	g_cvarHeadScaling.AddChangeHook(OnConVarChanged);
+	g_cvarHeadScalingCap.AddChangeHook(OnConVarChanged);
+	FindConVar("tf_feign_death_duration").AddChangeHook(OnConVarChanged);
 
 	AutoExecConfig(true, "plugin.tf2x10");
 
@@ -192,7 +193,7 @@ public void OnPluginStart()
 	PrepSDKCall_SetFromConf(hConf, SDKConf_Virtual, "GetMaxHealth");
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
 	g_hSdkGetMaxHealth = EndPrepSDKCall();
-	CloseHandle(hConf);
+	hConf.Close();
 
 	if(g_hSdkGetMaxHealth == INVALID_HANDLE)
 	{
@@ -209,7 +210,7 @@ public void OnPluginStart()
 	PrepSDKCall_SetFromConf(hConf, SDKConf_Virtual, "CTFPlayer::EquipWearable");
 	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
 	g_hSdkEquipWearable = EndPrepSDKCall();
-	CloseHandle(hConf);
+	hConf.Close();
 
 	if(g_hSdkEquipWearable == INVALID_HANDLE)
 	{
@@ -236,7 +237,7 @@ public void OnPluginStart()
 
 public void OnConfigsExecuted()
 {
-	if(!GetConVarBool(g_cvarEnabled))
+	if(!g_cvarEnabled.BoolValue)
 	{
 		return;
 	}
@@ -258,10 +259,10 @@ public void OnConfigsExecuted()
 		}
 		default:
 		{
-			g_iHeadCap = GetConVarInt(g_cvarHeadCap);
-			g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
-			g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
-			tf_feign_death_duration = GetConVarInt(FindConVar("tf_feign_death_duration"));
+			g_iHeadCap = g_cvarHeadCap.IntValue;
+			g_bHeadScaling = g_cvarHeadScaling.BoolValue;
+			g_fHeadScalingCap = g_cvarHeadScalingCap.FloatValue;
+			tf_feign_death_duration = FindConVar("tf_feign_death_duration").IntValue;
 
 			CreateTimer(330.0, Timer_ServerRunningX10, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 		}
@@ -269,7 +270,7 @@ public void OnConfigsExecuted()
 
 	if(LibraryExists("updater"))
 	{
-		GetConVarBool(g_cvarAutoUpdate) ? Updater_AddPlugin(UPDATE_URL) : Updater_RemovePlugin();
+		g_cvarAutoUpdate.BoolValue ? Updater_AddPlugin(UPDATE_URL) : Updater_RemovePlugin();
 	}
 }
 
@@ -277,15 +278,15 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 {
 	if(convar == g_cvarHeadCap)
 	{
-		g_iHeadCap = GetConVarInt(g_cvarHeadCap);
+		g_iHeadCap = g_cvarHeadCap.IntValue;
 	}
 	else if(convar == g_cvarHeadScaling)
 	{
-		g_bHeadScaling = GetConVarBool(g_cvarHeadScaling);
+		g_bHeadScaling = g_cvarHeadScaling.BoolValue;
 	}
 	else if(convar == g_cvarHeadScalingCap)
 	{
-		g_fHeadScalingCap = GetConVarFloat(g_cvarHeadScalingCap);
+		g_fHeadScalingCap = g_cvarHeadScalingCap.FloatValue;
 	}
 	else if(convar == FindConVar("tf_feign_death_duration"))
 	{
@@ -293,13 +294,13 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 	}
 	else if(convar == g_cvarAutoUpdate)
 	{
-		GetConVarBool(g_cvarAutoUpdate) ? Updater_AddPlugin(UPDATE_URL) : Updater_RemovePlugin();
+		g_cvarAutoUpdate.BoolValue ? Updater_AddPlugin(UPDATE_URL) : Updater_RemovePlugin();
 	}
 }
 
 public void OnConVarChanged_tf2x10_enable(Handle convar, const char[] oldValue, const char[] newValue)
 {
-	if (GetConVarBool(g_cvarEnabled))
+	if (g_cvarEnabled.BoolValue)
 	{
 		for (int client=1; client < MaxClients; client++)
 		{
@@ -358,17 +359,17 @@ public void OnConVarChanged_tf2x10_enable(Handle convar, const char[] oldValue, 
 
 void DetectGameDescSetting()
 {
-	bool bGameDesc = GetConVarBool(g_cvarGameDesc);
+	bool bGameDesc = g_cvarGameDesc.BoolValue;
 
 	char sDescription[16];
 	GetGameDescription(sDescription, sizeof(sDescription));
 
-	if(GetConVarBool(g_cvarEnabled) && bGameDesc && StrEqual(sDescription, "Team Fortress"))
+	if(g_cvarEnabled.BoolValue && bGameDesc && StrEqual(sDescription, "Team Fortress"))
 	{
 		Format(sDescription, sizeof(sDescription), "TF2x10 v%s", PLUGIN_VERSION);
 		Steam_SetGameDescription(sDescription);
 	}
-	else if((!GetConVarBool(g_cvarEnabled) || !bGameDesc) && StrContains(sDescription, "TF2x10 ") != -1)
+	else if((!g_cvarEnabled.BoolValue || !bGameDesc) && StrContains(sDescription, "TF2x10 ") != -1)
 	{
 		Steam_SetGameDescription("Team Fortress");
 	}
@@ -376,24 +377,18 @@ void DetectGameDescSetting()
 
 public void OnAdminMenuReady(Handle topmenu)
 {
-	if (topmenu == g_hTopMenu)
+	if(topmenu == g_hTopMenu)
 	{
 		return;
 	}
 
-	g_hTopMenu = topmenu;
+	g_hTopMenu = TopMenu.FromHandle(topmenu);
 
-	TopMenuObject player_commands = FindTopMenuCategory(g_hTopMenu, ADMINMENU_SERVERCOMMANDS);
+	TopMenuObject player_commands = g_hTopMenu.FindCategory(ADMINMENU_SERVERCOMMANDS);
 
-	if (player_commands != INVALID_TOPMENUOBJECT)
+	if(player_commands != INVALID_TOPMENUOBJECT)
 	{
-		AddToTopMenu(g_hTopMenu,
-		"TF2x10 Recache Weapons",
-		TopMenuObject_Item,
-		AdminMenu_Recache,
-		player_commands,
-		"sm_tf2x10_recache",
-		ADMFLAG_GENERIC);
+		g_hTopMenu.AddItem("TF2x10: Recache Weapons", AdminMenu_Recache, player_commands, "sm_tf2x10_recache", ADMFLAG_GENERIC);
 	}
 }
 
@@ -409,63 +404,63 @@ int LoadFileIntoTrie(const char[] rawname, const char[] basename = "")
 
 	strcopy(finalbasename, sizeof(finalbasename), StrEqual(basename, "") ? rawname : basename);
 
-	Handle hKeyValues = CreateKeyValues(finalbasename);
-	if (FileToKeyValues(hKeyValues, strBuffer) == true)
+	KeyValues hKeyValues = CreateKeyValues(finalbasename);
+	if(hKeyValues.ImportFromFile(strBuffer))
 	{
-		KvGetSectionName(hKeyValues, strBuffer, sizeof(strBuffer));
-		if (StrEqual(strBuffer, finalbasename) == true)
+		hKeyValues.GetSectionName(strBuffer, sizeof(strBuffer));
+		if(StrEqual(strBuffer, finalbasename))
 		{
-			if (KvGotoFirstSubKey(hKeyValues))
+			if(hKeyValues.GotoFirstSubKey())
 			{
 				do
 				{
 					i = 0;
 
-					KvGetSectionName(hKeyValues, strBuffer, sizeof(strBuffer));
-					KvGotoFirstSubKey(hKeyValues, false);
+					hKeyValues.GetSectionName(strBuffer, sizeof(strBuffer));
+					hKeyValues.GotoFirstSubKey(false);
 
 					do
 					{
-						KvGetSectionName(hKeyValues, strBuffer2, sizeof(strBuffer2));
+						hKeyValues.GetSectionName(strBuffer2, sizeof(strBuffer2));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%d_name", rawname, strBuffer, i);
 						SetTrieString(g_hItemInfoTrie, tmpID, strBuffer2);
 
-						KvGetString(hKeyValues, NULL_STRING, strBuffer3, sizeof(strBuffer3));
+						hKeyValues.GetString(NULL_STRING, strBuffer3, sizeof(strBuffer3));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%d_val", rawname, strBuffer, i);
 						SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
 
 						i++;
 					}
-					while(KvGotoNextKey(hKeyValues, false));
-					KvGoBack(hKeyValues);
+					while(hKeyValues.GotoNextKey(false));
+					hKeyValues.GoBack();
 
 					Format(tmpID, sizeof(tmpID), "%s__%s_size", rawname, strBuffer);
 					SetTrieValue(g_hItemInfoTrie, tmpID, i);
 				}
-				while(KvGotoNextKey(hKeyValues));
-				KvGoBack(hKeyValues);
+				while(hKeyValues.GotoNextKey());
+				hKeyValues.GoBack();
 
 				SetTrieValue(g_hItemInfoTrie, strBuffer, 1);
 			}
 		}
 		else
 		{
-			CloseHandle(hKeyValues);
+			hKeyValues.Close();
 			return -2;
 		}
 	}
 	else
 	{
-		CloseHandle(hKeyValues);
+		hKeyValues.Close();
 		return -1;
 	}
-	CloseHandle(hKeyValues);
+	hKeyValues.Close();
 	return 1;
 }
 
 public Action Timer_ServerRunningX10(Handle hTimer)
 {
-	if (!GetConVarBool(g_cvarEnabled))
+	if (!g_cvarEnabled.BoolValue)
 	{
 		return Plugin_Stop;
 	}
@@ -486,7 +481,7 @@ SourceMod Admin Commands
 
 public void AdminMenu_Recache(Handle topmenu, TopMenuAction action, TopMenuObject object_id, int param, char[] buffer, int maxlength)
 {
-	if (!GetConVarBool(g_cvarEnabled))
+	if (!g_cvarEnabled.BoolValue)
 	{
 		return;
 	}
@@ -507,7 +502,7 @@ public void AdminMenu_Recache(Handle topmenu, TopMenuAction action, TopMenuObjec
 
 public Action Command_Enable(int client, int args)
 {
-	if (!GetConVarBool(g_cvarEnabled))
+	if (!g_cvarEnabled.BoolValue)
 	{
 		ServerCommand("tf2x10_enabled 1");
 		ReplyToCommand(client, "[TF2x10] Multiply A Weapon's Stats by 10 Plugin is now enabled.");
@@ -521,7 +516,7 @@ public Action Command_Enable(int client, int args)
 
 public Action Command_Disable(int client, int args)
 {
-	if (GetConVarBool(g_cvarEnabled))
+	if (g_cvarEnabled.BoolValue)
 	{
 		ServerCommand("tf2x10_enabled 0");
 		ReplyToCommand(client, "[TF2x10] Multiply A Weapon's Stats by 10 Plugin is now disabled.");
@@ -535,7 +530,7 @@ public Action Command_Disable(int client, int args)
 
 public Action Command_GetMod(int client, int args)
 {
-	if (GetConVarBool(g_cvarEnabled))
+	if (g_cvarEnabled.BoolValue)
 	{
 		ReplyToCommand(client, "[TF2x10] This mod is loading from configs/x10.%s.txt primarily.", g_sSelectedMod);
 		return Plugin_Handled;
@@ -545,20 +540,20 @@ public Action Command_GetMod(int client, int args)
 
 public Action Command_Group(int client, int args)
 {
-	Handle kv = CreateKeyValues("data");
-	KvSetString(kv, "title", "TF2x10 Steam Group");
-	KvSetString(kv, "msg", "http://www.steamcommunity.com/groups/tf2x10");
-	KvSetNum(kv, "customsvr", 1);
-	KvSetNum(kv, "type", MOTDPANEL_TYPE_URL);
+	KeyValues kv = CreateKeyValues("data");
+	kv.SetString("title", "TF2x10 Steam Group");
+	kv.SetString("msg", "http://www.steamcommunity.com/groups/tf2x10");
+	kv.SetNum("customsvr", 1);
+	kv.SetNum("type", MOTDPANEL_TYPE_URL);
 	ShowVGUIPanel(client, "info", kv, true);
-	CloseHandle(kv);
+	kv.Close();
 
 	return Plugin_Handled;
 }
 
 public Action Command_Recache(int client, int args)
 {
-	if (GetConVarBool(g_cvarEnabled))
+	if (g_cvarEnabled.BoolValue)
 	{
 		switch(LoadFileIntoTrie("default", "tf2x10_base_items"))
 		{
@@ -582,7 +577,7 @@ public Action Command_Recache(int client, int args)
 
 public Action Command_SetMod(int client, int args)
 {
-	if(GetConVarBool(g_cvarEnabled))
+	if(g_cvarEnabled.BoolValue)
 	{
 		if(args != 1)
 		{
@@ -661,7 +656,7 @@ public void OnAllPluginsLoaded()
 
 public void OnLibraryAdded(const char[] name)
 {
-	if (StrEqual(name, "updater") && GetConVarBool(g_cvarAutoUpdate))
+	if (StrEqual(name, "updater") && g_cvarAutoUpdate.BoolValue)
 	{
 		Updater_AddPlugin(UPDATE_URL);
 	}
@@ -697,7 +692,7 @@ public void OnLibraryRemoved(const char[] name)
 
 public void OnMapStart()
 {
-	if (GetConVarBool(g_cvarEnabled))
+	if (g_cvarEnabled.BoolValue)
 	{
 		DetectGameDescSetting();
 	}
@@ -708,7 +703,7 @@ public void OnMapEnd()
 	char sDescription[16];
 	GetGameDescription(sDescription, sizeof(sDescription));
 
-	if (GetConVarBool(g_cvarEnabled) && GetConVarBool(g_cvarGameDesc) && StrContains(sDescription, "TF2x10 ") != -1)
+	if (g_cvarEnabled.BoolValue && g_cvarGameDesc.BoolValue && StrContains(sDescription, "TF2x10 ") != -1)
 	{
 		Steam_SetGameDescription("Team Fortress");
 	}
@@ -722,7 +717,7 @@ Player Connect/Disconnect & Round End
 
 public void OnClientPutInServer(int client)
 {
-	if (GetConVarBool(g_cvarEnabled))
+	if (g_cvarEnabled.BoolValue)
 	{
 		ResetVariables(client);
 		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
@@ -733,7 +728,7 @@ public void OnClientPutInServer(int client)
 
 public void OnClientDisconnect(int client)
 {
-	if (GetConVarBool(g_cvarEnabled))
+	if (g_cvarEnabled.BoolValue)
 	{
 		ResetVariables(client);
 		SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
@@ -744,7 +739,7 @@ public void OnClientDisconnect(int client)
 
 public Action event_round_end(Handle event, const char[] name, bool dontBroadcast)
 {
-	if(GetConVarBool(g_cvarEnabled))
+	if(g_cvarEnabled.BoolValue)
 	{
 		for(int client=1; client <= MaxClients; client++)
 		{
@@ -762,7 +757,7 @@ Gameplay: Event-Specific
 
 public void TF2_OnConditionAdded(int client, TFCond condition)
 {
-	if(!GetConVarBool(g_cvarEnabled))
+	if(!g_cvarEnabled.BoolValue)
 	{
 		return;
 	}
@@ -784,7 +779,7 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 
 public void TF2_OnConditionRemoved(int client, TFCond condition)
 {
-	if(GetConVarBool(g_cvarEnabled))
+	if(g_cvarEnabled.BoolValue)
 	{
 		if(condition == TFCond_Zoomed && g_fChargeBegin[client])
 		{
@@ -968,7 +963,7 @@ public void OnGameFrame()
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon)
 {
-	if(!GetConVarBool(g_cvarEnabled) || !IsValidClient(client) || !IsPlayerAlive(client))
+	if(!g_cvarEnabled.BoolValue || !IsValidClient(client) || !IsPlayerAlive(client))
 	{
 		return Plugin_Continue;
 	}
@@ -1021,7 +1016,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		int revengeCrits = GetEntProp(client, Prop_Send, "m_iRevengeCrits");
 		if(revengeCrits > g_iRevengeCrits[client])
 		{
-			int newCrits = ((revengeCrits - g_iRevengeCrits[client]) * GetConVarInt(g_cvarCritsManmelter)) + revengeCrits - 1;
+			int newCrits = ((revengeCrits - g_iRevengeCrits[client]) * g_cvarCritsManmelter.IntValue) + revengeCrits - 1;
 			SetEntProp(client, Prop_Send, "m_iRevengeCrits", newCrits);
 
 			g_iRevengeCrits[client] = newCrits;
@@ -1037,7 +1032,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 
 public Action OnGetMaxHealth(int client, int &maxHealth)
 {
-	if(GetConVarBool(g_cvarEnabled))
+	if(g_cvarEnabled.BoolValue)
 	{
 		if(dalokohs[client])
 		{
@@ -1058,7 +1053,7 @@ public Action OnGetMaxHealth(int client, int &maxHealth)
 public Action event_deflected(Handle event, const char[] name, bool dontBroadcast)
 {
 	#if defined _freak_fortress_2_included
-	if(GetConVarBool(g_cvarEnabled) && g_bFF2Running && !GetEventInt(event, "weaponid"))  //A non-0 weaponid indicates that a projectile got deflected and not a client
+	if(g_cvarEnabled.BoolValue && g_bFF2Running && !GetEventInt(event, "weaponid"))  //A non-0 weaponid indicates that a projectile got deflected and not a client
 	{
 		int iBossIndex = FF2_GetBossIndex(GetClientOfUserId(GetEventInt(event, "ownerid")));
 
@@ -1085,14 +1080,14 @@ public Action event_deflected(Handle event, const char[] name, bool dontBroadcas
 
 public Action event_object_destroyed(Handle event, const char[] name, bool dontBroadcast)
 {
-	if(!GetConVarBool(g_cvarEnabled))
+	if(!g_cvarEnabled.BoolValue)
 	{
 		return Plugin_Continue;
 	}
 
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 	int primaryWep = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary);
-	int critsDiamondback = GetConVarInt(g_cvarCritsDiamondback);
+	int critsDiamondback = g_cvarCritsDiamondback.IntValue;
 
 	if (IsValidClient(attacker) && IsPlayerAlive(attacker) && critsDiamondback > 0 && IsValidEntity(primaryWep) && WeaponHasAttribute(attacker, primaryWep, "sapper kills collect crits"))
 	{
@@ -1110,7 +1105,7 @@ public Action event_object_destroyed(Handle event, const char[] name, bool dontB
 
 public Action event_object_remove(Handle event, const char[] name, bool dontBroadcast)
 {
-	if(!GetConVarBool(g_cvarEnabled))
+	if(!g_cvarEnabled.BoolValue)
 	{
 		return Plugin_Continue;
 	}
@@ -1169,7 +1164,7 @@ Gameplay: Damage and Death Only
 
 public Action event_player_death(Handle event, const char[] name, bool dontBroadcast)
 {
-	if(!GetConVarBool(g_cvarEnabled))
+	if(!g_cvarEnabled.BoolValue)
 	{
 		return Plugin_Continue;
 	}
@@ -1200,7 +1195,7 @@ public Action event_player_death(Handle event, const char[] name, bool dontBroad
 			int primWep = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary);
 			if(IsValidEntity(primWep) && WeaponHasAttribute(attacker, primWep, "sapper kills collect crits"))
 			{
-				int crits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + GetConVarInt(g_cvarCritsDiamondback) - 1;
+				int crits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + g_cvarCritsDiamondback.IntValue - 1;
 				SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", crits);
 			}
 		}
@@ -1218,7 +1213,7 @@ public Action event_player_death(Handle event, const char[] name, bool dontBroad
 
 		if(StrContains(inflictorName, "sentry") >= 0)
 		{
-			int critsFJ = GetConVarInt(g_cvarCritsFJ);
+			int critsFJ = g_cvarCritsFJ.IntValue;
 
 			if(GetEventInt(event, "assister") < 1)
 			{
@@ -1274,7 +1269,7 @@ void TF2_SpawnMedipack(int client, bool cmd = false)
 			_medPackTraceFilteredEnt = client;
 			Handle TraceEx = TR_TraceRayFilterEx(fPlayerPosition, PlayerPosAway, MASK_SOLID, RayType_EndPoint, MedipackTraceFilter);
 			TR_GetEndPosition(fPlayerPosition, TraceEx);
-			CloseHandle(TraceEx);
+			TraceEx.Close();
 		}
 
 		float Direction[3];
@@ -1285,7 +1280,7 @@ void TF2_SpawnMedipack(int client, bool cmd = false)
 
 		float MediPos[3];
 		TR_GetEndPosition(MediPos, Trace);
-		CloseHandle(Trace);
+		Trace.Close();
 		MediPos[2] += 4;
 
 		int Medipack = CreateEntityByName("item_healthkit_full");
@@ -1320,7 +1315,7 @@ public void OnPreThink(int client)
 
 public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if (!GetConVarBool(g_cvarEnabled))
+	if (!g_cvarEnabled.BoolValue)
 	{
 		return Plugin_Continue;
 	}
@@ -1369,7 +1364,7 @@ public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &dam
 
 public void OnTakeDamagePost(int client, int attacker, int inflictor, float damage, int damagetype)
 {
-	if (!GetConVarBool(g_cvarEnabled))
+	if (!g_cvarEnabled.BoolValue)
 	{
 		return;
 	}
@@ -1411,7 +1406,7 @@ void CheckHealthCaps(int client)
 {
 	if(!g_bAprilFools)  //April Fool's 2015: Unlimited health!
 	{
-		int cap = GetConVarInt(g_cvarHealthCap);
+		int cap = g_cvarHealthCap.IntValue;
 
 		if (cap > 0 && GetClientHealth(client) > cap)
 		{
@@ -1422,7 +1417,7 @@ void CheckHealthCaps(int client)
 
 public Action Event_PlayerShieldBlocked(UserMsg msg_id, Handle bf, const players[], int playersNum, bool reliable, bool init)
 {
-	if (!GetConVarBool(g_cvarEnabled) || playersNum < 2)
+	if (!g_cvarEnabled.BoolValue || playersNum < 2)
 	{
 		return Plugin_Continue;
 	}
@@ -1454,7 +1449,7 @@ public Action Event_PlayerShieldBlocked(UserMsg msg_id, Handle bf, const players
 		TF2Items_SetNumAttributes(hWeapon, 2);
 
 		int entity = TF2Items_GiveNamedItem(victim, hWeapon);
-		CloseHandle(hWeapon);
+		hWeapon.Close();
 		SDKCall(g_hSdkEquipWearable, victim, entity);
 	}
 
@@ -1469,8 +1464,8 @@ Gameplay: Player & Item Spawn
 
 public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemDefinitionIndex, int itemLevel, int itemQuality, int entityIndex)
 {
-	if (!GetConVarBool(g_cvarEnabled)
-		|| (!GetConVarBool(g_cvarIncludeBots) && IsFakeClient(client))
+	if (!g_cvarEnabled.BoolValue
+		|| (!g_cvarIncludeBots.BoolValue && IsFakeClient(client))
 		|| ShouldDisableWeapons(client)
 		|| !isCompatibleItem(classname, itemDefinitionIndex)
 		|| (itemQuality == 5 && itemDefinitionIndex != 266)
@@ -1546,7 +1541,7 @@ bool isCompatibleItem(char[] classname, int iItemDefinitionIndex)
 
 public Action event_postinventory(Handle event, const char[] name, bool dontBroadcast)
 {
-	if (!GetConVarBool(g_cvarEnabled))
+	if (!g_cvarEnabled.BoolValue)
 	{
 		return Plugin_Continue;
 	}
@@ -1564,7 +1559,7 @@ public Action Timer_FixClips(Handle hTimer, any userid)
 {
 	int client = GetClientOfUserId(userid);
 
-	if (!GetConVarBool(g_cvarEnabled) || !IsValidClient(client) || !IsPlayerAlive(client))
+	if (!g_cvarEnabled.BoolValue || !IsValidClient(client) || !IsPlayerAlive(client))
 	{
 		return Plugin_Continue;
 	}
