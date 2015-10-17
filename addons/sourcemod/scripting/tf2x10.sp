@@ -170,46 +170,47 @@ public void OnPluginStart()
 	RegAdminCmd("sm_tf2x10_setmod", Command_SetMod, ADMFLAG_CHEATS);
 	RegConsoleCmd("sm_x10group", Command_Group);
 
-	HookEvent("arena_win_panel", event_round_end, EventHookMode_PostNoCopy);
-	HookEvent("object_destroyed", event_object_destroyed, EventHookMode_Post);
-	HookEvent("object_removed", event_object_remove, EventHookMode_Post);
-	HookEvent("player_death", event_player_death, EventHookMode_Post);
-	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), Event_PlayerShieldBlocked);
-	HookEvent("post_inventory_application", event_postinventory, EventHookMode_Post);
-	HookEvent("teamplay_restart_round", event_round_end, EventHookMode_PostNoCopy);
-	HookEvent("teamplay_win_panel", event_round_end, EventHookMode_PostNoCopy);
-	HookEvent("round_end", event_round_end, EventHookMode_PostNoCopy);
-	HookEvent("object_deflected", event_deflected, EventHookMode_Post);
-	HookEvent("mvm_pickup_currency", event_pickup_currency, EventHookMode_Pre);
+	HookEvent("arena_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("object_destroyed", OnObjectDestroyed, EventHookMode_Post);
+	HookEvent("object_removed", OnObjectRemoved, EventHookMode_Post);
+	HookEvent("player_death", OnPlayerDeath, EventHookMode_Post);
+	HookEvent("post_inventory_application", OnPostInventoryApplication, EventHookMode_Post);
+	HookEvent("teamplay_restart_round", OnRoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("teamplay_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("round_end", OnRoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("object_deflected", OnObjectDeflected, EventHookMode_Post);
+	HookEvent("mvm_pickup_currency", OnPickupMVMCurrency, EventHookMode_Pre);
 
-	Handle hConf = LoadGameConfigFile("sdkhooks.games");
-	if(hConf == INVALID_HANDLE)
+	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), OnPlayerShieldBlocked);
+
+	Handle config = LoadGameConfigFile("sdkhooks.games");
+	if(config == INVALID_HANDLE)
 	{
 		SetFailState("Cannot find sdkhooks.games gamedata.");
 	}
 
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hConf, SDKConf_Virtual, "GetMaxHealth");
+	PrepSDKCall_SetFromConf(config, SDKConf_Virtual, "GetMaxHealth");
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
 	g_hSdkGetMaxHealth = EndPrepSDKCall();
-	hConf.Close();
+	config.Close();
 
 	if(g_hSdkGetMaxHealth == INVALID_HANDLE)
 	{
 		SetFailState("Failed to set up GetMaxHealth sdkcall. Your SDKHooks is probably outdated.");
 	}
 
-	hConf = LoadGameConfigFile("tf2items.randomizer");
-	if(hConf == INVALID_HANDLE)
+	config = LoadGameConfigFile("tf2items.randomizer");
+	if(config == INVALID_HANDLE)
 	{
 		SetFailState("Cannot find gamedata/tf2.randomizer.txt. Get the file from [TF2Items] GiveWeapon.");
 	}
 
 	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(hConf, SDKConf_Virtual, "CTFPlayer::EquipWearable");
+	PrepSDKCall_SetFromConf(config, SDKConf_Virtual, "CTFPlayer::EquipWearable");
 	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
 	g_hSdkEquipWearable = EndPrepSDKCall();
-	hConf.Close();
+	config.Close();
 
 	if(g_hSdkEquipWearable == INVALID_HANDLE)
 	{
@@ -736,7 +737,7 @@ public void OnClientDisconnect(int client)
 	}
 }
 
-public Action event_round_end(Handle event, const char[] name, bool dontBroadcast)
+public Action OnRoundEnd(Handle event, const char[] name, bool dontBroadcast)
 {
 	if(g_cvarEnabled.BoolValue)
 	{
@@ -1049,10 +1050,10 @@ public Action OnGetMaxHealth(int client, int &maxHealth)
 	return Plugin_Continue;
 }
 
-public Action event_deflected(Handle event, const char[] name, bool dontBroadcast)
+public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadcast)
 {
 	#if defined _freak_fortress_2_included
-	if(g_cvarEnabled.BoolValue && g_bFF2Running && !GetEventInt(event, "weaponid"))  //A non-0 weaponid indicates that a projectile got deflected and not a client
+	if(g_cvarEnabled.BoolValue && g_bFF2Running && !GetEventInt(event, "weaponid"))  //We only want a weaponid of 0 (a client)
 	{
 		int boss = FF2_GetBossIndex(GetClientOfUserId(GetEventInt(event, "ownerid")));
 
@@ -1077,7 +1078,7 @@ public Action event_deflected(Handle event, const char[] name, bool dontBroadcas
 	return Plugin_Continue;
 }
 
-public Action event_object_destroyed(Handle event, const char[] name, bool dontBroadcast)
+public Action OnObjectDestroyed(Handle event, const char[] name, bool dontBroadcast)
 {
 	if(!g_cvarEnabled.BoolValue)
 	{
@@ -1102,7 +1103,7 @@ public Action event_object_destroyed(Handle event, const char[] name, bool dontB
 	return Plugin_Continue;
 }
 
-public Action event_object_remove(Handle event, const char[] name, bool dontBroadcast)
+public Action OnObjectRemoved(Handle event, const char[] name, bool dontBroadcast)
 {
 	if(!g_cvarEnabled.BoolValue)
 	{
@@ -1130,7 +1131,7 @@ public Action event_object_remove(Handle event, const char[] name, bool dontBroa
 	return Plugin_Continue;
 }
 
-public Action event_pickup_currency(Handle event, const char[] name, bool dontBroadcast)
+public Action OnPickupMVMCurrency(Handle event, const char[] name, bool dontBroadcast)
 {
 	int client = GetEventInt(event, "player");
 	int dollars = GetEventInt(event, "currency");
@@ -1161,7 +1162,7 @@ Gameplay: Damage and Death Only
 
 ******************************************************************/
 
-public Action event_player_death(Handle event, const char[] name, bool dontBroadcast)
+public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 {
 	if(!g_cvarEnabled.BoolValue)
 	{
@@ -1413,7 +1414,7 @@ void CheckHealthCaps(int client)
 	}
 }
 
-public Action Event_PlayerShieldBlocked(UserMsg msg_id, Handle bf, const players[], int playersNum, bool reliable, bool init)
+public Action OnPlayerShieldBlocked(UserMsg msg_id, Handle bf, const players[], int playersNum, bool reliable, bool init)
 {
 	if(!g_cvarEnabled.BoolValue || playersNum < 2)
 	{
@@ -1536,7 +1537,7 @@ bool isCompatibleItem(char[] classname, int iItemDefinitionIndex)
 		iItemDefinitionIndex == 642));
 }
 
-public Action event_postinventory(Handle event, const char[] name, bool dontBroadcast)
+public Action OnPostInventoryApplication(Handle event, const char[] name, bool dontBroadcast)
 {
 	if(!g_cvarEnabled.BoolValue)
 	{
