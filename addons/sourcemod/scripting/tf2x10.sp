@@ -71,10 +71,9 @@ float g_fHeadScalingCap;
 int g_iHeadCap;
 
 Handle g_hHudText;
-Handle g_hItemInfoTrie;
 Handle g_hSdkGetMaxHealth;
 Handle g_hSdkEquipWearable;
-
+StringMap g_hItemInfoTrie;
 TopMenu g_hTopMenu;
 
 Handle dalokohsTimer[MAXPLAYERS + 1];
@@ -325,7 +324,7 @@ public void OnConVarChanged_tf2x10_enable(Handle convar, const char[] oldValue, 
 			g_bVSHRunning = false;
 		#endif
 
-		ClearTrie(g_hItemInfoTrie);
+		g_hItemInfoTrie.Clear();
 		LoadFileIntoTrie("default", "tf2x10_base_items");
 
 		if(g_bFF2Running || g_bVSHRunning)
@@ -352,7 +351,7 @@ public void OnConVarChanged_tf2x10_enable(Handle convar, const char[] oldValue, 
 			}
 		}
 
-		ClearTrie(g_hItemInfoTrie);
+		g_hItemInfoTrie.Clear();
 	}
 	DetectGameDescSetting();
 }
@@ -423,11 +422,11 @@ int LoadFileIntoTrie(const char[] rawname, const char[] basename = "")
 					{
 						hKeyValues.GetSectionName(strBuffer2, sizeof(strBuffer2));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%d_name", rawname, strBuffer, i);
-						SetTrieString(g_hItemInfoTrie, tmpID, strBuffer2);
+						g_hItemInfoTrie.SetString(tmpID, strBuffer2);
 
 						hKeyValues.GetString(NULL_STRING, strBuffer3, sizeof(strBuffer3));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%d_val", rawname, strBuffer, i);
-						SetTrieString(g_hItemInfoTrie, tmpID, strBuffer3);
+						g_hItemInfoTrie.SetString(tmpID, strBuffer3);
 
 						i++;
 					}
@@ -435,12 +434,12 @@ int LoadFileIntoTrie(const char[] rawname, const char[] basename = "")
 					hKeyValues.GoBack();
 
 					Format(tmpID, sizeof(tmpID), "%s__%s_size", rawname, strBuffer);
-					SetTrieValue(g_hItemInfoTrie, tmpID, i);
+					g_hItemInfoTrie.SetValue(tmpID, i);
 				}
 				while(hKeyValues.GotoNextKey());
 				hKeyValues.GoBack();
 
-				SetTrieValue(g_hItemInfoTrie, strBuffer, 1);
+				g_hItemInfoTrie.SetValue(strBuffer, 1);
 			}
 		}
 		else
@@ -588,7 +587,7 @@ public Action Command_SetMod(int client, int args)
 		int uselessVar;
 		GetCmdArg(1, g_sSelectedMod, sizeof(g_sSelectedMod));
 
-		if (!StrEqual(g_sSelectedMod, "default") && !GetTrieValue(g_hItemInfoTrie, g_sSelectedMod, uselessVar))
+		if (!StrEqual(g_sSelectedMod, "default") && !g_hItemInfoTrie.GetValue(g_sSelectedMod, uselessVar))
 		{
 			switch(LoadFileIntoTrie(g_sSelectedMod))
 			{
@@ -1482,10 +1481,10 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	char tmpID[32];
 
 	Format(tmpID, sizeof(tmpID), "%s__%d_size", g_sSelectedMod, itemDefinitionIndex);
-	if (!GetTrieValue(g_hItemInfoTrie, tmpID, size))
+	if (!g_hItemInfoTrie.GetValue(tmpID, size))
 	{
 		Format(tmpID, sizeof(tmpID), "default__%d_size", itemDefinitionIndex);
-		if (!GetTrieValue(g_hItemInfoTrie, tmpID, size))
+		if (!g_hItemInfoTrie.GetValue(tmpID, size))
 		{
 			return;
 		}
@@ -1502,10 +1501,10 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	for(int i=0; i < size; i++)
 	{
 		Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", selectedMod, itemDefinitionIndex, i);
-		GetTrieString(g_hItemInfoTrie, tmpID, attribName, sizeof(attribName));
+		g_hItemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
 
 		Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", selectedMod, itemDefinitionIndex, i);
-		GetTrieString(g_hItemInfoTrie, tmpID, attribValue, sizeof(attribValue));
+		g_hItemInfoTrie.GetString(tmpID, attribValue, sizeof(attribValue));
 
 		if(StrEqual(attribValue, "remove"))
 		{
