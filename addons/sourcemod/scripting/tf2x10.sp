@@ -155,7 +155,7 @@ public void OnPluginStart()
 	g_cvarHealthCap = CreateConVar("tf2x10_healthcap", "2100", "The max health a player can have. -1 to disable.", _, true, -1.0, false);
 	g_cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", _, true, 0.0, true, 1.0);
 
-	g_cvarEnabled.AddChangeHook(OnConVarChanged_tf2x10_enable);
+	g_cvarEnabled.AddChangeHook(OnConVarChanged);
 	g_cvarHeadCap.AddChangeHook(OnConVarChanged);
 	g_cvarHeadScaling.AddChangeHook(OnConVarChanged);
 	g_cvarHeadScalingCap.AddChangeHook(OnConVarChanged);
@@ -276,7 +276,65 @@ public void OnConfigsExecuted()
 
 public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] newValue)
 {
-	if(convar == g_cvarHeadCap)
+	if(convar == g_cvarEnabled)
+	{
+		if(g_cvarEnabled.BoolValue)
+		{
+			for(int client = 1; client <= MaxClients; client++)
+			{
+				if(IsValidClient(client))
+				{
+					ResetVariables(client);
+					SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+					SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+				}
+			}
+
+			g_bHiddenRunning = FindConVar("sm_hidden_enabled").BoolValue;
+			#if defined _freak_fortress_2_included
+			g_bFF2Running = LibraryExists("freak_fortress_2") ? FF2_IsFF2Enabled() : false;
+			#else
+			g_bFF2Running = false;
+			#endif
+
+			#if defined _saxtonhale_included
+			g_bVSHRunning = LibraryExists("saxtonhale") ? VSH_IsSaxtonHaleModeEnabled() : false;
+			#else
+			g_bVSHRunning = false;
+			#endif
+
+			g_hItemInfoTrie.Clear();
+			LoadFileIntoTrie("default", "tf2x10_base_items");
+
+			if(g_bFF2Running || g_bVSHRunning)
+			{
+				g_sSelectedMod = "vshff2";
+				LoadFileIntoTrie(g_sSelectedMod);
+			}
+
+			if(g_bAprilFools)
+			{
+				g_sSelectedMod = "aprilfools";
+				LoadFileIntoTrie(g_sSelectedMod);
+			}
+		}
+		else
+		{
+			for(int client = 1; client <= MaxClients; client++)
+			{
+				if(IsValidClient(client))
+				{
+					ResetVariables(client);
+					SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+					SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+					SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+				}
+			}
+			g_hItemInfoTrie.Clear();
+		}
+		SetGameDescription();
+	}
+	else if(convar == g_cvarHeadCap)
 	{
 		g_iHeadCap = g_cvarHeadCap.IntValue;
 	}
@@ -298,78 +356,17 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 	}
 }
 
-public void OnConVarChanged_tf2x10_enable(Handle convar, const char[] oldValue, const char[] newValue)
+void SetGameDescription()
 {
-	if(g_cvarEnabled.BoolValue)
+	char description[16];
+	GetGameDescription(description, sizeof(description));
+
+	if(g_cvarEnabled.BoolValue && g_cvarGameDesc.BoolValue)
 	{
-		for(int client=1; client < MaxClients; client++)
-		{
-			if(IsValidClient(client))
-			{
-				ResetVariables(client);
-				SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
-				SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
-			}
-		}
-
-		g_bHiddenRunning = FindConVar("sm_hidden_enabled").BoolValue;
-		#if defined _freak_fortress_2_included
-		g_bFF2Running = LibraryExists("freak_fortress_2") ? FF2_IsFF2Enabled() : false;
-		#else
-		g_bFF2Running = false;
-		#endif
-
-		#if defined _saxtonhale_included
-		g_bVSHRunning = LibraryExists("saxtonhale") ? VSH_IsSaxtonHaleModeEnabled() : false;
-		#else
-		g_bVSHRunning = false;
-		#endif
-
-		g_hItemInfoTrie.Clear();
-		LoadFileIntoTrie("default", "tf2x10_base_items");
-
-		if(g_bFF2Running || g_bVSHRunning)
-		{
-			g_sSelectedMod = "vshff2";
-			LoadFileIntoTrie(g_sSelectedMod);
-		}
-
-		if(g_bAprilFools)
-		{
-			g_sSelectedMod = "aprilfools";
-			LoadFileIntoTrie(g_sSelectedMod);
-		}
+		Format(description, sizeof(description), "TF2x10 v%s", PLUGIN_VERSION);
+		Steam_SetGameDescription(description);
 	}
-	else
-	{
-		for(int client=1; client < MaxClients; client++)
-		{
-			if(IsValidClient(client))
-			{
-				ResetVariables(client);
-				SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
-				SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
-			}
-		}
-
-		g_hItemInfoTrie.Clear();
-	}
-	DetectGameDescSetting();
-}
-
-void DetectGameDescSetting()
-{
-	bool bGameDesc = g_cvarGameDesc.BoolValue;
-
-	char sDescription[16];
-	GetGameDescription(sDescription, sizeof(sDescription));
-
-	if(g_cvarEnabled.BoolValue && bGameDesc && StrEqual(sDescription, "Team Fortress"))
-	{
-		Format(sDescription, sizeof(sDescription), "TF2x10 v%s", PLUGIN_VERSION);
-		Steam_SetGameDescription(sDescription);
-	}
-	else if((!g_cvarEnabled.BoolValue || !bGameDesc) && StrContains(sDescription, "TF2x10 ") != -1)
+	else if(!g_cvarEnabled.BoolValue || !g_cvarGameDesc.BoolValue)
 	{
 		Steam_SetGameDescription("Team Fortress");
 	}
@@ -465,7 +462,7 @@ public Action Timer_ServerRunningX10(Handle hTimer)
 		return Plugin_Stop;
 	}
 
-	DetectGameDescSetting();
+	SetGameDescription();
 
 	PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] Mod by \x07FF5C33UltiMario\x01 and \x073399FFMr. Blue\x01. Plugin development by \x07008800Wliu\x01 (based off of \x0794DBFFI\x01s\x0794DBFFa\x01t\x0794DBFFi\x01s's and \x075C5C8AInvisGhost\x01's code).");
 	PrintToChatAll("\x01Join our Steam group for Hale x10, Randomizer x10 and more by typing \x05/x10group\x01!");
@@ -694,7 +691,7 @@ public void OnMapStart()
 {
 	if(g_cvarEnabled.BoolValue)
 	{
-		DetectGameDescSetting();
+		SetGameDescription();
 	}
 }
 
