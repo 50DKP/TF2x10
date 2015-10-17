@@ -289,7 +289,7 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 	}
 	else if(convar == FindConVar("tf_feign_death_duration"))
 	{
-		tf_feign_death_duration = GetConVarInt(FindConVar("tf_feign_death_duration"));
+		tf_feign_death_duration = FindConVar("tf_feign_death_duration").IntValue;
 	}
 	else if(convar == g_cvarAutoUpdate)
 	{
