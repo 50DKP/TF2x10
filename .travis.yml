@@ -1,10 +1,6 @@
-#Use the new container-based infrastructure
-sudo: false
-
-#Install some apt packages needed for spcomp
-addons:
-    apt_packages:
-        - lib32stdc++6
+#Use Trusty
+sudo: required
+dist: trusty
 
 #Set the build environment
 env:
