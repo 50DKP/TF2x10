@@ -16,7 +16,6 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 #include <sdktools>
 #include <adminmenu>
 #include <sdkhooks>
-//#include <morecolors>  //Next version
 #include <tf2_stocks>
 #include <tf2items>
 #include <tf2attributes>
@@ -464,7 +463,7 @@ public Action Timer_ServerRunningX10(Handle hTimer)
 
 	SetGameDescription();
 
-	PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] Mod by \x07FF5C33UltiMario\x01 and \x073399FFMr. Blue\x01. Plugin development by \x07008800Wliu\x01 (based off of \x0794DBFFI\x01s\x0794DBFFa\x01t\x0794DBFFi\x01s's and \x075C5C8AInvisGhost\x01's code).");
+	PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] Mod by \x07FF5C33UltiMario\x01 and \x073399FFMr. Blue\x01. Plugin development by \x079EC34FWliu\x01 (based off of \x0794DBFFI\x01s\x0794DBFFa\x01t\x0794DBFFi\x01s's and \x075C5C8AInvisGhost\x01's code).");
 	PrintToChatAll("\x01Join our Steam group for Hale x10, Randomizer x10 and more by typing \x05/x10group\x01!");
 
 	return Plugin_Continue;
@@ -1049,25 +1048,31 @@ public Action OnGetMaxHealth(int client, int &maxHealth)
 
 public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadcast)
 {
+	PrintToChatAll("Entered OnObjectDeflected");
 	#if defined _freak_fortress_2_included
 	if(g_cvarEnabled.BoolValue && g_bFF2Running && !GetEventInt(event, "weaponid"))  //We only want a weaponid of 0 (a client)
 	{
 		int boss = FF2_GetBossIndex(GetClientOfUserId(GetEventInt(event, "ownerid")));
+		PrintToChatAll("Boss id: %i; client id: %i", boss, GetClientOfUserId(GetEventInt(event, "ownerid")));
 
 		int weapon = GetEntPropEnt(GetClientOfUserId(GetEventInt(event, "userid")), Prop_Send, "m_hActiveWeapon");
 		int index = IsValidEntity(weapon) ? GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") : -1;
+		PrintToChatAll("Weapon index: %i", index);
 
-		if(boss != -1 && (index == 40 || index == 1146)) //backburner
+		if(boss != -1 && (index == 40 || index == 1146)) //Backburner
 		{
-			float charge = FF2_GetBossCharge(boss, 0) + 63.0; //work with FF2's deflect to set to 70 in total instead of 7
+			float charge = FF2_GetBossCharge(boss, 0) + 63.0; //Work with FF2's deflect to set to 70 in total instead of 7
+			PrintToChatAll("New charge: %f", charge);
 
 			if(charge > 100.0)
 			{
 				FF2_SetBossCharge(boss, 0, 100.0);
+				PrintToChatAll("Set boss charge");
 			}
 			else
 			{
 				FF2_SetBossCharge(boss, 0, charge);
+				PrintToChatAll("Set boss charge");
 			}
 		}
 	}
