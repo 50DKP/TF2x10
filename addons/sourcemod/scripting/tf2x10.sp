@@ -182,7 +182,7 @@ public void OnPluginStart()
 	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), OnPlayerShieldBlocked);
 
 	Handle config = LoadGameConfigFile("tf2items.randomizer");
-	if(config == INVALID_HANDLE)
+	if(config == null)
 	{
 		SetFailState("Cannot find gamedata/tf2.randomizer.txt. Get the file from [TF2Items] GiveWeapon.");
 	}
@@ -193,7 +193,7 @@ public void OnPluginStart()
 	g_hSdkEquipWearable = EndPrepSDKCall();
 	config.Close();
 
-	if(g_hSdkEquipWearable == INVALID_HANDLE)
+	if(g_hSdkEquipWearable == null)
 	{
 		SetFailState("Failed to set up EquipWearable sdkcall. Get a int gamedata/tf2items.randomizer.txt from [TF2Items] GiveWeapon.");
 	}
@@ -207,7 +207,7 @@ public void OnPluginStart()
 	}
 
 	TopMenu hTopMenu = GetAdminTopMenu();
-	if(LibraryExists("adminmenu") && hTopMenu != INVALID_HANDLE)
+	if(LibraryExists("adminmenu") && hTopMenu != null)
 	{
 		OnAdminMenuReady(hTopMenu);
 	}
@@ -223,7 +223,7 @@ public void OnConfigsExecuted()
 		return;
 	}
 
-	if(FindConVar("aw2_version") != INVALID_HANDLE)
+	if(FindConVar("aw2_version") != null)
 	{
 		SetFailState("TF2x10 is incompatible with Advanced Weaponiser.");
 	}
@@ -872,10 +872,10 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		}
 
-		if(dalokohsTimer[client] != INVALID_HANDLE)
+		if(dalokohsTimer[client] != null)
 		{
 			KillTimer(dalokohsTimer[client]);
-			dalokohsTimer[client] = INVALID_HANDLE;
+			dalokohsTimer[client] = null;
 		}
 		dalokohsTimer[client] = CreateTimer(30.0, Timer_DalokohsEnd, userid, TIMER_FLAG_NO_MAPCHANGE);
 		//TF2Attrib_SetByName(secondary, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH - 300));  //Disabled due to Invasion crashes
@@ -909,7 +909,7 @@ public Action Timer_DalokohsEnd(Handle timer, any userid)
 	{
 		dalokohs[client] = 0;
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
-		dalokohsTimer[client] = INVALID_HANDLE;
+		dalokohsTimer[client] = null;
 	}
 	return Plugin_Continue;
 }
@@ -1215,10 +1215,10 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 	if(dalokohs[client])
 	{
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
-		if(dalokohsTimer[client] != INVALID_HANDLE)
+		if(dalokohsTimer[client] != null)
 		{
 			KillTimer(dalokohsTimer[client]);
-			dalokohsTimer[client] = INVALID_HANDLE;
+			dalokohsTimer[client] = null;
 		}
 	}
 
