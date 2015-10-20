@@ -345,6 +345,11 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 	}
 }
 
+public Action Updater_OnPluginChecking()
+{
+	g_cvarAutoUpdate.BoolValue ? return Plugin_Continue : return Plugin_Handled;
+}
+
 void SetGameDescription()
 {
 	char description[16];
