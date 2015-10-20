@@ -289,8 +289,16 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 				}
 			}
 
-			g_bHiddenRunning = FindConVar("sm_hidden_enabled").BoolValue;
-			#if defined _freak_fortress_2_included
+			if(FindConVar("sm_hidden_enabled"))
+			{
+				g_bHiddenRunning = FindConVar("sm_hidden_enabled").BoolValue;
+			}
+			else
+			{
+				g_bHiddenRunning = false;
+			}
+
+			#if defined _FF2_included
 			g_bFF2Running = LibraryExists("freak_fortress_2") ? FF2_IsFF2Enabled() : false;
 			#else
 			g_bFF2Running = false;
@@ -624,8 +632,16 @@ SourceMod Map/Library Events
 
 public void OnAllPluginsLoaded()
 {
-	g_bHiddenRunning = FindConVar("sm_hidden_enabled").BoolValue;
-	#if defined _freak_fortress_2_included
+	if(FindConVar("sm_hidden_enabled"))
+	{
+		g_bHiddenRunning = FindConVar("sm_hidden_enabled").BoolValue;
+	}
+	else
+	{
+		g_bHiddenRunning = false;
+	}
+
+	#if defined _FF2_included
 	g_bFF2Running = LibraryExists("freak_fortress_2") ? FF2_IsFF2Enabled() : false;
 	#else
 	g_bFF2Running = false;
@@ -658,7 +674,7 @@ public void OnLibraryAdded(const char[] name)
 	}
 	else if(StrEqual(name, "freak_fortress_2"))
 	{
-		#if defined _freak_fortress_2_included
+		#if defined _FF2_included
 		g_bFF2Running = FF2_IsFF2Enabled();
 		#endif
 	}
@@ -1048,31 +1064,25 @@ public Action OnGetMaxHealth(int client, int &maxHealth)
 
 public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadcast)
 {
-	PrintToChatAll("Entered OnObjectDeflected");
-	#if defined _freak_fortress_2_included
+	#if defined _FF2_included
 	if(g_cvarEnabled.BoolValue && g_bFF2Running && !GetEventInt(event, "weaponid"))  //We only want a weaponid of 0 (a client)
 	{
 		int boss = FF2_GetBossIndex(GetClientOfUserId(GetEventInt(event, "ownerid")));
-		PrintToChatAll("Boss id: %i; client id: %i", boss, GetClientOfUserId(GetEventInt(event, "ownerid")));
 
 		int weapon = GetEntPropEnt(GetClientOfUserId(GetEventInt(event, "userid")), Prop_Send, "m_hActiveWeapon");
 		int index = IsValidEntity(weapon) ? GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") : -1;
-		PrintToChatAll("Weapon index: %i", index);
 
 		if(boss != -1 && (index == 40 || index == 1146)) //Backburner
 		{
 			float charge = FF2_GetBossCharge(boss, 0) + 63.0; //Work with FF2's deflect to set to 70 in total instead of 7
-			PrintToChatAll("New charge: %f", charge);
 
 			if(charge > 100.0)
 			{
 				FF2_SetBossCharge(boss, 0, 100.0);
-				PrintToChatAll("Set boss charge");
 			}
 			else
 			{
 				FF2_SetBossCharge(boss, 0, charge);
-				PrintToChatAll("Set boss charge");
 			}
 		}
 	}
@@ -1387,7 +1397,7 @@ bool ShouldDisableWeapons(int client)
 	//in case vsh/ff2 and other mods are running, disable x10 effects and checks
 	//this list may get extended as I check out more game mods
 
-	#if defined _freak_fortress_2_included
+	#if defined _FF2_included
 	if(g_bFF2Running && FF2_GetBossTeam() == GetClientTeam(client))
 	{
 		return true;
@@ -1547,7 +1557,15 @@ public Action OnPostInventoryApplication(Handle event, const char[] name, bool d
 	}
 
 	int userid = GetEventInt(event, "userid");
-	float delay = FindConVar("tf2items_rnd_enabled").BoolValue ? 0.3 : 0.1;
+	float delay;
+	if(FindConVar("tf2items_rnd_enabled"))
+	{
+		delay = FindConVar("tf2items_rnd_enabled").BoolValue ? 0.3 : 0.1;
+	}
+	else
+	{
+		delay = 0.1;
+	}
 
 	UpdateVariables(GetClientOfUserId(userid));
 	CreateTimer(delay, Timer_FixClips, userid, TIMER_FLAG_NO_MAPCHANGE);
