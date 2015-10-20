@@ -637,14 +637,14 @@ public void OnAllPluginsLoaded()
 
 	if(g_bFF2Running || g_bVSHRunning)
 	{
-		selectedMod = "vshff2";
-		LoadFileIntoTrie(selectedMod);
+		g_sSelectedMod = "vshff2";
+		LoadFileIntoTrie(g_sSelectedMod);
 	}
 
 	if(g_bAprilFools)
 	{
-		selectedMod = "aprilfools";
-		LoadFileIntoTrie(selectedMod);
+		g_sSelectedMod = "aprilfools";
+		LoadFileIntoTrie(g_sSelectedMod);
 	}
 }
 
@@ -820,7 +820,7 @@ public Action Timer_BazaarCharge(Handle hTimer, any userid)
 		charge = 150.0;
 	}
 
-	SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", charge);
+	SetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage", charge);
 	return Plugin_Continue;
 }
 
@@ -926,13 +926,15 @@ public void OnGameFrame()
 		if(g_bTakesHeads[client])
 		{
 			int heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
-			/*if(heads > 4)
+			if(heads > 4)
 			{
 				float speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
+				PrintToChatAll("[TF2x10] %N's current speed is %f", speed);
 				float newSpeed = heads < g_iHeadCap ? speed + 20.0 : speed;
-				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed > 520.0 ? 520.0 : newSpeed);
-				PrintToChatAll("[TF2x10] %N %i heads %f speed", client, heads, newSpeed > 520.0 ? 520.0 : newSpeed);
-			}*/
+				PrintToChatAll("[TF2x10] New speed: %f", newSpeed);
+				/*SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed > 520.0 ? 520.0 : newSpeed);
+				PrintToChatAll("[TF2x10] %N %i heads %f speed", client, heads, newSpeed > 520.0 ? 520.0 : newSpeed);*/
+			}
 
 			if(g_bHeadScaling)
 			{
@@ -1045,7 +1047,7 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
 		int client = GetClientOfUserId(GetEventInt(event, "ownerid"));
 		int boss = FF2_GetBossIndex(client);
 
-		int weapon = GetEntPropEnt(client), Prop_Send, "m_hActiveWeapon");
+		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		int index = IsValidEntity(weapon) ? GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") : -1;
 
 		if(boss != -1 && (index == 40 || index == 1146)) //Backburner
