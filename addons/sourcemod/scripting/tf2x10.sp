@@ -70,7 +70,6 @@ float g_fHeadScalingCap;
 int g_iHeadCap;
 
 Handle g_hHudText;
-Handle g_hSdkGetMaxHealth;
 Handle g_hSdkEquipWearable;
 StringMap g_hItemInfoTrie;
 TopMenu g_hTopMenu;
@@ -182,24 +181,7 @@ public void OnPluginStart()
 
 	HookUserMessage(GetUserMessageId("PlayerShieldBlocked"), OnPlayerShieldBlocked);
 
-	Handle config = LoadGameConfigFile("sdkhooks.games");
-	if(config == INVALID_HANDLE)
-	{
-		SetFailState("Cannot find sdkhooks.games gamedata.");
-	}
-
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(config, SDKConf_Virtual, "GetMaxHealth");
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	g_hSdkGetMaxHealth = EndPrepSDKCall();
-	config.Close();
-
-	if(g_hSdkGetMaxHealth == INVALID_HANDLE)
-	{
-		SetFailState("Failed to set up GetMaxHealth sdkcall. Your SDKHooks is probably outdated.");
-	}
-
-	config = LoadGameConfigFile("tf2items.randomizer");
+	Handle config = LoadGameConfigFile("tf2items.randomizer");
 	if(config == INVALID_HANDLE)
 	{
 		SetFailState("Cannot find gamedata/tf2.randomizer.txt. Get the file from [TF2Items] GiveWeapon.");
@@ -1585,11 +1567,10 @@ public Action Timer_FixClips(Handle hTimer, any userid)
 		}
 	}
 
-	int maxhealth = SDKCall(g_hSdkGetMaxHealth, client);
-
-	if(GetClientHealth(client) != maxhealth)
+	int maxHealth = GetEntProp(client, Prop_Data, "m_iMaxHealth");
+	if(GetClientHealth(client) != maxHealth)
 	{
-		TF2_SetHealth(client, maxhealth);
+		TF2_SetHealth(client, maxHealth);
 	}
 
 	UpdateVariables(client);
