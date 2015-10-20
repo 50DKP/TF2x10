@@ -368,12 +368,12 @@ void SetGameDescription()
 	char description[16];
 	GetGameDescription(description, sizeof(description));
 
-	if(g_cvarEnabled.BoolValue && g_cvarGameDesc.BoolValue)
+	if(g_cvarEnabled.BoolValue && g_cvarGameDesc.BoolValue && StrEqual(description, "Team Fortress"))
 	{
 		Format(description, sizeof(description), "TF2x10 v%s", PLUGIN_VERSION);
 		Steam_SetGameDescription(description);
 	}
-	else if(!g_cvarEnabled.BoolValue || !g_cvarGameDesc.BoolValue)
+	else if(!g_cvarEnabled.BoolValue || !g_cvarGameDesc.BoolValue && StrContains(description, "TF2x10 ") != -1)
 	{
 		Steam_SetGameDescription("Team Fortress");
 	}
@@ -426,11 +426,11 @@ int LoadFileIntoTrie(const char[] rawname, const char[] basename = "")
 					do
 					{
 						hKeyValues.GetSectionName(strBuffer2, sizeof(strBuffer2));
-						Format(tmpID, sizeof(tmpID), "%s__%s_%d_name", rawname, strBuffer, i);
+						Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", rawname, strBuffer, i);
 						g_hItemInfoTrie.SetString(tmpID, strBuffer2);
 
 						hKeyValues.GetString(NULL_STRING, strBuffer3, sizeof(strBuffer3));
-						Format(tmpID, sizeof(tmpID), "%s__%s_%d_val", rawname, strBuffer, i);
+						Format(tmpID, sizeof(tmpID), "%s__%s_%i_val", rawname, strBuffer, i);
 						g_hItemInfoTrie.SetString(tmpID, strBuffer3);
 
 						i++;
@@ -469,11 +469,8 @@ public Action Timer_ServerRunningX10(Handle hTimer)
 		return Plugin_Stop;
 	}
 
-	SetGameDescription();
-
 	PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] Mod by \x07FF5C33UltiMario\x01 and \x073399FFMr. Blue\x01. Plugin development by \x079EC34FWliu\x01 (based off of \x0794DBFFI\x01s\x0794DBFFa\x01t\x0794DBFFi\x01s's and \x075C5C8AInvisGhost\x01's code).");
 	PrintToChatAll("\x01Join our Steam group for Hale x10, Randomizer x10 and more by typing \x05/x10group\x01!");
-
 	return Plugin_Continue;
 }
 
@@ -485,21 +482,19 @@ SourceMod Admin Commands
 
 public void AdminMenu_Recache(Handle topmenu, TopMenuAction action, TopMenuObject object_id, int param, char[] buffer, int maxlength)
 {
-	if(!g_cvarEnabled.BoolValue)
+	if(g_cvarEnabled.BoolValue)
 	{
-		return;
-	}
-
-	switch(action)
-	{
-		case TopMenuAction_DisplayOption:
+		switch(action)
 		{
-			Format(buffer, maxlength, "TF2x10 Recache Weapons");
-		}
+			case TopMenuAction_DisplayOption:
+			{
+				Format(buffer, maxlength, "TF2x10 Recache Weapons");
+			}
 
-		case TopMenuAction_SelectOption:
-		{
-			Command_Recache(param, 0);
+			case TopMenuAction_SelectOption:
+			{
+				Command_Recache(param, 0);
+			}
 		}
 	}
 }
@@ -536,7 +531,7 @@ public Action Command_GetMod(int client, int args)
 {
 	if(g_cvarEnabled.BoolValue)
 	{
-		ReplyToCommand(client, "[TF2x10] This mod is loading from configs/x10.%s.txt primarily.", g_sSelectedMod);
+		ReplyToCommand(client, "[TF2x10] This mod is loading primarily from configs/x10.%s.txt.", g_sSelectedMod);
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
@@ -655,14 +650,14 @@ public void OnAllPluginsLoaded()
 
 	if(g_bFF2Running || g_bVSHRunning)
 	{
-		g_sSelectedMod = "vshff2";
-		LoadFileIntoTrie(g_sSelectedMod);
+		selectedMod = "vshff2";
+		LoadFileIntoTrie(selectedMod);
 	}
 
 	if(g_bAprilFools)
 	{
-		g_sSelectedMod = "aprilfools";
-		LoadFileIntoTrie(g_sSelectedMod);
+		selectedMod = "aprilfools";
+		LoadFileIntoTrie(selectedMod);
 	}
 }
 
@@ -712,10 +707,10 @@ public void OnMapStart()
 
 public void OnMapEnd()
 {
-	char sDescription[16];
-	GetGameDescription(sDescription, sizeof(sDescription));
+	char description[16];
+	GetGameDescription(description, sizeof(description));
 
-	if(g_cvarEnabled.BoolValue && g_cvarGameDesc.BoolValue && StrContains(sDescription, "TF2x10 ") != -1)
+	if(g_cvarEnabled.BoolValue && g_cvarGameDesc.BoolValue && StrContains(description, "TF2x10 ") != -1)
 	{
 		Steam_SetGameDescription("Team Fortress");
 	}
@@ -753,7 +748,7 @@ public Action OnRoundEnd(Handle event, const char[] name, bool dontBroadcast)
 {
 	if(g_cvarEnabled.BoolValue)
 	{
-		for(int client=1; client <= MaxClients; client++)
+		for(int client = 1; client <= MaxClients; client++)
 		{
 			ResetVariables(client);
 		}
@@ -777,13 +772,13 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 	int weapon = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
 	int index = IsValidEntity(weapon) ? GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") : -1;
 
-	if(condition == TFCond_Zoomed && index == 402)
+	if(condition == TFCond_Zoomed && index == 402)  //Bazaar Bargain
 	{
 		g_fChargeBegin[client] = GetGameTime();
 		CreateTimer(0.0, Timer_BazaarCharge, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 
-	if(condition == TFCond_Taunting && (index == 159 || index == 433) && !g_bVSHRunning && !g_bFF2Running && !g_bHiddenRunning)
+	if(condition == TFCond_Taunting && (index == 159 || index == 433) && !g_bVSHRunning && !g_bFF2Running && !g_bHiddenRunning)  //Dalokohs Bar, Fishcake
 	{
 		CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
@@ -814,36 +809,31 @@ public Action Timer_BazaarCharge(Handle hTimer, any userid)
 		return Plugin_Stop;
 	}
 
-	int activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-
-	if(!IsValidEntity(activeWep))
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if(!IsValidEntity(weapon))
 	{
 		return Plugin_Stop;
 	}
 
-	int index = GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex");
-
-	if(index != 402)
+	int index = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+	if(index != 402)  //Bazaar Bargain
 	{
 		return Plugin_Stop;
 	}
 
 	int heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
-
 	if(heads > sizeof(g_fBazaarRates) - 1)
 	{
 		heads = sizeof(g_fBazaarRates) - 1;
 	}
 
 	float charge = 150 * (GetGameTime() - g_fChargeBegin[client]) / g_fBazaarRates[heads];
-
 	if(charge > 150)
 	{
 		charge = 150.0;
 	}
 
 	SetEntPropFloat(activeWep, Prop_Send, "m_flChargedDamage", charge);
-
 	return Plugin_Continue;
 }
 
@@ -939,7 +929,7 @@ public Action Timer_DalokohsEnd(Handle timer, any userid)
 
 public void OnGameFrame()
 {
-	for(int client=1; client <= MaxClients; client++)
+	for(int client = 1; client <= MaxClients; client++)
 	{
 		if(!IsValidClient(client) || !IsPlayerAlive(client))
 		{
@@ -983,7 +973,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	int activeWep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	int index = IsValidEntity(activeWep) ? GetEntProp(activeWep, Prop_Send, "m_iItemDefinitionIndex") : -1;
 
-	if(buttons & IN_ATTACK && index == 1098)
+	if(buttons & IN_ATTACK && index == 1098)  //Classic
 	{
 		g_bChargingClassic[client] = true;
 	}
@@ -992,13 +982,13 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		g_bChargingClassic[client] = false;
 	}
 
-	if(index == 307)
+	if(index == 307)  //Ullapool Caber
 	{
 		int detonated = GetEntProp(activeWep, Prop_Send, "m_iDetonated");
 		if(!detonated)
 		{
 			SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
-			ShowSyncHudText(client, g_hHudText, "Cabers: %d", g_iCabers[client]);
+			ShowSyncHudText(client, g_hHudText, "Cabers: %i", g_iCabers[client]);
 		}
 
 		if(g_iCabers[client] > 1 && detonated == 1)
@@ -1008,10 +998,9 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		}
 	}
 
-	else if(index == 19 || index == 206 || index == 1007)
+	else if(index == 19 || index == 206 || index == 1007) //Grenade Launcher, Strange Grenade Launcher, Festive Grenade Launcher
 	{
-		int iClip = GetEntProp(activeWep, Prop_Send, "m_iClip1");
-		if(iClip >= 10)
+		if(GetEntProp(activeWep, Prop_Send, "m_iClip1") >= 10)
 		{
 			buttons &= ~IN_ATTACK;
 		}
@@ -1020,7 +1009,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	if(g_iRazorbackCount[client] > 1)
 	{
 		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
-		ShowSyncHudText(client, g_hHudText, "Razorbacks: %d", g_iRazorbackCount[client]);
+		ShowSyncHudText(client, g_hHudText, "Razorbacks: %i", g_iRazorbackCount[client]);
 	}
 
 	if(g_bHasManmelter[client])
@@ -1038,7 +1027,6 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			g_iRevengeCrits[client] = revengeCrits;
 		}
 	}
-
 	return Plugin_Continue;
 }
 
@@ -1067,15 +1055,15 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
 	#if defined _FF2_included
 	if(g_cvarEnabled.BoolValue && g_bFF2Running && !GetEventInt(event, "weaponid"))  //We only want a weaponid of 0 (a client)
 	{
-		int boss = FF2_GetBossIndex(GetClientOfUserId(GetEventInt(event, "ownerid")));
+		int client = GetClientOfUserId(GetEventInt(event, "ownerid"));
+		int boss = FF2_GetBossIndex(client);
 
-		int weapon = GetEntPropEnt(GetClientOfUserId(GetEventInt(event, "userid")), Prop_Send, "m_hActiveWeapon");
+		int weapon = GetEntPropEnt(client), Prop_Send, "m_hActiveWeapon");
 		int index = IsValidEntity(weapon) ? GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") : -1;
 
 		if(boss != -1 && (index == 40 || index == 1146)) //Backburner
 		{
 			float charge = FF2_GetBossCharge(boss, 0) + 63.0; //Work with FF2's deflect to set to 70 in total instead of 7
-
 			if(charge > 100.0)
 			{
 				FF2_SetBossCharge(boss, 0, 100.0);
@@ -1098,18 +1086,17 @@ public Action OnObjectDestroyed(Handle event, const char[] name, bool dontBroadc
 	}
 
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-	int primaryWep = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary);
+	int primary = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary);
 	int critsDiamondback = g_cvarCritsDiamondback.IntValue;
 
-	if(IsValidClient(attacker) && IsPlayerAlive(attacker) && critsDiamondback > 0 && IsValidEntity(primaryWep) && WeaponHasAttribute(attacker, primaryWep, "sapper kills collect crits"))
+	if(IsValidClient(attacker) && IsPlayerAlive(attacker) && critsDiamondback > 0 && IsValidEntity(primary) && WeaponHasAttribute(attacker, primary, "sapper kills collect crits"))
 	{
 		char weapon[32];
 		GetEventString(event, "weapon", weapon, sizeof(weapon));
 
 		if(StrContains(weapon, "sapper") != -1 || StrEqual(weapon, "recorder"))
 		{
-			int crits = GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + critsDiamondback - 1;
-			SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", crits);
+			SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + critsDiamondback - 1);
 		}
 	}
 	return Plugin_Continue;
@@ -1134,7 +1121,7 @@ public Action OnObjectRemoved(Handle event, const char[] name, bool dontBroadcas
 		return Plugin_Continue;
 	}
 
-	if(WeaponHasAttribute(client, weapon, "mod sentry killed revenge") && GetEventInt(event, "objecttype") == 2)
+	if(WeaponHasAttribute(client, weapon, "mod sentry killed revenge") && GetEventInt(event, "objecttype") == 2)  //Sentry gun
 	{
 		int crits = GetEntProp(client, Prop_Send, "m_iRevengeCrits") + g_iBuildingsDestroyed[client];
 		SetEntProp(client, Prop_Send, "m_iRevengeCrits", crits);
@@ -1318,7 +1305,7 @@ public void OnPreThink(int client)
 		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		int index = IsValidEntity(weapon) ? GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") : -1;
 
-		if(IsValidEntity(weapon) && index == 1098)
+		if(IsValidEntity(weapon) && index == 1098)  //Classic
 		{
 			SetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage", GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage") * 10);
 		}
@@ -1491,10 +1478,10 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	char selectedMod[16];
 	char tmpID[32];
 
-	Format(tmpID, sizeof(tmpID), "%s__%d_size", g_sSelectedMod, itemDefinitionIndex);
+	Format(tmpID, sizeof(tmpID), "%s__%i_size", g_sSelectedMod, itemDefinitionIndex);
 	if(!g_hItemInfoTrie.GetValue(tmpID, size))
 	{
-		Format(tmpID, sizeof(tmpID), "default__%d_size", itemDefinitionIndex);
+		Format(tmpID, sizeof(tmpID), "default__%i_size", itemDefinitionIndex);
 		if(!g_hItemInfoTrie.GetValue(tmpID, size))
 		{
 			return;
@@ -1509,12 +1496,12 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 		strcopy(selectedMod, sizeof(selectedMod), g_sSelectedMod);
 	}
 
-	for(int i=0; i < size; i++)
+	for(int i; i < size; i++)
 	{
-		Format(tmpID, sizeof(tmpID), "%s__%d_%d_name", selectedMod, itemDefinitionIndex, i);
+		Format(tmpID, sizeof(tmpID), "%s__%i_%i_name", selectedMod, itemDefinitionIndex, i);
 		g_hItemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
 
-		Format(tmpID, sizeof(tmpID), "%s__%d_%d_val", selectedMod, itemDefinitionIndex, i);
+		Format(tmpID, sizeof(tmpID), "%s__%i_%i_val", selectedMod, itemDefinitionIndex, i);
 		g_hItemInfoTrie.GetString(tmpID, attribValue, sizeof(attribValue));
 
 		if(StrEqual(attribValue, "remove"))
@@ -1712,28 +1699,28 @@ void ResetVariables(int client)
 
 void UpdateVariables(int client)
 {
-	int primyWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Primary);
-	int secndWep = GetPlayerWeaponSlot_Wearable(client, TFWeaponSlot_Secondary);
-	int meleeWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
+	int primary = GetPlayerWeaponSlot(client, TFWeaponSlot_Primary);
+	int secondary = GetPlayerWeaponSlot_Wearable(client, TFWeaponSlot_Secondary);
+	int melee = GetPlayerWeaponSlot(client, TFWeaponSlot_Melee);
 
-	if(!IsValidEntity(secndWep))
+	if(!IsValidEntity(secondary))
 	{
-		secndWep = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+		secondary = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
 	}
 
-	if(IsValidEntity(primyWep))
+	if(IsValidEntity(primary))
 	{
-		g_bHasBazooka[client] = GetEntProp(primyWep, Prop_Send, "m_iItemDefinitionIndex") == 730;
+		g_bHasBazooka[client] = GetEntProp(primary, Prop_Send, "m_iItemDefinitionIndex") == 730;
 	}
 	else
 	{
 		g_bHasBazooka[client] = false;
 	}
 
-	if(IsValidEntity(secndWep))
+	if(IsValidEntity(secondary))
 	{
-		g_iRazorbackCount[client] = WeaponHasAttribute(client, secndWep, "backstab shield") ? 10 : 0;
-		g_bHasManmelter[client] = WeaponHasAttribute(client, secndWep, "extinguish earns revenge crits");
+		g_iRazorbackCount[client] = WeaponHasAttribute(client, secondary, "backstab shield") ? 10 : 0;
+		g_bHasManmelter[client] = WeaponHasAttribute(client, secondary, "extinguish earns revenge crits");
 	}
 	else
 	{
@@ -1741,10 +1728,10 @@ void UpdateVariables(int client)
 		g_bHasManmelter[client] = false;
 	}
 
-	if(IsValidEntity(meleeWep))
+	if(IsValidEntity(melee))
 	{
-		g_bHasCaber[client] = GetEntProp(meleeWep, Prop_Send, "m_iItemDefinitionIndex") == 307;
-		g_bTakesHeads[client] = WeaponHasAttribute(client, meleeWep, "decapitate type");
+		g_bHasCaber[client] = GetEntProp(melee, Prop_Send, "m_iItemDefinitionIndex") == 307;
+		g_bTakesHeads[client] = WeaponHasAttribute(client, melee, "decapitate type");
 		if(g_bTakesHeads[client])
 		{
 			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
@@ -1758,12 +1745,12 @@ void UpdateVariables(int client)
 	g_iCabers[client] = g_bHasCaber[client] ? 10 : 0;
 }
 
-stock void TF2_SetHealth(int client, int NewHealth)
+stock void TF2_SetHealth(int client, int health)
 {
 	if(IsValidClient(client))
 	{
-		SetEntProp(client, Prop_Send, "m_iHealth", NewHealth);
-		SetEntProp(client, Prop_Data, "m_iHealth", NewHealth);
+		SetEntProp(client, Prop_Send, "m_iHealth", health);
+		SetEntProp(client, Prop_Data, "m_iHealth", health);
 	}
 }
 
