@@ -1526,7 +1526,8 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 			TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
 		}
 
-		if(itemDefinitionIndex==1153 && TF2_GetPlayerClass(client)==TFClass_Engineer)  //Engineer has the Panic Attack in the primary slot
+		//Engineer has the Panic Attack in the primary slot
+		if(itemDefinitionIndex==1153 && TF2_GetPlayerClass(client)==TFClass_Engineer && StrEqual(attribName, "maxammo secondary increased"))
 		{
 			TF2Attrib_RemoveByName(entityIndex, "maxammo secondary increased");
 			TF2Attrib_SetByName(entityIndex, "maxammo primary increased", StringToFloat(attribValue));
