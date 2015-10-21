@@ -929,7 +929,7 @@ public void OnGameFrame()
 			if(heads > 4)
 			{
 				float speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
-				PrintToChatAll("[TF2x10] %N's current speed is %f", speed);
+				PrintToChatAll("[TF2x10] %N's current speed is %f", client, speed);
 				float newSpeed = heads < g_iHeadCap ? speed + 20.0 : speed;
 				PrintToChatAll("[TF2x10] New speed: %f", newSpeed);
 				/*SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed > 520.0 ? 520.0 : newSpeed);
