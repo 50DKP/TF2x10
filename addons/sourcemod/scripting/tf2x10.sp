@@ -249,9 +249,9 @@ public void OnConfigsExecuted()
 		}
 	}
 
-	if(LibraryExists("updater"))
+	if(LibraryExists("updater") && g_cvarAutoUpdate.BoolValue)
 	{
-		g_cvarAutoUpdate.BoolValue ? Updater_AddPlugin(UPDATE_URL) : Updater_RemovePlugin();
+		Updater_AddPlugin(UPDATE_URL);
 	}
 }
 
@@ -343,11 +343,6 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 	{
 		g_cvarAutoUpdate.BoolValue ? Updater_AddPlugin(UPDATE_URL) : Updater_RemovePlugin();
 	}
-}
-
-public Action Updater_OnPluginChecking()
-{
-	return (g_cvarAutoUpdate.BoolValue ? Plugin_Continue : Plugin_Handled);
 }
 
 void SetGameDescription()
