@@ -899,7 +899,7 @@ public void OnGameFrame()
 				float speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
 				PrintToChatAll("[TF2x10] %N's current speed is %f", client, speed);
 				float newSpeed = speed;
-				if(heads < cvarHeadCap.IntValue)
+				if(heads < cvarHeadCap.IntValue && !TF2_IsPlayerInCondition(client, TFCond_Charging))
 				{
 					newSpeed += 20.0;
 					if(newSpeed > 520.0)
