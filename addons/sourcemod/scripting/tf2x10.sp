@@ -275,7 +275,7 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 			ff2Running = false;
 			#endif
 
-			#if defined _saxtonhale_included
+			#if defined _VSH_included
 			vshRunning = LibraryExists("saxtonhale") ? VSH_IsSaxtonHaleModeEnabled() : false;
 			#else
 			vshRunning = false;
@@ -597,7 +597,7 @@ public void OnAllPluginsLoaded()
 	ff2Running = false;
 	#endif
 
-	#if defined _saxtonhale_included
+	#if defined _VSH_included
 	vshRunning = LibraryExists("saxtonhale") ? VSH_IsSaxtonHaleModeEnabled() : false;
 	#else
 	vshRunning = false;
@@ -630,7 +630,7 @@ public void OnLibraryAdded(const char[] name)
 	}
 	else if(StrEqual(name, "saxtonhale"))
 	{
-		#if defined _saxtonhale_included
+		#if defined _VSH_included
 		vshRunning = VSH_IsSaxtonHaleModeEnabled();
 		#endif
 	}
@@ -1355,7 +1355,7 @@ bool ShouldDisableWeapons(int client)
 	}
 	#endif
 
-	#if defined _saxtonhale_included
+	#if defined _VSH_included
 	if(vshRunning && VSH_GetSaxtonHaleUserId() == GetClientUserId(client))
 	{
 		return true;

@@ -23,6 +23,8 @@ before_script:
     - wget "http://hg.limetech.org/projects/steamtools/raw-file/tip/plugin/steamtools.inc" -O include/steamtools.inc
     - wget "https://bitbucket.org/GoD_Tony/updater/raw/default/include/updater.inc" -O include/updater.inc
     - wget "https://forums.alliedmods.net/attachment.php?attachmentid=116849&d=1377667508" -O include/tf2attributes.inc
+    - wget "https://raw.githubusercontent.com/50DKP/FF2-Official/master/addons/sourcemod/scripting/include/freak_fortress_2.inc" -O include/freak_fortress_2.inc
+    - wget "https://raw.githubusercontent.com/Chdata/Versus-Saxton-Hale/master/addons/sourcemod/scripting/include/saxtonhale.inc" -O include/saxtonhale.inc
     - chmod +x spcomp
 script: ./compile.sh tf2x10.sp
 
