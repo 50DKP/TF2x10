@@ -34,7 +34,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
-#define UPDATE_URL			"http://ff2.50dkp.com/updater/tf2x10/update.txt"
+#define UPDATE_URL			"http://50dkp.github.io/tf2x10/addons/sourcemod/update.txt"
 
 #define KUNAI_DAMAGE			2100
 #define DALOKOH_MAXHEALTH		800
