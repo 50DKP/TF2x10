@@ -13,6 +13,7 @@
 		"Notes"			"Fixed Dalokohs Bar maxhealth increase not going away when switching classes"
 		"Notes"			"Remove external gamedata dependency on sdkhooks.games.txt"
 		"Notes"			"Many internal code updates (including updating to the new API)"
+		"Notes"			"Changed Updater location again to be more reliable"
 	}
 
 	"Files"
