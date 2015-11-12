@@ -4,14 +4,15 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.5.0"
-			"Previous"	"1.4.5"
+			"Latest"	"1.6.0"
+			"Previous"	"1.5.0"
 		}
 
-		"Notes"			"Added Invasion weapons"
-		"Notes"			"Fixed crashes when using the Dalokohs Bar or similar items"
-		"Notes"			"Fixed tf2x10_autoupdate not having any effect"
-
+		"Notes"			"Fixed Engineer not being able to use the Panic Attack"
+		"Notes"			"Fixed FF2 and VSH integration (this also fixes backburner airblasts not giving 70% rage on FF2)"
+		"Notes"			"Fixed Dalokohs Bar maxhealth increase not going away when switching classes"
+		"Notes"			"Remove external gamedata dependency on sdkhooks.games.txt"
+		"Notes"			"Many internal code updates (including updating to the new API)"
 	}
 
 	"Files"
