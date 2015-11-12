@@ -1,0 +1,26 @@
+"Updater"
+{
+	"Information"
+	{
+		"Version"
+		{
+			"Latest"	"1.6.0"
+			"Previous"	"1.5.0"
+		}
+
+		"Notes"			"Fixed Engineer not being able to use the Panic Attack"
+		"Notes"			"Fixed FF2 and VSH integration (this also fixes backburner airblasts not giving 70% rage on FF2)"
+		"Notes"			"Fixed Dalokohs Bar maxhealth increase not going away when switching classes"
+		"Notes"			"Remove external gamedata dependency on sdkhooks.games.txt"
+		"Notes"			"Many internal code updates (including updating to the new API)"
+	}
+
+	"Files"
+	{
+		"Plugin"		"Path_SM/configs/x10.default.txt"
+		"Plugin"		"Path_SM/configs/x10.vshff2.txt"
+		"Plugin"		"Path_SM/configs/x10.aprilfools.txt"
+		"Plugin"		"Path_SM/plugins/tf2x10.smx"
+		"Source"		"Path_SM/scripting/tf2x10.sp"
+	}
+}
