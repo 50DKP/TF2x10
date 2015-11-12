@@ -57,6 +57,7 @@ int buildingsDestroyed[MAXPLAYERS + 1];
 int cabers[MAXPLAYERS + 1];
 int dalokohsSeconds[MAXPLAYERS + 1];
 int dalokohs[MAXPLAYERS + 1];
+//int headsTaken[MAXPLAYERS + 1];
 int razorbacks[MAXPLAYERS + 1];
 int revengeCrits[MAXPLAYERS + 1];
 
@@ -85,7 +86,7 @@ char selectedMod[16] = "default";
 ConVar cvarEnabled;
 ConVar cvarGameDesc;
 ConVar cvarAutoUpdate;
-ConVar cvarHeadCap;
+//ConVar cvarHeadCap;
 ConVar cvarHeadScaling;
 ConVar cvarHeadScalingCap;
 ConVar cvarHealthCap;
@@ -143,7 +144,7 @@ public void OnPluginStart()
 	cvarCritsManmelter = CreateConVar("tf2x10_crits_manmelter", "10", "Number of crits after Manmelter extinguishes player.", _, true, 0.0, false);
 	cvarEnabled = CreateConVar("tf2x10_enabled", "1", "Toggle TF2x10. 0 = disable, 1 = enable", _, true, 0.0, true, 1.0);
 	cvarGameDesc = CreateConVar("tf2x10_gamedesc", "1", "Toggle setting game description. 0 = disable, 1 = enable.", _, true, 0.0, true, 1.0);
-	cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", _, true, 4.0);
+	//cvarHeadCap = CreateConVar("tf2x10_headcap", "40", "The number of heads before the wielder stops gaining health and speed bonuses", _, true, 4.0);
 	cvarHeadScaling = CreateConVar("tf2x10_headscaling", "1", "Enable any decapitation weapon (eyelander etc) to grow their head as they gain heads. 0 = off, 1 = on.", _, true, 0.0, true, 1.0);
 	cvarHeadScalingCap = CreateConVar("tf2x10_headscalingcap", "6.0", "The number of heads before head scaling stops growing their head. 6.0 = 24 heads.", _, true, 0.0, false);
 	cvarHealthCap = CreateConVar("tf2x10_healthcap", "2100", "The max health a player can have. -1 to disable.", _, true, -1.0, false);
@@ -894,22 +895,27 @@ public void OnGameFrame()
 		if(takesHeads[client])
 		{
 			int heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
+			/*if(heads > cvarHeadCap.IntValue)
+			{
+				heads = cvarHeadCap.IntValue;
+			}
+
 			if(heads > 4)
 			{
 				float speed = GetEntPropFloat(client, Prop_Data, "m_flMaxspeed");
-				PrintToChatAll("[TF2x10] %N's current speed is %f", client, speed);
-				float newSpeed = speed;
-				if(heads < cvarHeadCap.IntValue && !TF2_IsPlayerInCondition(client, TFCond_Charging))
+				if(heads != headsTaken[client] && !TF2_IsPlayerInCondition(client, TFCond_Charging))  //Don't change the speed if they're charging
 				{
-					newSpeed += 20.0;
-					if(newSpeed > 520.0)
+					speed += heads * 22.4;  //Speed increases by 22.4 each head
+					if(speed > 520.0)  //520 is the max speed: don't go above it :P
 					{
-						newSpeed = 520.0;
+						speed = 520.0;
 					}
+
+					headsTaken[client] = heads;
+					PrintToChatAll("[TF2x10] New speed: %f", speed);
 				}
-				PrintToChatAll("[TF2x10] New speed: %f", newSpeed);
-				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", newSpeed);
-			}
+				SetEntPropFloat(client, Prop_Data, "m_flMaxspeed", speed);
+			}*/
 
 			if(cvarHeadScaling.BoolValue)
 			{
@@ -1004,12 +1010,17 @@ public Action OnGetMaxHealth(int client, int &maxHealth)
 			return Plugin_Changed;
 		}
 
-		int heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
-		if(heads > 4 && heads < cvarHeadCap.IntValue)
+		/*int heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
+		if(heads > cvarHeadCap.IntValue)
+		{
+			heads = cvarHeadCap.IntValue;
+		}
+
+		if(heads > 4)
 		{
 			maxHealth = GetEntProp(client, Prop_Data, "m_iMaxHealth") + heads * 15;
 			return Plugin_Changed;
-		}
+		}*/
 	}
 	return Plugin_Continue;
 }
@@ -1283,17 +1294,34 @@ public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &dam
 		return Plugin_Continue;
 	}
 
-	if(damagecustom == TF_CUSTOM_BOOTS_STOMP)
-	{
-		damage *= 10;
-		return Plugin_Changed;
-	}
-
 	char classname[64];
 	if(!IsValidEntity(weapon) || !GetEdictClassname(weapon, classname, sizeof(classname)))
 	{
 		return Plugin_Continue;
 	}
+
+	if(damagecustom == TF_CUSTOM_BOOTS_STOMP)
+	{
+		damage *= 10;
+		return Plugin_Changed;
+	}
+	/*else if(damagecustom == TF_CUSTOM_CHARGE_IMPACT)
+	{
+		int heads = GetEntProp(client, Prop_Send, "m_iDecapitations");
+		if(heads > cvarHeadCap.IntValue)
+		{
+			heads = cvarHeadCap.IntValue;
+		}
+
+		if(heads > 4)
+		{
+			Address attribute = TF2Attrib_GetByName(client, "charge impact damage increased");
+			float damageIncrease = attribute ? TF2Attrib_GetValue(attribute) : 1.0;
+			damage = damageIncrease * (heads * 10 + 50);  //50 being the base damage of the shield and 10 the default increase in damage per head
+			PrintToChatAll("[TF2x10] Damage is %f", damage);
+			return Plugin_Changed;
+		}
+	}*/
 
 	if(StrEqual(classname, "tf_weapon_bat_fish") && damagecustom != TF_CUSTOM_BLEEDING &&
 		damagecustom != TF_CUSTOM_BURNING && damagecustom != TF_CUSTOM_BURNING_ARROW &&
@@ -1586,7 +1614,7 @@ void Randomizer_CheckAmmo(int client, int entityIndex)
 	//Canceling out Randomizer's own "give ammo" function to the right amount
 
 	int ammoCount = -1;
-	int iOffset = GetEntProp(entityIndex, Prop_Send, "m_iPrimaryAmmoType", 1)*4;
+	int iOffset = GetEntProp(entityIndex, Prop_Send, "m_iPrimaryAmmoType", 1) * 4;
 	int iAmmoTable = FindSendPropInfo("CTFPlayer", "m_iAmmo");
 	Address attribAddress;
 
@@ -1595,7 +1623,7 @@ void Randomizer_CheckAmmo(int client, int entityIndex)
 		(attribAddress = TF2Attrib_GetByName(entityIndex, "maxammo primary reduced")) != Address_Null ||
 		(attribAddress = TF2Attrib_GetByName(entityIndex, "maxammo secondary reduced")) != Address_Null)
 	{
-		ammoCount = RoundToCeil(GetEntData(client, iAmmoTable+iOffset) * TF2Attrib_GetValue(attribAddress));
+		ammoCount = RoundToCeil(GetEntData(client, iAmmoTable + iOffset) * TF2Attrib_GetValue(attribAddress));
 	}
 	else if((attribAddress = TF2Attrib_GetByName(entityIndex, "maxammo grenades1 increased")) != Address_Null)
 	{
@@ -1652,6 +1680,7 @@ void ResetVariables(int client)
 	cabers[client] = 0;
 	dalokohsSeconds[client] = 0;
 	dalokohs[client] = 0;
+	//headsTaken[client] = 0;
 	revengeCrits[client] = 0;
 	hasCaber[client] = false;
 	hasManmelter[client] = false;
@@ -1706,6 +1735,8 @@ void UpdateVariables(int client)
 	}
 
 	cabers[client] = hasCaber[client] ? 10 : 0;
+
+	dalokohs[client] = 0;
 }
 
 stock void TF2_SetHealth(int client, int health)
