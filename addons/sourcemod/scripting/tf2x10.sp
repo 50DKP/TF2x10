@@ -190,7 +190,7 @@ public void OnPluginStart()
 
 	if(equipWearable == null)
 	{
-		SetFailState("Failed to set up EquipWearable sdkcall. Get a int gamedata/tf2items.randomizer.txt from [TF2Items] GiveWeapon.");
+		SetFailState("Failed to set up EquipWearable sdkcall. Get a new gamedata/tf2items.randomizer.txt from [TF2Items] GiveWeapon.");
 	}
 
 	for(int client = 1; client <= MaxClients; client++)
