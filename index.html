@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>TF2x10 by 50DKP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">TF2x10</h1>
+      <h2 class="project-tagline">Multiply a Weapon&#39;s Stats by 10!</h2>
+      <a href="https://github.com/50DKP/TF2x10" class="btn">View on GitHub</a>
+      <a href="https://github.com/50DKP/TF2x10/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/50DKP/TF2x10/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h2>
+<a id="multiply-a-weapon-stats-by-10-the-plugin-" class="anchor" href="#multiply-a-weapon-stats-by-10-the-plugin-" aria-hidden="true"><span class="octicon octicon-link"></span></a>Multiply A Weapon Stats by 10: The Plugin <a href="http://ff2.50dkp.com/jenkins/job/TF2x10/"><img src="http://ff2.50dkp.com/jenkins/buildStatus/icon?job=TF2x10" alt="Build Status"></a>
+</h2>
+
+<p>It's in the name! All weapon stats multipled by 10. Everything about that (un)balanced goodness that you can run on your own TF2 server.</p>
+
+<p>Join our group for a list of servers running the latest and greatest: <a href="http://steamcommunity.com/groups/tf2x10">http://steamcommunity.com/groups/tf2x10</a></p>
+
+<h3>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h3>
+
+<ul>
+<li>SourceMod 1.6+</li>
+<li>TF2Items</li>
+<li>TF2Attributes</li>
+<li>SteamTools</li>
+<li>Updater</li>
+</ul>
+
+<p>For the Updater bit: there will be times where Valve may change weapon attributes or add new ones. This is to ensure the server gets fast, timely updates to weapon attributes and any possible SourceMod plugin additions we have to complement the update. Highly recommended, but you can compile without the updater requirement if you so wish.</p>
+
+<h3>
+<a id="cvars" class="anchor" href="#cvars" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cvars</h3>
+
+<p><code>tf2x10_autoupdate</code> (default 1):
+Tells updater.smx to automatically update this plugin. 0 = off, 1 = on.</p>
+
+<p><code>tf2x10_crits_diamondback</code> (default 10):
+Number of crits after successful sap with Diamondback equipped.</p>
+
+<p><code>tf2x10_crits_fj</code> (default 10):
+Number of crits after Frontier kill or for buildings. Half this for assists.</p>
+
+<p><code>tf2x10_crits_manmelter</code> (default 10):
+Number of crits after Manmelter extinguishes player.</p>
+
+<p><code>tf2x10_enabled</code> (default 1):
+Toggle TF2x10. 0 = disable, 1 = enable</p>
+
+<p><code>tf2x10_gamedesc</code> (default 1):
+Toggle setting game description. 0 = disable, 1 = enable.</p>
+
+<p><code>tf2x10_headscaling</code> (default 1):
+Enable any decapitation weapon (eyelander etc) to grow their head as they gain heads. 0 = off, 1 = on.</p>
+
+<p><code>tf2x10_headscalingcap</code> (float, default 6.0):
+The number of heads before head scaling stops growing their head. 6.0 = 24 heads.</p>
+
+<p><code>tf2x10_healthcap</code> (default 2000):
+The max health a player can have. -1 to disable.</p>
+
+<p><code>tf2x10_includebots</code> (default 0):
+1 allows bots (MvM or not) to receive TF2x10 weapons, 0 disables this.</p>
+
+<h3>
+<a id="admin-commands" class="anchor" href="#admin-commands" aria-hidden="true"><span class="octicon octicon-link"></span></a>Admin Commands</h3>
+
+<p><code>sm_tf2x10_disable</code>:
+Disable TF2x10.</p>
+
+<p><code>sm_tf2x10_enable</code>:
+Enable TF2x10.</p>
+
+<p><code>sm_tf2x10_getmod</code>:
+Gets the current "mod" that is loaded over the default x10 weapons. See below.</p>
+
+<p><code>sm_tf2x10_recache</code>:
+Clears the x10 weapon trie cache and loads x10.default.txt. Useful if you're testing out attributes on-the-fly.</p>
+
+<p><code>sm_tf2x10_setmod</code> <em>filename</em>:
+Sets the current "mod". e.g. if the file is named <code>x10.myweaponstuffs.txt</code> then you will do <code>sm_tf2x10_setmod myweaponstuffs</code>.</p>
+
+<h3>
+<a id="mods" class="anchor" href="#mods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mods</h3>
+
+<p>All TF2x10 weapon stats are placed in <code>x10.default.txt</code> in the configs folder. The TF2x10 weapon plugin also includes rudimentary tf2items-esque coded weapon mods that will allow you to load different weapon attributes than what will be loaded from the main default file. An example of this is <code>x10.vshff2.txt</code>, which is manually loaded on map change by a VSH/FF2 x10 server I run. Things in this file will cancel out things in the default.</p>
+
+<p>Note that in your <code>x10.filenamehere.txt</code> file, the first line should be what you named your file.</p>
+
+<p>See <code>x10.vshff2.txt</code> and how things are done if you want a good example. Please, NEVER touch <code>x10.default.txt</code> as that will be updated as Valve sends out weapon attribute changes, and it's so much easier to load a "mod" so you don't have to go through the hassle of modifying things.</p>
+
+<h3>
+<a id="known-compatibility-with-other-game-mods" class="anchor" href="#known-compatibility-with-other-game-mods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Known Compatibility With Other Game Mods</h3>
+
+<p>TF2x10's goal is for 100% compatibility with game mods. There may be one or two other game mods that will not ever work with x10, and that is fine. But things like Randomizer, Saxton Hale, Prop Hunt, etc. is what we're trying to be compatible with. Here's the full list:</p>
+
+<ul>
+<li>
+<strong>Advanced Weaponiser</strong>: due to the way it gives weapons, will not load tf2x10 if present.</li>
+<li>
+<strong>Freak Fortress 2 &amp; VS Saxton Hale</strong>: should work mostly but some things (e.g. powerjack) and kunai may need to be adjusted. will post when I can get together everything.</li>
+<li>
+<strong>Randomizer</strong>: currently has something going with it that it crashes(?) it may be my server. In my bitbucket, there's a very unstable randomizer in it that you can try out, but I'd much rather get it to where the x10 plugin can take over stuff without needing to modify the actual plugin.</li>
+</ul>
+
+<h3>
+<a id="credits-and-thanks" class="anchor" href="#credits-and-thanks" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits and Thanks</h3>
+
+<p><strong>Coders</strong>:</p>
+
+<p>InvisGhost - original x10 plugin to complement the tf2items txt</p>
+
+<p>Isatis - overhaul, implementing TF2Attributes and pretty much 90% of what you see in the source</p>
+
+<p>Dark Skript - bugfixing, additional support</p>
+
+<p>RavenShadow - additional support</p>
+
+<p><strong>Weapon Attributists</strong>:</p>
+
+<p>UltiMario - creating the mod and weapon attributes</p>
+
+<p>Mr. Blue - PR and weapon attributes</p>
+
+<p><strong>Thanks</strong>:</p>
+
+<p>FlaminSarge - for putting up with me and for some code examples I took (e.g. loading into trie) :p</p>
+
+<h3>
+<a id="install-instructions" class="anchor" href="#install-instructions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install Instructions</h3>
+
+<p>Place all three folders in your <code>addons/sourcemod/</code> folder. Launch, and go!</p>
+
+<p>If you are having any issues with the plugin itself, please post in the <a href="https://forums.alliedmods.net/showthread.php?t=270723">AlliedModders thread</a> instead of contacting anyone on the x10 team individually so we can better help you. Thanks!</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/50DKP/TF2x10">TF2x10</a> is maintained by <a href="https://github.com/50DKP">50DKP</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
