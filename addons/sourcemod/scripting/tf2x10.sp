@@ -329,7 +329,7 @@ void SetGameDescription()
 		Format(description, sizeof(description), "TF2x10 v%s", PLUGIN_VERSION);
 		Steam_SetGameDescription(description);
 	}
-	else if(!cvarEnabled.BoolValue || !cvarGameDesc.BoolValue && StrContains(description, "TF2x10 ") != -1)
+	else if((!cvarEnabled.BoolValue || !cvarGameDesc.BoolValue) && StrContains(description, "TF2x10 ") != -1)
 	{
 		Steam_SetGameDescription("Team Fortress");
 	}
@@ -424,6 +424,8 @@ public Action Timer_ServerRunningX10(Handle hTimer)
 	{
 		return Plugin_Stop;
 	}
+
+	SetGameDescription();
 
 	PrintToChatAll("\x01[\x07FF0000TF2\x070000FFx10\x01] Mod by \x07FF5C33UltiMario\x01 and \x073399FFMr. Blue\x01. Plugin development by \x079EC34FWliu\x01 (based off of \x0794DBFFI\x01s\x0794DBFFa\x01t\x0794DBFFi\x01s's and \x075C5C8AInvisGhost\x01's code).");
 	PrintToChatAll("\x01Join our Steam group for Hale x10, Randomizer x10 and more by typing \x05/x10group\x01!");
