@@ -30,7 +30,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.6.1"
+#define PLUGIN_VERSION		"1.6.2"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -876,12 +876,9 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 public Action Timer_DalokohsEnd(Handle timer, any userid)
 {
 	int client = GetClientOfUserId(userid);
-	if(IsValidClient(client))
-	{
-		dalokohs[client] = 0;
-		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
-		dalokohsTimer[client] = null;
-	}
+	dalokohs[client] = 0;
+	dalokohsTimer[client] = null;
+	SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	return Plugin_Continue;
 }
 

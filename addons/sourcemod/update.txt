@@ -4,12 +4,11 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.6.1"
-			"Previous"	"1.6.0"
+			"Latest"	"1.6.2"
+			"Previous"	"1.6.1"
 		}
 
-		"Notes"			"Fixed invalid convar error"
-		"Notes"			"Fixed the game description not updating to TF2x10 until after a map change"
+		"Notes"			"Fixed invalid timer error that would occur if a client disconnected before the Dalokohs Bar buff finished"
 	}
 
 	"Files"
