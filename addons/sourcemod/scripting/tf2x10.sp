@@ -179,7 +179,7 @@ public void OnPluginStart()
 	Handle config = LoadGameConfigFile("tf2items.randomizer");
 	if(config == null)
 	{
-		SetFailState("Cannot find gamedata/tf2.randomizer.txt. Get the file from [TF2Items] GiveWeapon.");
+		SetFailState("Could not find 'gamedata/tf2.randomizer.txt'. Get the file from [TF2Items] Randomizer.");
 	}
 
 	StartPrepSDKCall(SDKCall_Player);
@@ -190,7 +190,7 @@ public void OnPluginStart()
 
 	if(equipWearable == null)
 	{
-		SetFailState("Failed to set up EquipWearable sdkcall. Get a new gamedata/tf2items.randomizer.txt from [TF2Items] GiveWeapon.");
+		SetFailState("Failed to set up EquipWearable sdkcall. Get a new 'gamedata/tf2items.randomizer.txt' file from [TF2Items] Randomizer.");
 	}
 
 	for(int client = 1; client <= MaxClients; client++)
@@ -1427,17 +1427,17 @@ public Action OnPlayerShieldBlocked(UserMsg msg_id, Handle bf, const players[], 
 
 		RemovePlayerBack(victim);
 
-		Handle hWeapon = TF2Items_CreateItem(OVERRIDE_CLASSNAME | OVERRIDE_ITEM_DEF | OVERRIDE_ITEM_LEVEL | OVERRIDE_ITEM_QUALITY | OVERRIDE_ATTRIBUTES);
-		TF2Items_SetClassname(hWeapon, "tf_wearable");
-		TF2Items_SetItemIndex(hWeapon, 57);
-		TF2Items_SetLevel(hWeapon, 10);
-		TF2Items_SetQuality(hWeapon, 6);
-		TF2Items_SetAttribute(hWeapon, 0, 52, 1.0);
-		TF2Items_SetAttribute(hWeapon, 1, 292, 5.0);
-		TF2Items_SetNumAttributes(hWeapon, 2);
+		Handle weapon = TF2Items_CreateItem(OVERRIDE_CLASSNAME | OVERRIDE_ITEM_DEF | OVERRIDE_ITEM_LEVEL | OVERRIDE_ITEM_QUALITY | OVERRIDE_ATTRIBUTES);
+		TF2Items_SetClassname(weapon, "tf_wearable");
+		TF2Items_SetItemIndex(weapon, 57);  //Razorback
+		TF2Items_SetLevel(weapon, 10);
+		TF2Items_SetQuality(weapon, 6);
+		TF2Items_SetAttribute(weapon, 0, 52, 1.0);  //Block one backstab attempt
+		TF2Items_SetAttribute(weapon, 1, 292, 5.0);  //...kill eater score type?
+		TF2Items_SetNumAttributes(weapon, 2);
 
-		int entity = TF2Items_GiveNamedItem(victim, hWeapon);
-		hWeapon.Close();
+		int entity = TF2Items_GiveNamedItem(victim, weapon);
+		weapon.Close();
 		SDKCall(equipWearable, victim, entity);
 	}
 
@@ -1453,11 +1453,11 @@ Gameplay: Player & Item Spawn
 public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemDefinitionIndex, int itemLevel, int itemQuality, int entityIndex)
 {
 	if(!cvarEnabled.BoolValue
-		|| (!cvarIncludeBots.BoolValue && IsFakeClient(client))
-		|| ShouldDisableWeapons(client)
-		|| !isCompatibleItem(classname, itemDefinitionIndex)
-		|| (itemQuality == 5 && itemDefinitionIndex != 266)
-		|| itemQuality == 8 || itemQuality == 10)
+	|| (!cvarIncludeBots.BoolValue && IsFakeClient(client))
+	|| ShouldDisableWeapons(client)
+	|| !isCompatibleItem(classname, itemDefinitionIndex)
+	|| (itemQuality == 5 && itemDefinitionIndex != 266)
+	|| itemQuality == 8 || itemQuality == 10)
 	{
 		return;
 	}
