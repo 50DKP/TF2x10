@@ -1469,6 +1469,107 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	char modToUse[16];
 	char tmpID[32];
 
+	if(StrEqual(classname, "tf_weapon_flamethrower") &&
+	   itemDefinitionIndex != 215 &&  //Degreaser
+	   itemDefinitionIndex != 594)  //Phlogistinator
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_minigun") &&
+	        itemDefinitionIndex != 41 &&  //Natascha
+	        itemDefinitionIndex != 312 &&  //Brass Beast
+	        itemDefinitionIndex != 424 &&  //Tomislav
+	        itemDefinitionIndex != 811)  //Huo Long Heatmaker
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_sniperrifle") &&
+	        itemDefinitionIndex != 230 && //Sydney Sleeper
+	        itemDefinitionIndex != 526 &&  //Machina
+	        itemDefinitionIndex != 752)  //Hitman's Heatmaker
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_smg"))
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_scattergun") &&
+	        itemDefinitionIndex != 45 &&  //Force-a-Nature
+	        itemDefinitionIndex != 772 &&  //Baby Face's Blaster
+	        itemDefinitionIndex != 1078 &&  //Festive Force-a-Nature
+	        itemDefinitionIndex != 1103)  //Back Scatter
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_pistol"))
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_pipebomblauncher") &&
+	        itemDefinitionIndex != 130 &&  //Scottish Resistance
+	        itemDefinitionIndex != 265 &&  //Stickybomb Jumper
+	        itemDefinitionIndex != 1150)  //Quickiebomb Launcher
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_shotgun") &&
+	        itemDefinitionIndex != 415 &&  //Reserve Shooter
+	        itemDefinitionIndex != 425 &&  //Family Business
+	        itemDefinitionIndex != 527 &&  //Widowmaker
+	        itemDefinitionIndex != 997 &&  //Rescue Ranger
+	        itemDefinitionIndex != 1153)  //Panic Attack
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_medigun") &&
+	        itemDefinitionIndex != 35 &&  //Kritzkrieg
+	        itemDefinitionIndex != 411 &&  //Quick-Fix
+	        itemDefinitionIndex != 998)  //Vaccinator
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_revolver") &&
+	        itemDefinitionIndex != 61 &&  //Ambassador
+	        itemDefinitionIndex != 224 &&  //L'Etranger
+	        itemDefinitionIndex != 460 &&  //Enforcer
+	        itemDefinitionIndex != 525 &&  //Diamondback
+	        itemDefinitionIndex != 1006)  //Festive Ambassador
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_rocketlauncher") &&
+	        itemDefinitionIndex != 228 &&  //Black Box
+	        itemDefinitionIndex != 237 &&  //Rocket Jumper
+	        itemDefinitionIndex != 414 &&  //Liberty Launcher
+	        itemDefinitionIndex != 730 &&  //Beggar's Bazooka
+	        itemDefinitionIndex != 1085)  //Festive Black Box
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_wrench") &&
+	        itemDefinitionIndex != 155 &&  //Southern Hospitality
+	        itemDefinitionIndex != 329 &&  //Jag
+	        itemDefinitionIndex != 589)  //Eureka Effect
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_knife") &&
+	        itemDefinitionIndex != 225 &&  //Your Eternal Reward
+	        itemDefinitionIndex != 356 &&  //Conniver's Kunai
+	        itemDefinitionIndex != 461 &&  //Big Earner
+	        itemDefinitionIndex != 574 &&  //Wanga Prick
+	        itemDefinitionIndex != 649)  //Spy-cicle
+	{
+
+	}
+	else if(StrEqual(classname, "tf_weapon_grenadelauncher") &&
+	        itemDefinitionIndex != 308 &&  //Loch-n-Load
+	        itemDefinitionIndex != 1151)  //Iron Bomber
+	{
+
+	}
+
 	Format(tmpID, sizeof(tmpID), "%s__%i_size", selectedMod, itemDefinitionIndex);
 	if(!itemInfoTrie.GetValue(tmpID, size))
 	{
