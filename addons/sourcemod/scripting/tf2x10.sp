@@ -1472,14 +1472,30 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	Format(tmpID, sizeof(tmpID), "%s__%i_size", selectedMod, itemDefinitionIndex);
 	if(!itemInfoTrie.GetValue(tmpID, size))
 	{
-		Format(tmpID, sizeof(tmpID), "default__%i_size", itemDefinitionIndex);
+		Format(tmpID, sizeof(tmpID), "%s__%s_size", selectedMod, classname);
 		if(!itemInfoTrie.GetValue(tmpID, size))
 		{
-			return;
+			Format(tmpID, sizeof(tmpID), "default__%i_size", itemDefinitionIndex);
+			if(!itemInfoTrie.GetValue(tmpID, size))
+			{
+				Format(tmpID, sizeof(tmpID), "default__%s_size", classname);
+				if(!itemInfoTrie.GetValue(tmpID, size))
+				{
+					return;
+				}
+				else
+				{
+					strcopy(modToUse, sizeof(modToUse), "default");
+				}
+			}
+			else
+			{
+				strcopy(modToUse, sizeof(modToUse), "default");
+			}
 		}
 		else
 		{
-			strcopy(modToUse, sizeof(modToUse), "default");
+			strcopy(modToUse, sizeof(modToUse), selectedMod);
 		}
 	}
 	else
@@ -1490,8 +1506,7 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	for(int i; i < size; i++)
 	{
 		Format(tmpID, sizeof(tmpID), "%s__%i_%i_name", modToUse, itemDefinitionIndex, i);
-		itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
-		if(attribName[0])
+		if(itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName)))
 		{
 			Format(tmpID, sizeof(tmpID), "%s__%i_%i_val", modToUse, itemDefinitionIndex, i);
 			itemInfoTrie.GetString(tmpID, attribValue, sizeof(attribValue));
