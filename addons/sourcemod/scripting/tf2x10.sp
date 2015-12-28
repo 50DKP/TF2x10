@@ -1491,7 +1491,7 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	{
 		Format(tmpID, sizeof(tmpID), "%s__%i_%i_name", modToUse, itemDefinitionIndex, i);
 		itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
-		if(attribName)
+		if(attribName[0])
 		{
 			Format(tmpID, sizeof(tmpID), "%s__%i_%i_val", modToUse, itemDefinitionIndex, i);
 			itemInfoTrie.GetString(tmpID, attribValue, sizeof(attribValue));
