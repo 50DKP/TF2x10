@@ -1491,17 +1491,36 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	{
 		Format(tmpID, sizeof(tmpID), "%s__%i_%i_name", modToUse, itemDefinitionIndex, i);
 		itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
-
-		Format(tmpID, sizeof(tmpID), "%s__%i_%i_val", modToUse, itemDefinitionIndex, i);
-		itemInfoTrie.GetString(tmpID, attribValue, sizeof(attribValue));
-
-		if(StrEqual(attribValue, "remove"))
+		if(attribName)
 		{
-			TF2Attrib_RemoveByName(entityIndex, attribName);
+			Format(tmpID, sizeof(tmpID), "%s__%i_%i_val", modToUse, itemDefinitionIndex, i);
+			itemInfoTrie.GetString(tmpID, attribValue, sizeof(attribValue));
+
+			if(StrEqual(attribValue, "remove"))
+			{
+				TF2Attrib_RemoveByName(entityIndex, attribName);
+			}
+			else
+			{
+				TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
+			}
 		}
-		else
+		else  //Use the weapon classname as the backup
 		{
-			TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
+			Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", modToUse, classname, i);
+			itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
+
+			Format(tmpID, sizeof(tmpID), "%s__%s_%i_val", modToUse, classname, i);
+			itemInfoTrie.GetString(tmpID, attribValue, sizeof(attribValue));
+
+			if(StrEqual(attribValue, "remove"))
+			{
+				TF2Attrib_RemoveByName(entityIndex, attribName);
+			}
+			else
+			{
+				TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
+			}
 		}
 
 		//Engineer has the Panic Attack in the primary slot
