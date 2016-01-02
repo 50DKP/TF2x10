@@ -1034,9 +1034,9 @@ public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBro
 		int healer = GetClientOfUserId(GetEventInt(event, "healer"));
 		if(TF2_GetPlayerClass(healer) == TFClass_Pyro && GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon") == GetPlayerWeaponSlot(healer, TFWeaponSlot_Primary))
 		{
-			new health = GetClientHealth(healer);
-			new newhealth = health + 180;  //TF2 already adds 20 by default
-			new max = GetEntProp(attacker, Prop_Data, "m_iMaxHealth");
+			int health = GetClientHealth(healer);
+			int newhealth = health + 180;  //TF2 already adds 20 by default
+			int max = GetEntProp(attacker, Prop_Data, "m_iMaxHealth");
 			if(newhealth <= max)
 			{
 				SetEntityHealth(healer, newhealth);
@@ -1253,7 +1253,7 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 	if(activewep != -1)
 	{
 		int meleeWeapon = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Melee);
-		if(IsValidEntity(meleeWeapon) && WeaponHasAttribute(meleeWeapon, "honorbound"))
+		if(IsValidEntity(meleeWeapon) && WeaponHasAttribute(client, meleeWeapon, "honorbound"))
 		{
 			SDKUnhook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 		}
@@ -1419,16 +1419,16 @@ public void OnTakeDamagePost(int client, int attacker, int inflictor, float dama
 public Action OnWeaponSwitch(int client, int weapon)
 {
 	if(cvarEnabled.BoolValue && IsValidClient(client) && IsValidEntity(weapon) &&
-	WeaponHasAttribute(weapon, "honorbound") && !GetEntProp(weapon, Prop_Send, "m_bIsBloody"))
+	WeaponHasAttribute(client, weapon, "honorbound") && !GetEntProp(weapon, Prop_Send, "m_bIsBloody"))
 	{
-		new health = GetClientHealth(client);
+		int health = GetClientHealth(client);
 		if(health - 500 <= 0)
 		{
 			return Plugin_Handled;
 		}
 		else
 		{
-			SetEntityHealth(attacker, health - 500);
+			SetEntityHealth(client, health - 500);
 		}
 	}
 	return Plugin_Continue;
@@ -1610,7 +1610,7 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 		}
 	}
 
-	if(WeaponHasAttribute(entityIndex, "honorbound"))
+	if(WeaponHasAttribute(client, entityIndex, "honorbound"))
 	{
 		SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 	}
