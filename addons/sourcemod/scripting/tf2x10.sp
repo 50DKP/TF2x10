@@ -1036,7 +1036,7 @@ public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBro
 		{
 			int health = GetClientHealth(healer);
 			int newhealth = health + 180;  //TF2 already adds 20 by default
-			int max = GetEntProp(attacker, Prop_Data, "m_iMaxHealth");
+			int max = GetEntProp(healer, Prop_Data, "m_iMaxHealth");
 			if(newhealth <= max)
 			{
 				SetEntityHealth(healer, newhealth);
