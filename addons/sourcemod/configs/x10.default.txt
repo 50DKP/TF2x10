@@ -1013,8 +1013,9 @@
 	"327" //Claidheamh Mor
 	{
 		"kill refills meter"	"1"
-		"heal on kill"	"250"	//+250 health on kill
-		"dmg taken increased"	"2.5"	//150% increased damage taken while active
+		"heal on kill"	"0"	//Cancel out vanilla attribute
+		"dmg taken increased"	"1"	//Cancel out vanilla attribute
+		"charge time increased" "5" //+5 seconds of charge time
 	}
 	"329" //Jag
 	{
@@ -1734,11 +1735,11 @@
 
 	}
 
-	"15000" //Sniper Rifle Reskin
+	"15000" //Sniper Rifle Reskin Night Owl
 	{
 		"faster reload rate" "0.9" //-10% reload speed
 		"fire rate bonus" "0.9" //+10% firing speed
-		"maxammo primary increased" "10" //10x ammo
+		"maxammo primary increased" "10" //10x ammo\
 	}
 
 	"15001" //SMG Reskin
@@ -1857,9 +1858,10 @@
 		"maxammo primary increased" "10" //10x ammo
 	}
 
-	"15020" //Minigun Reskin
+	"15020" //Minigun Reskin Ironwood
 	{
 		"aiming movespeed increased" "1.5" //+50% movement speed while revved
+
 	}
 
 	"15021" //Scattergun Reskin
@@ -1876,11 +1878,12 @@
 		"maxammo secondary increased" "10" //10x ammo
 	}
 
-	"15023" //Sniper Rifle Reskin
+	"15023" //Sniper Rifle Reskin Shot In The Dark
 	{
 		"faster reload rate" "0.9" //-10% reload speed
 		"fire rate bonus" "0.9" //+10% firing speed
 		"maxammo primary increased" "10" //10x ammo
+
 	}
 
 	"15024" //Stickybomb Launcher Reskin
@@ -2036,6 +2039,7 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
+
 	}
 
 	"15050" //Medigun Reskin
@@ -2066,9 +2070,10 @@
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
 
-	"15055" //Minigun Reskin
+	"15055" //Minigun Reskin Brick House
 	{
 		"aiming movespeed increased" "1.5" //+50% movement speed while revved
+
 	}
 
 	"15056" //Pistol Reskin
@@ -2097,7 +2102,20 @@
 		"fire rate bonus" "0.9" //+10% firing speed
 		"maxammo primary increased" "10" //10x ammo
 	}
+	"15073" //Harvest Nutcracker Wrench
+	{
+		"fire rate bonus" "0.8" //20% faster firing speed
 
+	}
+	"15133" //Dressed To Kill Shotgun
+	{
+		"Reload time decreased" "0.9" //+10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+
+	}
 	"30474" //Nostromo Napalmer
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
