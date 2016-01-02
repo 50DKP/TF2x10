@@ -983,7 +983,7 @@
 		"damage bonus" "4" //+300% Damage
 		"dmg taken increased"	"4"	//300% Damage taken increase
 		"dmg taken from crit reduced" "0.5" //-50% Damage from crits
-		"heal on hit for rapidfire"	"500"	//500 Health on Hit
+		"heal on kill"	"500"	//500 Health on Hit
 	}
 	"311" //Buffalo Steak Sandvich
 	{
@@ -1073,7 +1073,7 @@
 	}
 	"404" //Persian Persuader
 	{
-		"charge recharge rate increased" "3" //+200% Charge rate on user
+		"charge recharge rate increased" "2" //+100% Charge rate on user
 		"maxammo primary reduced"	"0.5"	//50% primary ammo reduction
 		"maxammo secondary reduced"	"0.5"	//50% secondary ammo reduction
 		"charge meter on hit"	"1"	//100% charge refill on  kill
@@ -1091,7 +1091,7 @@
 		"charge impact damage increased" "8" //+700% damage
 		"dmg taken from fire reduced" "0.7" //-30% Explosive Damage
 		"dmg taken from blast reduced" "0.6" //-40% Fire Damage
-		"charge recharge rate increased"	"6"	//500% charge recharge rate increase
+		"charge recharge rate increased"	"2"	//100% charge recharge rate increase
 	}
 	"411" //Quick-Fix
 	{
@@ -1321,7 +1321,7 @@
 	{
 		"damage penalty" "0" //-100% Damage
 		"maxammo grenades1 increased" "10" //10 Wrap Assasin Balls
-		"Blast radius increased" "10" //10 Times Explosive Radius
+		"Blast radius increased" "11" //10 Times Explosive Radius
 	}
 	"649" //Spycicle
 	{
@@ -1378,7 +1378,6 @@
 	{
 		"fire rate penalty" "3" //200% slower firing speed
 		"clip size penalty" "0.6" //-40% clip size
-		"increase buff duration HIDDEN" "2" //2x Buff duration
 	}
 	"752" //Hitman's Heatmaker
 	{
@@ -1731,6 +1730,7 @@
 		"clip size penalty HIDDEN"	"6.67"
 		"maxammo secondary increased"	"1.5"
 		"single wep deploy time decreased"	"-4"
+		"bullets per shot bonus"	"0.5"
 
 	}
 
