@@ -307,6 +307,7 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 					SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 					SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 					SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+					SDKUnhook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 				}
 			}
 			itemInfoTrie.Clear();
@@ -699,6 +700,7 @@ public void OnClientDisconnect(int client)
 		SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 		SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 		SDKUnhook(client, SDKHook_PreThink, OnPreThink);
+		SDKUnhook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 	}
 }
 
@@ -1024,6 +1026,40 @@ public Action OnGetMaxHealth(int client, int &maxHealth)
 	return Plugin_Continue;
 }
 
+public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBroadcast)
+{
+	if(cvarEnabled.BoolValue)
+	{
+		PrintToChatAll("hi");
+		int healer = GetClientOfUserId(GetEventInt(event, "healer"));
+		if(TF2_GetPlayerClass(healer) == TFClass_Pyro && GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon") == GetPlayerWeaponSlot(healer, TFWeaponSlot_Primary))
+		{
+			new health = GetClientHealth(healer);
+			new newhealth = health + 180;  //TF2 already adds 20 by default
+			new max = GetEntProp(attacker, Prop_Data, "m_iMaxHealth");
+			if(newhealth <= max)
+			{
+				SetEntityHealth(healer, newhealth);
+			}
+			else if(health <= max)
+			{
+				SetEntityHealth(healer, max);
+			}
+		}
+		else
+		{
+			int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
+			char classname[64];
+			GetEdictClassname(weapon, classname, sizeof(classname));
+			if(StrEqual(classname, "tf_weapon_jar_milk") || StrEqual(classname, "tf_weapon_jarate"))
+			{
+				SetEntProp(weapon, Prop_Data, "m_iClip1", GetEntProp(weapon, Prop_Data, "m_iClip1") + 2);
+			}
+		}
+	}
+	return Plugin_Continue;
+}
+
 public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadcast)
 {
 	#if defined _FF2_included
@@ -1214,6 +1250,16 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	}
 
+	if(activewep != -1)
+	{
+		int meleeWeapon = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Melee);
+		if(IsValidEntity(meleeWeapon) && WeaponHasAttribute(meleeWeapon, "honorbound"))
+		{
+			SDKUnhook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
+		}
+	}
+
+
 	ResetVariables(client);
 	return Plugin_Continue;
 }
@@ -1368,6 +1414,24 @@ public void OnTakeDamagePost(int client, int attacker, int inflictor, float dama
 	{
 		CheckHealthCaps(attacker);
 	}
+}
+
+public Action OnWeaponSwitch(int client, int weapon)
+{
+	if(cvarEnabled.BoolValue && IsValidClient(client) && IsValidEntity(weapon) &&
+	WeaponHasAttribute(weapon, "honorbound") && !GetEntProp(weapon, Prop_Send, "m_bIsBloody"))
+	{
+		new health = GetClientHealth(client);
+		if(health - 500 <= 0)
+		{
+			return Plugin_Handled;
+		}
+		else
+		{
+			SetEntityHealth(attacker, health - 500);
+		}
+	}
+	return Plugin_Continue;
 }
 
 bool ShouldDisableWeapons(int client)
@@ -1544,6 +1608,11 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 			TF2Attrib_RemoveByName(entityIndex, "maxammo secondary increased");
 			TF2Attrib_SetByName(entityIndex, "maxammo primary increased", StringToFloat(attribValue));
 		}
+	}
+
+	if(WeaponHasAttribute(entityIndex, "honorbound"))
+	{
+		SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 	}
 }
 
