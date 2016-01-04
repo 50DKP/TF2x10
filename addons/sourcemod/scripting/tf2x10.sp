@@ -1064,7 +1064,7 @@ public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBro
 					{
 						PrintToChatAll("New clip: %i", GetEntProp(weapon, Prop_Data, "m_iClip1") + 2);
 						SetEntProp(weapon, Prop_Data, "m_iClip1", GetEntProp(weapon, Prop_Data, "m_iClip1") + 2);
-						SetEntProp(client, Prop_Data, "m_iAmmo", 1, _, GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType"));
+						SetEntProp(healer, Prop_Data, "m_iAmmo", 1, _, GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType"));
 					}
 				}
 			}
