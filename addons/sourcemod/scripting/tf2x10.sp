@@ -1032,38 +1032,38 @@ public Action OnGetMaxHealth(int client, int &maxHealth)
 
 public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBroadcast)
 {
-	PrintToChatAll("test");
 	if(cvarEnabled.BoolValue)
 	{
-		int healer = GetClientOfUserId(GetEventInt(event, "healer"));
+		int healer = GetEventInt(event, "healer");
 		if(IsValidClient(healer))
 		{
-			PrintToChatAll("%N %i %i", healer, GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon"), GetPlayerWeaponSlot(healer, TFWeaponSlot_Primary));
-			if(GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon") == GetPlayerWeaponSlot(healer, TFWeaponSlot_Primary))
+			int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
+			if(IsValidEntity(weapon))
 			{
-				int health = GetClientHealth(healer);
-				int newhealth = health + 180;  //TF2 already adds 20 by default
-				int max = GetEntProp(healer, Prop_Data, "m_iMaxHealth");
-				PrintToChatAll("Current health: %i, new health: %i, max health: %i", health, newhealth, max);
-				if(newhealth <= max)
+				if(weapon == GetPlayerWeaponSlot(healer, TFWeaponSlot_Primary))
 				{
-					PrintToChatAll("Setting health to %i", newhealth);
-					SetEntityHealth(healer, newhealth);
+					int health = GetClientHealth(healer);
+					int newhealth = health + 180;  //TF2 already adds 20 by default
+					int max = GetEntProp(healer, Prop_Data, "m_iMaxHealth");
+					if(newhealth <= max)
+					{
+						SetEntityHealth(healer, newhealth);
+					}
+					else if(health <= max)
+					{
+						SetEntityHealth(healer, max);
+					}
 				}
-				else if(health <= max)
+				else
 				{
-					PrintToChatAll("Setting health to max (%i)", max);
-					SetEntityHealth(healer, max);
-				}
-			}
-			else
-			{
-				int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
-				char classname[64];
-				GetEdictClassname(weapon, classname, sizeof(classname));
-				if(StrEqual(classname, "tf_weapon_jar_milk") || StrEqual(classname, "tf_weapon_jarate"))
-				{
-					SetEntProp(weapon, Prop_Data, "m_iClip1", GetEntProp(weapon, Prop_Data, "m_iClip1") + 2);
+					char classname[64];
+					GetEdictClassname(weapon, classname, sizeof(classname));
+					PrintToChatAll("%s", classname);
+					if(StrEqual(classname, "tf_weapon_jar_milk") || StrEqual(classname, "tf_weapon_jarate"))
+					{
+						PrintToChatAll("New clip: %i", GetEntProp(weapon, Prop_Data, "m_iClip1") + 2);
+						SetEntProp(weapon, Prop_Data, "m_iClip1", GetEntProp(weapon, Prop_Data, "m_iClip1") + 2);
+					}
 				}
 			}
 		}
@@ -1099,7 +1099,7 @@ public Action OnPlayerHealed(Handle event, const char[] name, bool dontBroadcast
 						if(uber + 0.1 < 1.0)
 						{
 							//TF2 already adds 1% per 49 damage, so add 9 to that to make it x10
-							SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", uber + 0.9);
+							SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", uber + 0.09);
 						}
 						else if(uber < 1.0)
 						{
@@ -1499,6 +1499,13 @@ public void OnTakeDamagePost(int client, int attacker, int inflictor, float dama
 
 public Action OnWeaponSwitch(int client, int weapon)
 {
+	if(IsValidEntity(weapon))
+	{
+		char classname[64];
+		GetEdictClassname(weapon, classname, sizeof(classname));
+		PrintToChatAll("Weapon: %i (%s), is bloody: %i", GetEntProp(weapon, Prop_Send, "m_bIsBloody"));
+	}
+
 	if(cvarEnabled.BoolValue && IsValidClient(client) && IsValidEntity(weapon) &&
 	WeaponHasAttribute(client, weapon, "honorbound") && !GetEntProp(weapon, Prop_Send, "m_bIsBloody"))
 	{
@@ -1693,6 +1700,7 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 
 	if(WeaponHasAttribute(client, entityIndex, "honorbound"))
 	{
+		PrintToChatAll("Hooked %N's Half-Zatoichi", client);
 		SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 	}
 }
