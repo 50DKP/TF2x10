@@ -60,6 +60,7 @@ int dalokohs[MAXPLAYERS + 1];
 //int headsTaken[MAXPLAYERS + 1];
 int razorbacks[MAXPLAYERS + 1];
 int revengeCrits[MAXPLAYERS + 1];
+int amputatorHealing[MAXPLAYERS + 1];
 
 bool aprilFools;
 bool ff2Running;
@@ -166,6 +167,9 @@ public void OnPluginStart()
 	HookEvent("arena_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("object_destroyed", OnObjectDestroyed, EventHookMode_Post);
 	HookEvent("object_removed", OnObjectRemoved, EventHookMode_Post);
+	HookEvent("player_healed", OnPlayerHealed, EventHookMode_Post);
+	HookEvent("player_extinguished", OnPlayerExtinguished, EventHookMode_Post);
+	HookEvent("player_sapped_object", OnObjectSapped, EventHookMode_Post);
 	HookEvent("player_death", OnPlayerDeath, EventHookMode_Post);
 	HookEvent("post_inventory_application", OnPostInventoryApplication, EventHookMode_Post);
 	HookEvent("teamplay_restart_round", OnRoundEnd, EventHookMode_PostNoCopy);
@@ -1028,32 +1032,81 @@ public Action OnGetMaxHealth(int client, int &maxHealth)
 
 public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBroadcast)
 {
+	PrintToChatAll("test");
 	if(cvarEnabled.BoolValue)
 	{
-		PrintToChatAll("hi");
 		int healer = GetClientOfUserId(GetEventInt(event, "healer"));
-		if(TF2_GetPlayerClass(healer) == TFClass_Pyro && GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon") == GetPlayerWeaponSlot(healer, TFWeaponSlot_Primary))
+		if(IsValidClient(healer))
 		{
-			int health = GetClientHealth(healer);
-			int newhealth = health + 180;  //TF2 already adds 20 by default
-			int max = GetEntProp(healer, Prop_Data, "m_iMaxHealth");
-			if(newhealth <= max)
+			PrintToChatAll("%N %i %i", healer, GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon"), GetPlayerWeaponSlot(healer, TFWeaponSlot_Primary));
+			if(GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon") == GetPlayerWeaponSlot(healer, TFWeaponSlot_Primary))
 			{
-				SetEntityHealth(healer, newhealth);
+				int health = GetClientHealth(healer);
+				int newhealth = health + 180;  //TF2 already adds 20 by default
+				int max = GetEntProp(healer, Prop_Data, "m_iMaxHealth");
+				PrintToChatAll("Current health: %i, new health: %i, max health: %i", health, newhealth, max);
+				if(newhealth <= max)
+				{
+					PrintToChatAll("Setting health to %i", newhealth);
+					SetEntityHealth(healer, newhealth);
+				}
+				else if(health <= max)
+				{
+					PrintToChatAll("Setting health to max (%i)", max);
+					SetEntityHealth(healer, max);
+				}
 			}
-			else if(health <= max)
+			else
 			{
-				SetEntityHealth(healer, max);
+				int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
+				char classname[64];
+				GetEdictClassname(weapon, classname, sizeof(classname));
+				if(StrEqual(classname, "tf_weapon_jar_milk") || StrEqual(classname, "tf_weapon_jarate"))
+				{
+					SetEntProp(weapon, Prop_Data, "m_iClip1", GetEntProp(weapon, Prop_Data, "m_iClip1") + 2);
+				}
 			}
 		}
-		else
+	}
+	return Plugin_Continue;
+}
+
+public Action OnPlayerHealed(Handle event, const char[] name, bool dontBroadcast)
+{
+	if(!cvarEnabled.BoolValue)
+	{
+		return Plugin_Continue;
+	}
+
+	int healer = GetClientOfUserId(GetEventInt(event, "healer"));
+	if(IsValidClient(healer))
+	{
+		int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
+		if(weapon == GetPlayerWeaponSlot(healer, TFWeaponSlot_Melee))
 		{
-			int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
-			char classname[64];
-			GetEdictClassname(weapon, classname, sizeof(classname));
-			if(StrEqual(classname, "tf_weapon_jar_milk") || StrEqual(classname, "tf_weapon_jarate"))
+			amputatorHealing[healer] += GetEventInt(event, "amount");
+			if(amputatorHealing[healer] >= 49)  //From the TF2 wiki
 			{
-				SetEntProp(weapon, Prop_Data, "m_iClip1", GetEntProp(weapon, Prop_Data, "m_iClip1") + 2);
+				amputatorHealing[healer] -= 49;
+				int medigun=GetPlayerWeaponSlot(healer, TFWeaponSlot_Secondary);
+				if(IsValidEntity(medigun))
+				{
+					char medigunClassname[64];
+					GetEdictClassname(medigun, medigunClassname, sizeof(medigunClassname));
+					if(StrEqual(medigunClassname, "tf_weapon_medigun"))
+					{
+						float uber = GetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel");
+						if(uber + 0.1 < 1.0)
+						{
+							//TF2 already adds 1% per 49 damage, so add 9 to that to make it x10
+							SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", uber + 0.9);
+						}
+						else if(uber < 1.0)
+						{
+							SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", 1.0);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -1085,6 +1138,35 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
 		}
 	}
 	#endif
+	return Plugin_Continue;
+}
+
+public Action OnObjectSapped(Handle event, const char[] name, bool dontBroadcast)
+{
+	if(!cvarEnabled.BoolValue)
+	{
+		return Plugin_Continue;
+	}
+
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	int weapon = GetEventInt(event, "sapper");
+	if(WeaponHasAttribute(client, weapon, "energy weapon charged shot"))
+	{
+		PrintToChatAll("Sapped!");
+		int building = GetEventInt(event, "object");
+		SetEntProp(building, Prop_Send, "m_bDisabled", 1);
+		CreateTimer(40.0, Timer_EnableBuilding, EntIndexToEntRef(building));  //4x10 = 40
+	}
+	return Plugin_Continue;
+}
+
+public Action Timer_EnableBuilding(Handle timer, any buildingRef)
+{
+	int building = EntRefToEntIndex(buildingRef);
+	if(building > MaxClients)
+	{
+		SetEntProp(building, Prop_Send, "m_bDisabled", 0);
+	}
 	return Plugin_Continue;
 }
 
@@ -1258,7 +1340,6 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 			SDKUnhook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 		}
 	}
-
 
 	ResetVariables(client);
 	return Plugin_Continue;
@@ -1784,6 +1865,7 @@ void ResetVariables(int client)
 	dalokohs[client] = 0;
 	//headsTaken[client] = 0;
 	revengeCrits[client] = 0;
+	amputatorHealing[client] = 0;
 	hasCaber[client] = false;
 	hasManmelter[client] = false;
 	takesHeads[client] = false;
