@@ -262,6 +262,7 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 					ResetVariables(client);
 					SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 					SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+					SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 				}
 			}
 
@@ -693,6 +694,7 @@ public void OnClientPutInServer(int client)
 		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 		SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 		SDKHook(client, SDKHook_PreThink, OnPreThink);
+		SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 	}
 }
 
@@ -1058,11 +1060,11 @@ public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBro
 				{
 					char classname[64];
 					GetEdictClassname(weapon, classname, sizeof(classname));
-					PrintToChatAll("%s", classname);
-					if(StrEqual(classname, "tf_weapon_jar_milk") || StrEqual(classname, "tf_weapon_jarate"))
+					if(StrEqual(classname, "tf_weapon_jar_milk") || StrEqual(classname, "tf_weapon_jar"))
 					{
 						PrintToChatAll("New clip: %i", GetEntProp(weapon, Prop_Data, "m_iClip1") + 2);
 						SetEntProp(weapon, Prop_Data, "m_iClip1", GetEntProp(weapon, Prop_Data, "m_iClip1") + 2);
+						SetEntProp(client, Prop_Data, "m_iAmmo", 1, _, GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType"));
 					}
 				}
 			}
@@ -1330,15 +1332,6 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 	if(takesHeads[client])
 	{
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
-	}
-
-	if(activewep != -1)
-	{
-		int meleeWeapon = GetPlayerWeaponSlot(attacker, TFWeaponSlot_Melee);
-		if(IsValidEntity(meleeWeapon) && WeaponHasAttribute(client, meleeWeapon, "honorbound"))
-		{
-			SDKUnhook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
-		}
 	}
 
 	ResetVariables(client);
@@ -1696,12 +1689,6 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 			TF2Attrib_RemoveByName(entityIndex, "maxammo secondary increased");
 			TF2Attrib_SetByName(entityIndex, "maxammo primary increased", StringToFloat(attribValue));
 		}
-	}
-
-	if(WeaponHasAttribute(client, entityIndex, "honorbound"))
-	{
-		PrintToChatAll("Hooked %N's Half-Zatoichi", client);
-		SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 	}
 }
 
