@@ -1036,7 +1036,7 @@ public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBro
 {
 	if(cvarEnabled.BoolValue)
 	{
-		int healer = GetEventInt(event, "healer");
+		int healer = GetEventInt(event, "healer");  //NOTE: This IS the client index, unlike most events.  Not a typo!
 		if(IsValidClient(healer))
 		{
 			int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
