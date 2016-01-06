@@ -169,7 +169,6 @@ public void OnPluginStart()
 	HookEvent("object_removed", OnObjectRemoved, EventHookMode_Post);
 	HookEvent("player_healed", OnPlayerHealed, EventHookMode_Post);
 	HookEvent("player_extinguished", OnPlayerExtinguished, EventHookMode_Post);
-	HookEvent("player_sapped_object", OnObjectSapped, EventHookMode_Post);
 	HookEvent("player_death", OnPlayerDeath, EventHookMode_Post);
 	HookEvent("post_inventory_application", OnPostInventoryApplication, EventHookMode_Post);
 	HookEvent("teamplay_restart_round", OnRoundEnd, EventHookMode_PostNoCopy);
@@ -262,7 +261,7 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 					ResetVariables(client);
 					SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 					SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
-					SDKHook(client, SDKHook_WeaponEquip, OnWeaponEquip);
+					SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 				}
 			}
 
@@ -312,7 +311,7 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 					SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 					SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 					SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
-					SDKUnhook(client, SDKHook_WeaponEquip, OnWeaponEquip);
+					SDKUnhook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 				}
 			}
 			itemInfoTrie.Clear();
@@ -694,7 +693,7 @@ public void OnClientPutInServer(int client)
 		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 		SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 		SDKHook(client, SDKHook_PreThink, OnPreThink);
-		SDKHook(client, SDKHook_WeaponEquip, OnWeaponEquip);
+		SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 	}
 }
 
@@ -706,7 +705,7 @@ public void OnClientDisconnect(int client)
 		SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 		SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 		SDKUnhook(client, SDKHook_PreThink, OnPreThink);
-		SDKUnhook(client, SDKHook_WeaponEquip, OnWeaponEquip);
+		SDKUnhook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 	}
 }
 
@@ -1056,7 +1055,7 @@ public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBro
 						SetEntityHealth(healer, max);
 					}
 				}
-				else
+				/*else
 				{
 					char classname[64];
 					GetEdictClassname(weapon, classname, sizeof(classname));
@@ -1065,7 +1064,7 @@ public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBro
 						SetEntProp(weapon, Prop_Data, "m_iClip2", GetEntProp(weapon, Prop_Data, "m_iClip2") + 2);
 						SetEntProp(healer, Prop_Data, "m_iAmmo", 1, _, GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType"));
 					}
-				}
+				}*/
 			}
 		}
 	}
@@ -1139,36 +1138,6 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
 		}
 	}
 	#endif
-	return Plugin_Continue;
-}
-
-public Action OnObjectSapped(Handle event, const char[] name, bool dontBroadcast)
-{
-	if(!cvarEnabled.BoolValue)
-	{
-		return Plugin_Continue;
-	}
-
-	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	int weapon = GetEventInt(event, "sapper");
-	PrintToChatAll("Hi!");
-	if(WeaponHasAttribute(client, weapon, "energy weapon charged shot"))
-	{
-		PrintToChatAll("Sapped!");
-		int building = GetEventInt(event, "object");
-		SetEntProp(building, Prop_Send, "m_bDisabled", 1);
-		CreateTimer(40.0, Timer_EnableBuilding, EntIndexToEntRef(building));  //4x10 = 40
-	}
-	return Plugin_Continue;
-}
-
-public Action Timer_EnableBuilding(Handle timer, any buildingRef)
-{
-	int building = EntRefToEntIndex(buildingRef);
-	if(building > MaxClients)
-	{
-		SetEntProp(building, Prop_Send, "m_bDisabled", 0);
-	}
 	return Plugin_Continue;
 }
 
@@ -1490,23 +1459,14 @@ public void OnTakeDamagePost(int client, int attacker, int inflictor, float dama
 	}
 }
 
-public Action OnWeaponEquip(int client, int weapon)
+public Action OnWeaponSwitch(int client, int weapon)
 {
-	if(IsValidEntity(weapon))
+	int activeWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if(cvarEnabled.BoolValue && IsValidClient(client) && IsValidEntity(activeWeapon))
 	{
 		char classname[64];
-		GetEdictClassname(weapon, classname, sizeof(classname));
-		if(StrEqual(classname, "tf_weapon_katana"))
-		{
-			PrintToChatAll("Weapon: %i (%s), is bloody: %i", weapon, classname, GetEntProp(weapon, Prop_Send, "m_bIsBloody"));
-		}
-	}
-
-	if(cvarEnabled.BoolValue && IsValidClient(client) && IsValidEntity(weapon))
-	{
-		char classname[64];
-		GetEdictClassname(weapon, classname, sizeof(classname));
-		if(StrEqual(classname, "tf_weapon_katana") && !GetEntProp(weapon, Prop_Send, "m_bIsBloody"))
+		GetEdictClassname(activeWeapon, classname, sizeof(classname));
+		if(StrEqual(classname, "tf_weapon_katana") && !GetEntProp(activeWeapon, Prop_Send, "m_bIsBloody"))
 		{
 			int health = GetClientHealth(client);
 			if(health - 500 <= 0)
@@ -1515,7 +1475,7 @@ public Action OnWeaponEquip(int client, int weapon)
 			}
 			else
 			{
-				SetEntityHealth(client, health - 500);
+				SetEntityHealth(client, health - 450);  //50 + 450 = 500
 			}
 		}
 	}
