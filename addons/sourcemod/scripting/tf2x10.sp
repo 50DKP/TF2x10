@@ -95,6 +95,7 @@ ConVar cvarIncludeBots;
 ConVar cvarCritsFJ;
 ConVar cvarCritsDiamondback;
 ConVar cvarCritsManmelter;
+ConVar cvarZatoichiSheathThreshold;
 ConVar cvarFeignDeathDuration;
 
 public Plugin myinfo =
@@ -150,6 +151,7 @@ public void OnPluginStart()
 	cvarHeadScalingCap = CreateConVar("tf2x10_headscalingcap", "6.0", "The number of heads before head scaling stops growing their head. 6.0 = 24 heads.", _, true, 0.0, false);
 	cvarHealthCap = CreateConVar("tf2x10_healthcap", "2100", "The max health a player can have. -1 to disable.", _, true, -1.0, false);
 	cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", _, true, 0.0, true, 1.0);
+	cvarZatoichiSheathThreshold = CreateConVar("tf2x10_zatoichi_sheath_threshold", "500", "Minimum required health needed in order to sheath the Half-Zatoichi.  Damage will be 500 regardless.", _, true, 0.0);
 	cvarFeignDeathDuration = FindConVar("tf_feign_death_duration");
 
 	cvarEnabled.AddChangeHook(OnConVarChanged);
@@ -1469,7 +1471,7 @@ public Action OnWeaponSwitch(int client, int weapon)
 		if(StrEqual(classname, "tf_weapon_katana") && !GetEntProp(activeWeapon, Prop_Send, "m_bIsBloody"))
 		{
 			int health = GetClientHealth(client);
-			if(health - 500 <= 0)
+			if(health - cvarZatoichiSheathThreshold.IntValue <= 0)
 			{
 				return Plugin_Handled;
 			}
