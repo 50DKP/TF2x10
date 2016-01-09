@@ -1043,7 +1043,9 @@ public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBro
 			int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
 			if(IsValidEntity(weapon))
 			{
-				if(weapon == GetPlayerWeaponSlot(healer, TFWeaponSlot_Primary))
+				char classname[64];
+				GetEdictClassname(weapon, classname, sizeof(classname));
+				if(StrEqual(weapon, "tf_weapon_flamethrower") || StrEqual(weapon, "tf_weapon_flaregun_revenge"))
 				{
 					int health = GetClientHealth(healer);
 					int newhealth = health + 180;  //TF2 already adds 20 by default
