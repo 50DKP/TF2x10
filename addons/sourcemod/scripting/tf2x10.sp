@@ -167,6 +167,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_x10group", Command_Group);
 
 	HookEvent("arena_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("player_builtobject", OnObjectBuilt, EventHookMode_Post);
 	HookEvent("object_destroyed", OnObjectDestroyed, EventHookMode_Post);
 	HookEvent("object_removed", OnObjectRemoved, EventHookMode_Post);
 	HookEvent("player_healed", OnPlayerHealed, EventHookMode_Post);
@@ -1045,7 +1046,7 @@ public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBro
 			{
 				char classname[64];
 				GetEdictClassname(weapon, classname, sizeof(classname));
-				if(StrEqual(weapon, "tf_weapon_flamethrower") || StrEqual(weapon, "tf_weapon_flaregun_revenge"))
+				if(StrEqual(classname, "tf_weapon_flamethrower") || StrEqual(classname, "tf_weapon_flaregun_revenge"))
 				{
 					int health = GetClientHealth(healer);
 					int newhealth = health + 180;  //TF2 already adds 20 by default
@@ -1145,6 +1146,12 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
 	return Plugin_Continue;
 }
 
+public Action OnObjectBuilt(Handle event, const char[] name, bool dontBroadcast)
+{
+	SDKHook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+	return Plugin_Continue;
+}
+
 public Action OnObjectDestroyed(Handle event, const char[] name, bool dontBroadcast)
 {
 	if(!cvarEnabled.BoolValue)
@@ -1166,6 +1173,8 @@ public Action OnObjectDestroyed(Handle event, const char[] name, bool dontBroadc
 			SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + critsDiamondback - 1);
 		}
 	}
+
+	SDKUnhook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
 	return Plugin_Continue;
 }
 
@@ -1194,6 +1203,8 @@ public Action OnObjectRemoved(Handle event, const char[] name, bool dontBroadcas
 		SetEntProp(client, Prop_Send, "m_iRevengeCrits", crits);
 		buildingsDestroyed[client] = 0;
 	}
+
+	SDKUnhook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
 	return Plugin_Continue;
 }
 
@@ -1461,6 +1472,33 @@ public void OnTakeDamagePost(int client, int attacker, int inflictor, float dama
 	{
 		CheckHealthCaps(attacker);
 	}
+}
+
+public Action OnTakeDamage_Object(int building, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	PrintToChatAll("Building hit");
+	if(cvarEnabled.BoolValue && IsValidEntity(building) && damagecustom == TF_CUSTOM_PLASMA_CHARGED)
+	{
+		PrintToChatAll("Cow Mangler");
+		if(!GetEntProp(building, Prop_Send, "m_bDisabled"))
+		{
+			SetEntProp(building, Prop_Send, "m_bDisabled", 1);
+			CreateTimer(40.0, Timer_EnableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //4 x 10 = 40
+			PrintToChatAll("Disabled");
+		}
+	}
+	return Plugin_Continue;
+}
+
+public Action Timer_EnableBuilding(Handle timer, any buildingRef)
+{
+	int building = EntRefToEntIndex(buildingRef);
+	if(IsValidEntity(building) && building > MaxClients)
+	{
+		SetEntProp(building, Prop_Send, "m_bDisabled", 0);
+		PrintToChatAll("Enabled");
+	}
+	return Plugin_Continue;
 }
 
 public Action OnWeaponSwitch(int client, int weapon)
