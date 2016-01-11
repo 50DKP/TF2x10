@@ -1476,16 +1476,24 @@ public void OnTakeDamagePost(int client, int attacker, int inflictor, float dama
 
 public Action OnTakeDamage_Object(int building, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	PrintToChatAll("Building hit");
 	if(cvarEnabled.BoolValue && IsValidEntity(building) && damagecustom == TF_CUSTOM_PLASMA_CHARGED)
 	{
-		PrintToChatAll("Cow Mangler");
 		if(!GetEntProp(building, Prop_Send, "m_bDisabled"))
 		{
-			SetEntProp(building, Prop_Send, "m_bDisabled", 1);
+			CreateTimer(4.1, Timer_DisableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //Wait 4 seconds for the default disable to end, then set ours
 			CreateTimer(40.0, Timer_EnableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //4 x 10 = 40
-			PrintToChatAll("Disabled");
 		}
+	}
+	return Plugin_Continue;
+}
+
+public Action Timer_DisableBuilding(Handle timer, any buildingRef)
+{
+	int building = EntRefToEntIndex(buildingRef);
+	if(IsValidEntity(building) && building > MaxClients)
+	{
+		SetEntProp(building, Prop_Send, "m_bDisabled", 1);
+		PrintToChatAll("Disabled");
 	}
 	return Plugin_Continue;
 }
