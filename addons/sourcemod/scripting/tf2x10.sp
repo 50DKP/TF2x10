@@ -392,6 +392,7 @@ int LoadFileIntoTrie(const char[] rawname, const char[] basename = "")
 						hKeyValues.GetSectionName(strBuffer2, sizeof(strBuffer2));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", rawname, strBuffer, i);
 						itemInfoTrie.SetString(tmpID, strBuffer2);
+						PrintToServer("%s %s", strBuffer, strBuffer2);
 
 						hKeyValues.GetString(NULL_STRING, strBuffer3, sizeof(strBuffer3));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%i_val", rawname, strBuffer, i);
@@ -1478,11 +1479,8 @@ public Action OnTakeDamage_Object(int building, int &attacker, int &inflictor, f
 {
 	if(cvarEnabled.BoolValue && IsValidEntity(building) && damagecustom == TF_CUSTOM_PLASMA_CHARGED)
 	{
-		if(!GetEntProp(building, Prop_Send, "m_bDisabled"))
-		{
-			CreateTimer(4.1, Timer_DisableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //Wait 4 seconds for the default disable to end, then set ours
-			CreateTimer(40.0, Timer_EnableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //4 x 10 = 40
-		}
+		CreateTimer(4.0, Timer_DisableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //Wait 4 seconds for the default disable to end, then set ours
+		CreateTimer(40.0, Timer_EnableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //4 x 10 = 40
 	}
 	return Plugin_Continue;
 }
@@ -1493,7 +1491,6 @@ public Action Timer_DisableBuilding(Handle timer, any buildingRef)
 	if(IsValidEntity(building) && building > MaxClients)
 	{
 		SetEntProp(building, Prop_Send, "m_bDisabled", 1);
-		PrintToChatAll("Disabled");
 	}
 	return Plugin_Continue;
 }
@@ -1504,7 +1501,6 @@ public Action Timer_EnableBuilding(Handle timer, any buildingRef)
 	if(IsValidEntity(building) && building > MaxClients)
 	{
 		SetEntProp(building, Prop_Send, "m_bDisabled", 0);
-		PrintToChatAll("Enabled");
 	}
 	return Plugin_Continue;
 }
@@ -1682,7 +1678,7 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 				TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
 			}
 		}
-		else  //Use the weapon classname as the backup
+		else if(!StringToFloat(attribName)) //Use the weapon classname as the backup
 		{
 			Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", modToUse, classname, i);
 			itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
