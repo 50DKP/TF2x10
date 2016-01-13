@@ -81,6 +81,7 @@ StringMap itemInfoTrie;
 TopMenu globalTopMenu;
 
 Handle dalokohsTimer[MAXPLAYERS + 1];
+Handle cowManglerTimer[2048][2];  //0 controls the disable timer, and 1 controls the enable timer (and there's 2048 entities max)
 
 char selectedMod[16] = "default";
 
@@ -392,7 +393,6 @@ int LoadFileIntoTrie(const char[] rawname, const char[] basename = "")
 						hKeyValues.GetSectionName(strBuffer2, sizeof(strBuffer2));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", rawname, strBuffer, i);
 						itemInfoTrie.SetString(tmpID, strBuffer2);
-						PrintToServer("%s %s", strBuffer, strBuffer2);
 
 						hKeyValues.GetString(NULL_STRING, strBuffer3, sizeof(strBuffer3));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%i_val", rawname, strBuffer, i);
@@ -1149,7 +1149,10 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
 
 public Action OnObjectBuilt(Handle event, const char[] name, bool dontBroadcast)
 {
-	SDKHook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+	if(cvarEnabled.BoolValue)
+	{
+		SDKHook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+	}
 	return Plugin_Continue;
 }
 
@@ -1176,6 +1179,9 @@ public Action OnObjectDestroyed(Handle event, const char[] name, bool dontBroadc
 	}
 
 	SDKUnhook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+
+	cowManglerTimer[EntIndexToEntRef(GetEventInt(event, "index"))][0] = null;
+	cowManglerTimer[EntIndexToEntRef(GetEventInt(event, "index"))][1] = null;
 	return Plugin_Continue;
 }
 
@@ -1206,6 +1212,9 @@ public Action OnObjectRemoved(Handle event, const char[] name, bool dontBroadcas
 	}
 
 	SDKUnhook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+
+	cowManglerTimer[EntIndexToEntRef(GetEventInt(event, "index"))][0] = null;
+	cowManglerTimer[EntIndexToEntRef(GetEventInt(event, "index"))][1] = null;
 	return Plugin_Continue;
 }
 
@@ -1479,8 +1488,18 @@ public Action OnTakeDamage_Object(int building, int &attacker, int &inflictor, f
 {
 	if(cvarEnabled.BoolValue && IsValidEntity(building) && damagecustom == TF_CUSTOM_PLASMA_CHARGED)
 	{
-		CreateTimer(4.0, Timer_DisableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //Wait 4 seconds for the default disable to end, then set ours
-		CreateTimer(40.0, Timer_EnableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //4 x 10 = 40
+		int buildingRef = EntIndexToEntRef(building);
+		if(cowManglerTimer[buildingRef][0] != null)
+		{
+			KillTimer(cowManglerTimer[buildingRef][0]);
+		}
+		cowManglerTimer[buildingRef][0] = CreateTimer(4.1, Timer_DisableBuilding, buildingRef, TIMER_FLAG_NO_MAPCHANGE);  //Wait 4 seconds for the default disable to end, then set ours
+
+		if(cowManglerTimer[buildingRef][1] != null)
+		{
+			KillTimer(cowManglerTimer[buildingRef][1]);
+		}
+		cowManglerTimer[buildingRef][1] = CreateTimer(40.0, Timer_EnableBuilding, buildingRef, TIMER_FLAG_NO_MAPCHANGE);  //4 x 10 = 40
 	}
 	return Plugin_Continue;
 }
@@ -1492,6 +1511,7 @@ public Action Timer_DisableBuilding(Handle timer, any buildingRef)
 	{
 		SetEntProp(building, Prop_Send, "m_bDisabled", 1);
 	}
+	cowManglerTimer[buildingRef][0] = null;
 	return Plugin_Continue;
 }
 
@@ -1502,6 +1522,7 @@ public Action Timer_EnableBuilding(Handle timer, any buildingRef)
 	{
 		SetEntProp(building, Prop_Send, "m_bDisabled", 0);
 	}
+	cowManglerTimer[buildingRef][1] = null;
 	return Plugin_Continue;
 }
 
@@ -1678,7 +1699,7 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 				TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
 			}
 		}
-		else if(!StringToFloat(attribName)) //Use the weapon classname as the backup
+		else //Use the weapon classname as the backup
 		{
 			Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", modToUse, classname, i);
 			itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
@@ -1692,6 +1713,7 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 			}
 			else
 			{
+				PrintToServer("%s %s %s", classname, attribName, attribValue);
 				TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
 			}
 		}
