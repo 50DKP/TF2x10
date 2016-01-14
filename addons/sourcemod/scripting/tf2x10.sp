@@ -392,7 +392,6 @@ int LoadFileIntoTrie(const char[] rawname, const char[] basename = "")
 						hKeyValues.GetSectionName(strBuffer2, sizeof(strBuffer2));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", rawname, strBuffer, i);
 						itemInfoTrie.SetString(tmpID, strBuffer2);
-						PrintToServer("%s %s", strBuffer, strBuffer2);
 
 						hKeyValues.GetString(NULL_STRING, strBuffer3, sizeof(strBuffer3));
 						Format(tmpID, sizeof(tmpID), "%s__%s_%i_val", rawname, strBuffer, i);
@@ -1039,7 +1038,7 @@ public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBro
 {
 	if(cvarEnabled.BoolValue)
 	{
-		int healer = GetEventInt(event, "healer");
+		int healer = GetEventInt(event, "healer");  //NOTE: This IS the client index, unlike most events.  Not a typo!
 		if(IsValidClient(healer))
 		{
 			int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
@@ -1149,7 +1148,10 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
 
 public Action OnObjectBuilt(Handle event, const char[] name, bool dontBroadcast)
 {
-	SDKHook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+	if(cvarEnabled.BoolValue)
+	{
+		SDKHook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+	}
 	return Plugin_Continue;
 }
 
@@ -1678,7 +1680,7 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 				TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
 			}
 		}
-		else if(!StringToFloat(attribName)) //Use the weapon classname as the backup
+		else //Use the weapon classname as the backup
 		{
 			Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", modToUse, classname, i);
 			itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
