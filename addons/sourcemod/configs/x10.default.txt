@@ -166,7 +166,31 @@
 	{
 		"bleeding duration" "10" //10 Seconds of Bleed
 	}
-	"tf_weapon_shotgun" //Shotgun
+	"tf_weapon_shotgun_primary" //(Engineer) Shotgun
+	{
+		"Reload time decreased" "0.9" //+10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo primary increased" "10" //10x ammo
+	}
+	"tf_weapon_shotgun_hwg" //(Heavy) Shotgun
+	{
+		"Reload time decreased" "0.9" //+10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo primary increased" "10" //10x ammo
+	}
+	"tf_weapon_shotgun_pyro" //(Pyro) Shotgun
+	{
+		"Reload time decreased" "0.9" //+10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo primary increased" "10" //10x ammo
+	}
+	"tf_weapon_shotgun_soldier" //(Soldier) Shotgun
 	{
 		"Reload time decreased" "0.9" //+10% reload speed
 		"weapon spread bonus" "0.9" //+10% Accuracy
