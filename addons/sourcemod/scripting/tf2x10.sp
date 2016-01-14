@@ -1481,7 +1481,7 @@ public Action OnTakeDamage_Object(int building, int &attacker, int &inflictor, f
 {
 	if(cvarEnabled.BoolValue && IsValidEntity(building) && damagecustom == TF_CUSTOM_PLASMA_CHARGED)
 	{
-		CreateTimer(4.0, Timer_DisableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //Wait 4 seconds for the default disable to end, then set ours
+		CreateTimer(4.1, Timer_DisableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //Wait 4 seconds for the default disable to end, then set ours
 		CreateTimer(40.0, Timer_EnableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //4 x 10 = 40
 	}
 	return Plugin_Continue;
