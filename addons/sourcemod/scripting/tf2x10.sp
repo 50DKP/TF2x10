@@ -366,7 +366,7 @@ int LoadFileIntoTrie(const char[] rawname, const char[] basename = "")
 	char strBuffer2[64];
 	char strBuffer3[64];
 	BuildPath(Path_SM, strBuffer, sizeof(strBuffer), "configs/x10.%s.txt", rawname);
-	char tmpID[32];
+	char tmpID[64];
 	char finalbasename[32];
 	int i;
 
@@ -1627,7 +1627,7 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	char attribName[64];
 	char attribValue[8];
 	char modToUse[16];
-	char tmpID[32];
+	char tmpID[64];
 
 	Format(tmpID, sizeof(tmpID), "%s__%i_size", selectedMod, itemDefinitionIndex);
 	if(!itemInfoTrie.GetValue(tmpID, size))
