@@ -1,6 +1,6 @@
 "tf2x10_base_items"
 {
-	"tf_weapon_bat" //Bat
+	"0" //Bat
 	{
 		"fire rate bonus" "0.9" //+10% Firing Rate
 		"damage bonus" "1.1" //+10% Damage
@@ -15,7 +15,7 @@
 		"fire rate bonus" "0.9" //+10% Firing Rate
 		"damage bonus" "1.1" //+10% Damage
 	}
-	"tf_weapon_bottle" //Bottle
+	"1" //Bottle
 	{
 		"mod crit while airborne" "1" //Crits while Pipe/Sticky launching
 	}
@@ -23,7 +23,7 @@
 	{
 		"mod crit while airborne" "1" //Crits while Pipe/Sticky launching
 	}
-	"tf_weapon_fireaxe" //Fireaxe
+	"2" //Fireaxe
 	{
 		"bleeding duration" "10" //10 Seconds of Bleed
 	}
@@ -31,7 +31,7 @@
 	{
 		"bleeding duration" "10" //10 Seconds of Bleed
 	}
-	"tf_weapon_club" //Kukri
+	"3" //Kukri
 	{
 		"reveal cloaked victim on hit" "1" //reveal cloaked spies on hit
 		"reveal disguised victim on hit" "1" //reveal disguised spies on hit
@@ -41,7 +41,7 @@
 		"reveal cloaked victim on hit" "1" //reveal cloaked spies on hit
 		"reveal disguised victim on hit" "1" //reveal disguised spies on hit
 	}
-	"tf_weapon_knife" //Knife
+	"4" //Knife
 	{
 		"fire rate bonus" ".1" //+90% firing speed
 		"damage penalty" ".2" //-80% Damage
@@ -96,7 +96,7 @@
 		"fire rate bonus" ".1" //+90% firing speed
 		"damage penalty" ".2" //-80% Damage
 	}
-	"tf_weapon_fists" //Fists
+	"5" //Fists
 	{
 		"apply look velocity on damage" "600" //Horizontal Swing
 		"apply z velocity on damage" "400" //Vertical Swing
@@ -106,7 +106,7 @@
 		"apply look velocity on damage" "600" //Horizontal Swing
 		"apply z velocity on damage" "400" //Vertical Swing
 	}
-	"tf_weapon_shovel" //Shovel
+	"6" //Shovel
 	{
 		"apply z velocity on damage" "-10000" //Vertical Swing
 	}
@@ -114,7 +114,7 @@
 	{
 		"apply z velocity on damage" "-10000" //Vertical Swing
 	}
-	"tf_weapon_wrench" //Wrench
+	"7" //Wrench
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
 	}
@@ -158,7 +158,7 @@
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
 	}
-	"tf_weapon_bonesaw" //Bonesaw
+	"8" //Bonesaw
 	{
 		"bleeding duration" "10" //10 Seconds of Bleed
 	}
@@ -166,31 +166,7 @@
 	{
 		"bleeding duration" "10" //10 Seconds of Bleed
 	}
-	"tf_weapon_shotgun_primary" //(Engineer) Shotgun
-	{
-		"Reload time decreased" "0.9" //+10% reload speed
-		"weapon spread bonus" "0.9" //+10% Accuracy
-		"fire rate bonus" "0.9" //+10% firing speed
-		"damage bonus" "1.1" //+10% Damage
-		"maxammo primary increased" "10" //10x ammo
-	}
-	"tf_weapon_shotgun_hwg" //(Heavy) Shotgun
-	{
-		"Reload time decreased" "0.9" //+10% reload speed
-		"weapon spread bonus" "0.9" //+10% Accuracy
-		"fire rate bonus" "0.9" //+10% firing speed
-		"damage bonus" "1.1" //+10% Damage
-		"maxammo primary increased" "10" //10x ammo
-	}
-	"tf_weapon_shotgun_pyro" //(Pyro) Shotgun
-	{
-		"Reload time decreased" "0.9" //+10% reload speed
-		"weapon spread bonus" "0.9" //+10% Accuracy
-		"fire rate bonus" "0.9" //+10% firing speed
-		"damage bonus" "1.1" //+10% Damage
-		"maxammo primary increased" "10" //10x ammo
-	}
-	"tf_weapon_shotgun_soldier" //(Soldier) Shotgun
+	"9" //Engineer Shotgun
 	{
 		"Reload time decreased" "0.9" //+10% reload speed
 		"weapon spread bonus" "0.9" //+10% Accuracy
@@ -206,7 +182,31 @@
 		"damage bonus" "1.1" //+10% Damage
 		"maxammo primary increased" "10" //10x ammo
 	}
-	"tf_weapon_scattergun" //Scattergun
+	"10" //Soldier Shotgun
+	{
+		"Reload time decreased" "0.9" //+10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+	"11" //Heavy Shotgun
+	{
+		"Reload time decreased" "0.9" //+10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+	"12" //Pyro Shotgun
+	{
+		"Reload time decreased" "0.9" //-10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
+	}
+	"13" //Scattergun
 	{
 		"Reload time decreased" "0.5" //+50% reload speed
 	}
@@ -250,7 +250,7 @@
 	{
 		"Reload time decreased" "0.5" //+50% reload speed
 	}
-	"tf_weapon_sniperrifle" //Sniper Rifle
+	"14" //Sniper Rifle
 	{
 		"faster reload rate" "0.9" //-10% reload speed
 		"fire rate bonus" "0.9" //+10% firing speed
@@ -310,13 +310,13 @@
 		"fire rate bonus" "0.9" //+10% firing speed
 		"maxammo primary increased" "10" //10x ammo
 	}
-	"966" //Gold Botkiller Sniper Rifle Mk.II
+	"966" //Gold Botkiller Sniper Rifle Mk.II	
 	{
 		"faster reload rate" "0.9" //-10% reload speed
 		"fire rate bonus" "0.9" //+10% firing speed
 		"maxammo primary increased" "10" //10x ammo
 	}
-	"tf_weapon_minigun" //Minigun
+	"15" //Minigun
 	{
 		"aiming movespeed increased" "1.5" //+50% movement speed while revved
 	}
@@ -360,7 +360,7 @@
 	{
 		"aiming movespeed increased" "1.5" //+50% movement speed while revved
 	}
-	"tf_weapon_smg" //SMG
+	"16" //SMG
 	{
 		"Reload time decreased" "0.9" //-10% reload speed
 		"weapon spread bonus" "0.9" //+10% Accuracy
@@ -376,7 +376,7 @@
 		"damage bonus" "1.1" //+10% Damage
 		"maxammo secondary increased" "10" //10x ammo
 	}
-	"tf_weapon_syringegun_medic" //Syringe Gun
+	"17" //Syringe Gun
 	{
 		"fire rate bonus HIDDEN" "0.1" //10x firing rate
 	}
@@ -384,7 +384,7 @@
 	{
 		"fire rate bonus HIDDEN" "0.1" //10x firing rate
 	}
-	"tf_weapon_rocketlauncher" //Rocket Launcher
+	"18" //Rocket Launcher
 	{
 		"rocket jump damage reduction" "0.5" //-50% Self Damage while rocket jumping
 		"maxammo primary increased" "10" //10x ammo
@@ -439,7 +439,7 @@
 		"rocket jump damage reduction" "0.5" //-100% Self Damage while rocket jumping
 		"maxammo primary increased" "10" //10x ammo
 	}
-	"tf_weapon_grenadelauncher" //Grenade Launcher
+	"19" //Grenade Launcher
 	{
 		"reload time increased hidden" "0.3" //-70% reload
 		"projectile spread angle penalty" "10" //10 degrees random
@@ -472,7 +472,7 @@
 		"maxammo primary increased" "3.125" //50 ammo
 		"no primary ammo from dispensers while active" "1" //no ammo from dispensers
 	}
-	"tf_weapon_pipebomblauncher" //Stickybomb Launcher
+	"20" //Stickybomb Launcher
 	{
 		"maxammo secondary increased" "10" //10x max primary ammo
 	}
@@ -516,7 +516,7 @@
 	{
 		"maxammo secondary increased" "10" //10x max primary ammo
 	}
-	"tf_weapon_flamethrower" //Flame Thrower
+	"21" //Flame Thrower
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
@@ -571,7 +571,7 @@
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 	}
-	"tf_weapon_pistol" //Pistol
+	"22" //Engineer Pistol
 	{
 		"Reload time decreased" "0.1" //10x faster reload
 	}
@@ -579,7 +579,11 @@
 	{
 		"Reload time decreased" "0.1" //10x faster reload
 	}
-	"tf_weapon_revolver" //Revolver
+	"23" //Scout Pistol
+	{
+		"Reload time decreased" "0.1" //10x faster reload
+	}
+	"24" //Revolver
 	{
 		"clip size bonus" "10" //10x Loaded Ammo
 		"maxammo secondary increased" "10" //10x max primary ammo
@@ -589,7 +593,7 @@
 		"clip size bonus" "10" //10x Loaded Ammo
 		"maxammo secondary increased" "10" //10x max primary ammo
 	}
-	"tf_weapon_medigun" //Medi Gun
+	"29" //Medi Gun
 	{
 		"overheal decay bonus" "10" //10x longer overheal
 	}
@@ -633,7 +637,7 @@
 	{
 		"overheal decay bonus" "10" //10x longer overheal
 	}
-	"tf_weapon_invis" //Invisibility Watch
+	"30" //Invisibility Watch
 	{
 		"mult decloak rate" ".1" //10x decloak speed
 		"mult cloak rate" "-.9" //10x cloak speed
@@ -971,7 +975,7 @@
 	{
 		"SET BONUS: dmg taken from fire reduced set bonus" "0" //-100% Fire Vulnerability
 		"fire rate penalty" "3" //200% slower firing speed
-
+		
 	}
 	"308" //Loch n' Load
 	{
@@ -1080,7 +1084,7 @@
 		"maxammo primary reduced"	"0.5"	//50% primary ammo reduction
 		"maxammo secondary reduced"	"0.5"	//50% secondary ammo reduction
 		"charge meter on hit"	"1"	//100% charge refill on  kill
-
+	
 	}
 	"405" //Ali Baba's Wee Booties
 	{
@@ -1722,7 +1726,7 @@
 		"single wep deploy time decreased"	"-4"
 		"bullets per shot bonus"	"0.5"
 	}
-	"15000" //Sniper Rifle Reskin, Night Owl
+	"15000" //Sniper Rifle Reskin, Night Owl 
 	{
 		"faster reload rate" "0.9" //-10% reload speed
 		"fire rate bonus" "0.9" //+10% firing speed
@@ -2553,7 +2557,7 @@
 		"auto fires full clip" "1" //overload
 		"maxammo primary increased" "3.125" //50 ammo
 		"no primary ammo from dispensers while active" "1" //no ammo from dispensers
-	}
+	}	
 	"30474" //Nostromo Napalmer
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
