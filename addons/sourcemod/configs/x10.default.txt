@@ -1283,7 +1283,7 @@
 	"593" //Third Degree
 	{
 		"ragdolls become ash" "0" //Remove ragdolls become ash
-		"mod Flame Thrower push" "262144" //Crits vs overhealed players
+		"mod flamethrower push" "262144" //Crits vs overhealed players
 		"crit mod disabled" "0" //No random crits
 	}
 	"594" //Phlogisinator
