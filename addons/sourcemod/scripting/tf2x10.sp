@@ -30,7 +30,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.6.2"
+#define PLUGIN_VERSION		"1.7.0"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -60,6 +60,7 @@ int dalokohs[MAXPLAYERS + 1];
 //int headsTaken[MAXPLAYERS + 1];
 int razorbacks[MAXPLAYERS + 1];
 int revengeCrits[MAXPLAYERS + 1];
+int amputatorHealing[MAXPLAYERS + 1];
 
 bool aprilFools;
 bool ff2Running;
@@ -94,6 +95,7 @@ ConVar cvarIncludeBots;
 ConVar cvarCritsFJ;
 ConVar cvarCritsDiamondback;
 ConVar cvarCritsManmelter;
+ConVar cvarZatoichiSheathThreshold;
 ConVar cvarFeignDeathDuration;
 
 public Plugin myinfo =
@@ -149,6 +151,7 @@ public void OnPluginStart()
 	cvarHeadScalingCap = CreateConVar("tf2x10_headscalingcap", "6.0", "The number of heads before head scaling stops growing their head. 6.0 = 24 heads.", _, true, 0.0, false);
 	cvarHealthCap = CreateConVar("tf2x10_healthcap", "2100", "The max health a player can have. -1 to disable.", _, true, -1.0, false);
 	cvarIncludeBots = CreateConVar("tf2x10_includebots", "0", "1 allows bots to receive TF2x10 weapons, 0 disables this.", _, true, 0.0, true, 1.0);
+	cvarZatoichiSheathThreshold = CreateConVar("tf2x10_zatoichi_sheath_threshold", "500", "Minimum required health needed in order to sheath the Half-Zatoichi.  Damage will be 500 regardless.", _, true, 0.0);
 	cvarFeignDeathDuration = FindConVar("tf_feign_death_duration");
 
 	cvarEnabled.AddChangeHook(OnConVarChanged);
@@ -164,8 +167,11 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_x10group", Command_Group);
 
 	HookEvent("arena_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
+	HookEvent("player_builtobject", OnObjectBuilt, EventHookMode_Post);
 	HookEvent("object_destroyed", OnObjectDestroyed, EventHookMode_Post);
 	HookEvent("object_removed", OnObjectRemoved, EventHookMode_Post);
+	HookEvent("player_healed", OnPlayerHealed, EventHookMode_Post);
+	HookEvent("player_extinguished", OnPlayerExtinguished, EventHookMode_Post);
 	HookEvent("player_death", OnPlayerDeath, EventHookMode_Post);
 	HookEvent("post_inventory_application", OnPostInventoryApplication, EventHookMode_Post);
 	HookEvent("teamplay_restart_round", OnRoundEnd, EventHookMode_PostNoCopy);
@@ -258,6 +264,7 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 					ResetVariables(client);
 					SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 					SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
+					SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 				}
 			}
 
@@ -307,6 +314,7 @@ public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] n
 					SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 					SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 					SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+					SDKUnhook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 				}
 			}
 			itemInfoTrie.Clear();
@@ -358,7 +366,7 @@ int LoadFileIntoTrie(const char[] rawname, const char[] basename = "")
 	char strBuffer2[64];
 	char strBuffer3[64];
 	BuildPath(Path_SM, strBuffer, sizeof(strBuffer), "configs/x10.%s.txt", rawname);
-	char tmpID[32];
+	char tmpID[64];
 	char finalbasename[32];
 	int i;
 
@@ -688,6 +696,7 @@ public void OnClientPutInServer(int client)
 		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 		SDKHook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 		SDKHook(client, SDKHook_PreThink, OnPreThink);
+		SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 	}
 }
 
@@ -699,6 +708,7 @@ public void OnClientDisconnect(int client)
 		SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 		SDKUnhook(client, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
 		SDKUnhook(client, SDKHook_PreThink, OnPreThink);
+		SDKUnhook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 	}
 }
 
@@ -1024,6 +1034,90 @@ public Action OnGetMaxHealth(int client, int &maxHealth)
 	return Plugin_Continue;
 }
 
+public Action OnPlayerExtinguished(Handle event, const char[] name, bool dontBroadcast)
+{
+	if(cvarEnabled.BoolValue)
+	{
+		int healer = GetEventInt(event, "healer");  //NOTE: This IS the client index, unlike most events.  Not a typo!
+		if(IsValidClient(healer))
+		{
+			int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
+			if(IsValidEntity(weapon))
+			{
+				char classname[64];
+				GetEdictClassname(weapon, classname, sizeof(classname));
+				if(StrEqual(classname, "tf_weapon_flamethrower") || StrEqual(classname, "tf_weapon_flaregun_revenge"))
+				{
+					int health = GetClientHealth(healer);
+					int newhealth = health + 180;  //TF2 already adds 20 by default
+					int max = GetEntProp(healer, Prop_Data, "m_iMaxHealth");
+					if(newhealth <= max)
+					{
+						SetEntityHealth(healer, newhealth);
+					}
+					else if(health <= max)
+					{
+						SetEntityHealth(healer, max);
+					}
+				}
+				/*else
+				{
+					char classname[64];
+					GetEdictClassname(weapon, classname, sizeof(classname));
+					if(StrEqual(classname, "tf_weapon_jar_milk") || StrEqual(classname, "tf_weapon_jar"))
+					{
+						SetEntProp(weapon, Prop_Data, "m_iClip2", GetEntProp(weapon, Prop_Data, "m_iClip2") + 2);
+						SetEntProp(healer, Prop_Data, "m_iAmmo", 1, _, GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType"));
+					}
+				}*/
+			}
+		}
+	}
+	return Plugin_Continue;
+}
+
+public Action OnPlayerHealed(Handle event, const char[] name, bool dontBroadcast)
+{
+	if(!cvarEnabled.BoolValue)
+	{
+		return Plugin_Continue;
+	}
+
+	int healer = GetClientOfUserId(GetEventInt(event, "healer"));
+	if(IsValidClient(healer))
+	{
+		int weapon = GetEntPropEnt(healer, Prop_Send, "m_hActiveWeapon");
+		if(weapon == GetPlayerWeaponSlot(healer, TFWeaponSlot_Melee))
+		{
+			amputatorHealing[healer] += GetEventInt(event, "amount");
+			if(amputatorHealing[healer] >= 49)  //From the TF2 wiki
+			{
+				amputatorHealing[healer] -= 49;
+				int medigun=GetPlayerWeaponSlot(healer, TFWeaponSlot_Secondary);
+				if(IsValidEntity(medigun))
+				{
+					char medigunClassname[64];
+					GetEdictClassname(medigun, medigunClassname, sizeof(medigunClassname));
+					if(StrEqual(medigunClassname, "tf_weapon_medigun"))
+					{
+						float uber = GetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel");
+						if(uber + 0.1 < 1.0)
+						{
+							//TF2 already adds 1% per 49 damage, so add 9 to that to make it x10
+							SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", uber + 0.09);
+						}
+						else if(uber < 1.0)
+						{
+							SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", 1.0);
+						}
+					}
+				}
+			}
+		}
+	}
+	return Plugin_Continue;
+}
+
 public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadcast)
 {
 	#if defined _FF2_included
@@ -1052,6 +1146,15 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
 	return Plugin_Continue;
 }
 
+public Action OnObjectBuilt(Handle event, const char[] name, bool dontBroadcast)
+{
+	if(cvarEnabled.BoolValue)
+	{
+		SDKHook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+	}
+	return Plugin_Continue;
+}
+
 public Action OnObjectDestroyed(Handle event, const char[] name, bool dontBroadcast)
 {
 	if(!cvarEnabled.BoolValue)
@@ -1073,6 +1176,8 @@ public Action OnObjectDestroyed(Handle event, const char[] name, bool dontBroadc
 			SetEntProp(attacker, Prop_Send, "m_iRevengeCrits", GetEntProp(attacker, Prop_Send, "m_iRevengeCrits") + critsDiamondback - 1);
 		}
 	}
+
+	SDKUnhook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
 	return Plugin_Continue;
 }
 
@@ -1101,6 +1206,8 @@ public Action OnObjectRemoved(Handle event, const char[] name, bool dontBroadcas
 		SetEntProp(client, Prop_Send, "m_iRevengeCrits", crits);
 		buildingsDestroyed[client] = 0;
 	}
+
+	SDKUnhook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
 	return Plugin_Continue;
 }
 
@@ -1370,6 +1477,59 @@ public void OnTakeDamagePost(int client, int attacker, int inflictor, float dama
 	}
 }
 
+public Action OnTakeDamage_Object(int building, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if(cvarEnabled.BoolValue && IsValidEntity(building) && damagecustom == TF_CUSTOM_PLASMA_CHARGED)
+	{
+		CreateTimer(4.1, Timer_DisableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //Wait 4 seconds for the default disable to end, then set ours
+		CreateTimer(40.0, Timer_EnableBuilding, EntIndexToEntRef(building), TIMER_FLAG_NO_MAPCHANGE);  //4 x 10 = 40
+	}
+	return Plugin_Continue;
+}
+
+public Action Timer_DisableBuilding(Handle timer, any buildingRef)
+{
+	int building = EntRefToEntIndex(buildingRef);
+	if(IsValidEntity(building) && building > MaxClients)
+	{
+		SetEntProp(building, Prop_Send, "m_bDisabled", 1);
+	}
+	return Plugin_Continue;
+}
+
+public Action Timer_EnableBuilding(Handle timer, any buildingRef)
+{
+	int building = EntRefToEntIndex(buildingRef);
+	if(IsValidEntity(building) && building > MaxClients)
+	{
+		SetEntProp(building, Prop_Send, "m_bDisabled", 0);
+	}
+	return Plugin_Continue;
+}
+
+public Action OnWeaponSwitch(int client, int weapon)
+{
+	int activeWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if(cvarEnabled.BoolValue && IsValidClient(client) && IsValidEntity(activeWeapon))
+	{
+		char classname[64];
+		GetEdictClassname(activeWeapon, classname, sizeof(classname));
+		if(StrEqual(classname, "tf_weapon_katana") && !GetEntProp(activeWeapon, Prop_Send, "m_bIsBloody"))
+		{
+			int health = GetClientHealth(client);
+			if(health - cvarZatoichiSheathThreshold.IntValue <= 0)
+			{
+				return Plugin_Handled;
+			}
+			else
+			{
+				SetEntityHealth(client, health - 450);  //50 + 450 = 500
+			}
+		}
+	}
+	return Plugin_Continue;
+}
+
 bool ShouldDisableWeapons(int client)
 {
 	//in case vsh/ff2 and other mods are running, disable x10 effects and checks
@@ -1467,19 +1627,35 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	char attribName[64];
 	char attribValue[8];
 	char modToUse[16];
-	char tmpID[32];
+	char tmpID[64];
 
 	Format(tmpID, sizeof(tmpID), "%s__%i_size", selectedMod, itemDefinitionIndex);
 	if(!itemInfoTrie.GetValue(tmpID, size))
 	{
-		Format(tmpID, sizeof(tmpID), "default__%i_size", itemDefinitionIndex);
+		Format(tmpID, sizeof(tmpID), "%s__%s_size", selectedMod, classname);
 		if(!itemInfoTrie.GetValue(tmpID, size))
 		{
-			return;
+			Format(tmpID, sizeof(tmpID), "default__%i_size", itemDefinitionIndex);
+			if(!itemInfoTrie.GetValue(tmpID, size))
+			{
+				Format(tmpID, sizeof(tmpID), "default__%s_size", classname);
+				if(!itemInfoTrie.GetValue(tmpID, size))
+				{
+					return;
+				}
+				else
+				{
+					strcopy(modToUse, sizeof(modToUse), "default");
+				}
+			}
+			else
+			{
+				strcopy(modToUse, sizeof(modToUse), "default");
+			}
 		}
 		else
 		{
-			strcopy(modToUse, sizeof(modToUse), "default");
+			strcopy(modToUse, sizeof(modToUse), selectedMod);
 		}
 	}
 	else
@@ -1490,18 +1666,36 @@ public int TF2Items_OnGiveNamedItem_Post(int client, char[] classname, int itemD
 	for(int i; i < size; i++)
 	{
 		Format(tmpID, sizeof(tmpID), "%s__%i_%i_name", modToUse, itemDefinitionIndex, i);
-		itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
-
-		Format(tmpID, sizeof(tmpID), "%s__%i_%i_val", modToUse, itemDefinitionIndex, i);
-		itemInfoTrie.GetString(tmpID, attribValue, sizeof(attribValue));
-
-		if(StrEqual(attribValue, "remove"))
+		if(itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName)))
 		{
-			TF2Attrib_RemoveByName(entityIndex, attribName);
+			Format(tmpID, sizeof(tmpID), "%s__%i_%i_val", modToUse, itemDefinitionIndex, i);
+			itemInfoTrie.GetString(tmpID, attribValue, sizeof(attribValue));
+
+			if(StrEqual(attribValue, "remove"))
+			{
+				TF2Attrib_RemoveByName(entityIndex, attribName);
+			}
+			else
+			{
+				TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
+			}
 		}
-		else
+		else //Use the weapon classname as the backup
 		{
-			TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
+			Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", modToUse, classname, i);
+			itemInfoTrie.GetString(tmpID, attribName, sizeof(attribName));
+
+			Format(tmpID, sizeof(tmpID), "%s__%s_%i_val", modToUse, classname, i);
+			itemInfoTrie.GetString(tmpID, attribValue, sizeof(attribValue));
+
+			if(StrEqual(attribValue, "remove"))
+			{
+				TF2Attrib_RemoveByName(entityIndex, attribName);
+			}
+			else
+			{
+				TF2Attrib_SetByName(entityIndex, attribName, StringToFloat(attribValue));
+			}
 		}
 
 		//Engineer has the Panic Attack in the primary slot
@@ -1681,6 +1875,7 @@ void ResetVariables(int client)
 	dalokohs[client] = 0;
 	//headsTaken[client] = 0;
 	revengeCrits[client] = 0;
+	amputatorHealing[client] = 0;
 	hasCaber[client] = false;
 	hasManmelter[client] = false;
 	takesHeads[client] = false;
