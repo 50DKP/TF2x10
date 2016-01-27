@@ -4,11 +4,13 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.6.2"
-			"Previous"	"1.6.1"
+			"Latest"	"1.7.0"
+			"Previous"	"1.6.2"
 		}
 
-		"Notes"			"Fixed invalid timer error that would occur if a client disconnected before the Dalokohs Bar buff finished"
+		"Notes"			"Tough Break x10!"
+		"Notes"			"Allowed configs to specify a classname instead of an index to more easily match reskins"
+		"Notes"			"Made Cow Mangler disable buildings for 40 seconds"
 	}
 
 	"Files"
