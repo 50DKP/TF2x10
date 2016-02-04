@@ -810,6 +810,7 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 	int client = GetClientOfUserId(userid);
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || !TF2_IsPlayerInCondition(client, TFCond_Taunting))
 	{
+		dalokohsTimer[client] = null;
 		return Plugin_Stop;
 	}
 
@@ -886,9 +887,12 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 public Action Timer_DalokohsEnd(Handle timer, any userid)
 {
 	int client = GetClientOfUserId(userid);
-	dalokohs[client] = 0;
-	dalokohsTimer[client] = null;
-	SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+	if(IsValidClient(client))
+	{
+		dalokohs[client] = 0;
+		dalokohsTimer[client] = null;
+		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+	}
 	return Plugin_Continue;
 }
 
