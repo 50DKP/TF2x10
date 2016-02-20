@@ -1579,17 +1579,11 @@ public Action OnPlayerShieldBlocked(UserMsg msg_id, Handle bf, const players[], 
 	if(razorbacks[victim] > 1)
 	{
 		razorbacks[victim]--;
-
-		int loopBreak = 0;
-		int slotEntity = -1;
-
-		while((slotEntity = GetPlayerWeaponSlot_Wearable(victim, TFWeaponSlot_Secondary)) != -1 && loopBreak < 20)
+		int entity;
+		while((entity = GetPlayerWeaponSlot_Wearable(victim, TFWeaponSlot_Secondary)) != -1)
 		{
-			RemoveEdict(slotEntity);
-			loopBreak++;
+			TF2_RemoveWearable(victim, entity);
 		}
-
-		RemovePlayerBack(victim);
 
 		Handle weapon = TF2Items_CreateItem(OVERRIDE_CLASSNAME | OVERRIDE_ITEM_DEF | OVERRIDE_ITEM_LEVEL | OVERRIDE_ITEM_QUALITY | OVERRIDE_ATTRIBUTES);
 		TF2Items_SetClassname(weapon, "tf_wearable");
@@ -1600,7 +1594,7 @@ public Action OnPlayerShieldBlocked(UserMsg msg_id, Handle bf, const players[], 
 		TF2Items_SetAttribute(weapon, 1, 292, 5.0);  //...kill eater score type?
 		TF2Items_SetNumAttributes(weapon, 2);
 
-		int entity = TF2Items_GiveNamedItem(victim, weapon);
+		entity = TF2Items_GiveNamedItem(victim, weapon);
 		weapon.Close();
 		SDKCall(equipWearable, victim, entity);
 	}
@@ -1986,24 +1980,6 @@ stock int FindEntityByClassname2(int startEnt, const char[] classname)
 		startEnt--;
 	}
 	return FindEntityByClassname(startEnt, classname);
-}
-
-stock int RemovePlayerBack(int client)
-{
-	int edict = MaxClients + 1;
-	while((edict = FindEntityByClassname2(edict, "tf_wearable")) != -1)
-	{
-		char netclass[32];
-		if(GetEntityNetClass(edict, netclass, sizeof(netclass)) && StrEqual(netclass, "CTFWearable"))
-		{
-			int idx = GetEntProp(edict, Prop_Send, "m_iItemDefinitionIndex");
-			if((idx == 57 || idx == 133 || idx == 231 || idx == 444 || idx == 642)
-				&& GetEntPropEnt(edict, Prop_Send, "m_hOwnerEntity") == client && !GetEntProp(edict, Prop_Send, "m_bDisguiseWearable"))
-			{
-				AcceptEntityInput(edict, "Kill");
-			}
-		}
-	}
 }
 
 //I have this in case TF2Attrib_GetByName acts up
