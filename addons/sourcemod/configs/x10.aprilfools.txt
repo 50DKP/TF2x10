@@ -1,6 +1,5 @@
 
 "aprilfools"
-
 {
 	"tf_weapon_bat" //Bat
 	{
@@ -1420,7 +1419,6 @@
 	{
 		"move speed bonus" "1.1" //+10% speed bonus
 		"provide on active" "1" //Effects only present while active
-
 	}
 	"810" //Red Tape Recorder
 	{
@@ -2589,6 +2587,8 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
+		"ammo regen"	"10"
+		
 	}
 	"30665" //The Shooting Star
 	{
