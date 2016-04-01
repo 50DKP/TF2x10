@@ -164,6 +164,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_tf2x10_getmod", Command_GetMod, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_tf2x10_setmod", Command_SetMod, ADMFLAG_CHEATS);
+	RegAdminCmd("sm_tf2x10_april_fools", Command_AprilFools, ADMFLAG_CHEATS);
 	RegConsoleCmd("sm_x10group", Command_Group);
 
 	HookEvent("arena_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
@@ -581,6 +582,21 @@ public Action Command_SetMod(int client, int args)
 			ReplyToCommand(client, "[TF2x10] Now loading from configs/x10.default.txt.");
 		}
 		return Plugin_Handled;
+	}
+	return Plugin_Continue;
+}
+
+public Action Command_AprilFools(int client, int args)
+{
+	if(aprilFools)
+	{
+		aprilFools = false;
+		ReplyToCommand(client, "[TF2x10] April Fool's mode has been disabled!");
+	}
+	else
+	{
+		aprilFools = true;
+		ReplyToCommand(client, "[TF2x10] April Fool's mode has been enabled!");
 	}
 	return Plugin_Continue;
 }
