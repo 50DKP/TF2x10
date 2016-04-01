@@ -167,7 +167,7 @@
 	{
 		"bleeding duration" "10" //10 Seconds of Bleed
 	}
-	"tf_weapon_shotgun_primary" //(Engineer) Shotgun
+	"9" //(Engineer) Shotgun
 	{
 		"Reload time decreased" "0.9" //+10% reload speed
 		"weapon spread bonus" "0.9" //+10% Accuracy
@@ -175,29 +175,29 @@
 		"damage bonus" "1.1" //+10% Damage
 		"maxammo primary increased" "10" //10x ammo
 	}
-	"tf_weapon_shotgun_hwg" //(Heavy) Shotgun
+	"10" //(Soldier) Shotgun
 	{
 		"Reload time decreased" "0.9" //+10% reload speed
 		"weapon spread bonus" "0.9" //+10% Accuracy
 		"fire rate bonus" "0.9" //+10% firing speed
 		"damage bonus" "1.1" //+10% Damage
-		"maxammo primary increased" "10" //10x ammo
+		"maxammo secondary increased" "10" //10x ammo
+	}	
+	"11" //(Heavy) Shotgun
+	{
+		"Reload time decreased" "0.9" //+10% reload speed
+		"weapon spread bonus" "0.9" //+10% Accuracy
+		"fire rate bonus" "0.9" //+10% firing speed
+		"damage bonus" "1.1" //+10% Damage
+		"maxammo secondary increased" "10" //10x ammo
 	}
-	"tf_weapon_shotgun_pyro" //(Pyro) Shotgun
+	"12" //(Pyro) Shotgun
 	{
 		"Reload time decreased" "0.9" //+10% reload speed
 		"weapon spread bonus" "0.9" //+10% Accuracy
 		"fire rate bonus" "0.9" //+10% firing speed
 		"damage bonus" "1.1" //+10% Damage
-		"maxammo primary increased" "10" //10x ammo
-	}
-	"tf_weapon_shotgun_soldier" //(Soldier) Shotgun
-	{
-		"Reload time decreased" "0.9" //+10% reload speed
-		"weapon spread bonus" "0.9" //+10% Accuracy
-		"fire rate bonus" "0.9" //+10% firing speed
-		"damage bonus" "1.1" //+10% Damage
-		"maxammo primary increased" "10" //10x ammo
+		"maxammo secondary increased" "10" //10x ammo
 	}
 	"199" //Strange Engineer Shotgun
 	{
@@ -745,6 +745,8 @@
 		"hidden primary max ammo bonus" "5" //10x Primary Ammo
 		"disable fancy class select anim" "1" //Disables certain class animations
 		"faster reload rate" "0.8" //-20% Reload speed
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry
 	}
 	"57" //Razorback
 	{
@@ -753,11 +755,14 @@
 	"58" //Jarate
 	{
 		"maxammo grenades1 increased" "10" //10 Jarates
+		"Blast radius increased" "10" //10 Times Explosive Radius
 	}
 	"59" //Dead Ringer
 	{
 		"cloak consume rate decreased" "0.9" //Less cloak drain on activatre
 		"mult cloak meter regen rate" "8" //+700% Regen
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry	
 	}
 	"60" //Cloak and Dagger
 	{
@@ -806,6 +811,11 @@
 	"133" //Gunboats
 	{
 		"rocket jump damage reduction" "0" //-100% Self Damage while rocket jumping
+	}
+	"140" //The Wrangler
+	{
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry
 	}
 	"141" //Frontier Justice
 	{
@@ -925,6 +935,7 @@
 	{
 		"jarate duration" "80" //80 Seconds of Jarate on full charge hit
 		"sniper charge per sec" "3.5" //+250% Charge rate
+		"jarate backstabber"	"10"	//Jarate piss piss piss
 	}
 	"231" //Darwin's Danger Shield
 	{
@@ -950,6 +961,8 @@
 		"damage penalty" "0" //-100% Damage
 		"attach particle effect static" "2" //Flaming bits
 		"single wep holster time increased"	"6"	//500% holster speed penalty
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry	
 	}
 	"264" //Stock Melee Reskin, Frying Pan
 	{
@@ -973,8 +986,9 @@
 	"266" //Headtaker
 	{
 		"max health additive penalty" "-50" //-50 Health
-		"melee range multiplier" "2.87" //10x range bonus
+		"melee range multiplier" "5" //???x range bonus
 		"attach particle effect static" "44" //Particle: Misty Skull
+		"hand scale"	"3"	//??
 	}
 	"294" //Lugermorph
 	{
@@ -999,6 +1013,10 @@
 	{
 		"crit kill will gib"	"1"	//Just putting a dummy stat in here to keep the crossbow's place until a better fix is devised.
 		"Reload time decreased" "0.5" //+50% reload speed
+		"auto fires full clip"	"1"	//Beggar's Crossbow
+		"clip size penalty HIDDEN"	"9"	//Beggar's Crossbow
+		"projectile spread angle penalty"	"3"	//Beggar's Crossbow
+		"no primary ammo from dispensers while active"	"1"	//Beggar's Crossbow
 	}
 	"307" //Ullapool Caber
 	{
@@ -1050,6 +1068,8 @@
 		"heal on kill"	"0"	//Cancel out vanilla attribute
 		"dmg taken increased"	"1"	//Cancel out vanilla attribute
 		"charge time increased" "50" //+5 seconds of charge time
+		"mult charge turn control"	"1000"	//DEMO TRUCK REDUX
+		"no charge impact range"	"1"	//DEMO TRUCK REDUX
 	}
 	"329" //Jag
 	{
@@ -1077,11 +1097,14 @@
 		"crit mod disabled" "0" //No Random Critical Hits
 		"damage penalty" "1" //Remove the old damage penalty
 		"dmg bonus vs buildings" "0.1" //-90% damage vs buildings
+		"Set DamageType Ignite"	"1"	//Burn Shit
 	}
 	"351" //Detonator
 	{
 		"blast dmg to self increased" "2"
 		"self dmg push force increased" "10" //+100% Self Knockback
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry	
 	}
 	"354" //Concheror
 	{
@@ -1092,6 +1115,7 @@
 	{
 		"damage penalty" "0.06" //-94% damage
 		"deploy time decreased" "0.7" //30% faster weapon switch
+		"Set DamageType Ignite"	"1"	//Burn Shit
 	}
 	"356" //Conniver's Kunai
 	{
@@ -1136,9 +1160,11 @@
 	}
 	"412" //Overdose
 	{
-		"move speed bonus" "2" //10% speed bonus
+		"move speed bonus" "40" //+3000% Walk Speed
 		"damage penalty" "0" //-20% damage
 		"provide on active" "1" //Effects only present while active
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry	
 	}
 	"413" //Solemn Vow
 	{
@@ -1231,6 +1257,8 @@
 		"air dash count" "10" //+10 Air Jumps
 		"fire rate penalty" "4" //-300% firing rate
 		"dmg penalty vs players" "0.04" //-96% damage
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry	
 	}
 	"452" //Three-Rune Blade
 	{
@@ -1290,10 +1318,16 @@
 	{
 		"damage penalty" "0.7" //-30% damage
 		"SET BONUS: dmg from sentry reduced" "0.7" //30% Sentry resistance
+		"sapper damage leaches health"	"10"	//Each sapper adds 10 health per second
 	}
 	"526" //Machina
 	{
 		"sniper full charge damage bonus" "2.5" //+150% Damage at full charge
+		"sniper crit no scope"	"1"	//360 Noscope
+		"apply look velocity on damage" "600" //Horizontal Swing
+		"apply z velocity on damage" "400" //Vertical Swing
+		"mod stun waist high airborne"	"1"	//Nutshot stun
+		"explosive sniper shot"	"1"	//??
 	}
 	"527" //Widowmaker
 	{
@@ -1302,7 +1336,11 @@
 	}
 	"528" //Short Circuit
 	{
-		"mod ammo per shot" "3" //3 Ammo per use
+		"mod ammo per shot" "1" //3 Ammo per use
+		"fire rate bonus" "0.5" //+90% Firing Rate
+		"Blast radius increased" "10" //10 Times Explosive Radius
+		"self dmg push force decreased"	"-2.5"	//-350% knockback!
+		"Set DamageType Ignite"	"1"	//Burn shit	
 	}
 	"572" //Unarmed Combat
 	{
@@ -1425,6 +1463,7 @@
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
 		"ammo regen"	"0.1" //Ammo Regen
+		"pyrovision only DISPLAY ONLY"	"0"	//??
 	}
 	"751" //Cleaner's Carbine
 	{
@@ -1601,7 +1640,10 @@
 	"1005" //Festive Huntsman
 	{
 		"hidden primary max ammo bonus" "5" //10x Primary Ammo
+		"disable fancy class select anim" "1" //Disables certain class animations
 		"faster reload rate" "0.8" //-20% Reload speed
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry		
 	}
 	"1006" //Festive Ambassador
 	{
@@ -1651,6 +1693,10 @@
 		"crit kill will gib"	"1"	//Just putting a dummy stat in here to keep the crossbow's place until a better fix is devised.
 		"Reload time decreased" "0.5" //+50% reload speed
 		"override projectile type" "23" //Fire Candy Canes
+		"auto fires full clip"	"1"	//Beggar's Crossbow
+		"clip size penalty HIDDEN"	"9"	//Beggar's Crossbow
+		"projectile spread angle penalty"	"3"	//Beggar's Crossbow
+		"no primary ammo from dispensers while active"	"1"	//Beggar's Crossbow
 	}
 	"1080" //Festive Sapper
 	{
@@ -1670,6 +1716,7 @@
 	"1083" //Festive Jarate
 	{
 		"maxammo grenades1 increased" "10" //10 Jarates
+		"Blast radius increased" "10" //10 Times Explosive Radius
 	}
 	"1084" //Festive Gloves of Running Urgently GRU
 	{
@@ -1677,6 +1724,8 @@
 		"damage penalty" "0" //-100% Damage
 		"attach particle effect static" "2" //Flaming bits
 		"single wep holster time increased"	"6"	//500% holster speed penalty
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry	
 	}
 	"1085" //Festive Black Box
 	{
@@ -1685,11 +1734,18 @@
 		"SET BONUS: dmg from sentry reduced" "-1" //-200% Damage from sentries
 		"SET BONUS: calling card on kill"	"3"		//Tankbuster Calling Card
 	}
+	"1086" //Festive Wrangler
+	{
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry
+	}
 	"1092" //The Fortified Compound
 	{
 		"hidden primary max ammo bonus" "5" //10x Primary Ammo
 		"disable fancy class select anim" "1" //Disables certain class animations
 		"faster reload rate" "0.8" //-20% Reload speed
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry
 	}
 	"1098" //The Classic
 	{
@@ -1728,9 +1784,10 @@
 		"clipsize increase on kill"	"79"
 		"maxammo primary increased" "10" //+900% max primary ammo
 	}
-	"1105" //The Self-Aware Beauty Mark
+	"1105" //Jarate Reskin, The Self-Aware Beauty Mark
 	{
 		"maxammo grenades1 increased" "10" //10 Jarates
+		"Blast radius increased" "10" //10 Times Explosive Radius
 	}
 	"1121" //Mutated Milk
 	{
@@ -1827,6 +1884,7 @@
 		"faster reload rate" "0.9" //-10% reload speed
 		"fire rate bonus" "0.9" //+10% firing speed
 		"maxammo primary increased" "10" //10x ammo\
+		"set_item_texture_wear"	"0"	//??
 	}
 	"15001" //SMG Reskin, Woodsy Widowmaker
 	{
@@ -2689,6 +2747,9 @@
 	"30665" //The Shooting Star
 	{
 		"sniper full charge damage bonus" "2.5" //+150% Damage at full charge
+		"apply look velocity on damage" "600" //Horizontal Swing
+		"apply z velocity on damage" "400" //Vertical Swing
+		"mod stun waist high airborne"	"1"	//Nutshot stun
 	}
 	"30666" //The C.A.P.P.E.R
 	{
@@ -2698,5 +2759,10 @@
 	{
 		"fire rate bonus" "0.9" //+10% Firing Rate
 		"damage bonus" "1.1" //+10% Damage
+	}
+	"30668" //The Giger Counter
+	{
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry
 	}
 }
