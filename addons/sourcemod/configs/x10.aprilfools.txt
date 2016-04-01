@@ -1092,7 +1092,7 @@
 	"349" //Sun-on-a-stick
 	{
 		"damage bonus" "11" //+1000% damage
-		"dmg penalty vs nonburning" "0" //0% damage vs nonburning targets
+		"dmg penalty vs nonburning" "0.01" //0% damage vs nonburning targets
 		"crit mod disabled" "0" //No Random Critical Hits
 		"damage penalty" "1" //Remove the old damage penalty
 		"dmg bonus vs buildings" "0.1" //-90% damage vs buildings
