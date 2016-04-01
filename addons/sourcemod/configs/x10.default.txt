@@ -924,7 +924,7 @@
 		"attach particle effect static" "2" //Flaming bits
 		"single wep holster time increased"	"6"	//500% holster speed penalty
 	}
-	"264" //Frying Pan
+	"264" //Stock Melee Reskin, Frying Pan
 	{
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
@@ -1132,9 +1132,11 @@
 		"melee range multiplier" "2" //+100% range bonus
 		"fire rate penalty" "3" //200% slower firing speed
 	}
-	"423" //Saxxy
+	"423" //Stock Melee Reskin, Saxxy
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage		
 	}
 	"424" //Tomislav
 	{
@@ -1218,9 +1220,11 @@
 		"provide on active" "1" //Effects only present while active
 		"SET BONUS: dmg from sentry reduced" "" //Sentry Immunity
 	}
-	"474" //Protest Sign
+	"474" //Stock Melee Reskin, Conscientious Objector
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
 	}
 	"482" //Nessie's Nine Iron
 	{
@@ -1451,27 +1455,33 @@
 	{
 		"maxammo grenades1 increased" "10" //10 Sandviches
 	}
-	"880" //Freedom Staff
+	"880" //Stock Melee Reskin, Freedom Staff
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
 	}
 	"933" //The Ap-Sap
 	{
 		"sapper damage penalty hidden" "3.16" //(sqrt10)x Sapper Damage(hidden)
 	}
-	"939" //Bat Outta Hell
+	"939" //Stock Melee Reskin, Bat Outta Hell
 	{
 		"fire rate bonus" "0.9" //+10% Firing Rate
 		"damage bonus" "1.1" //+10% Damage
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
 	}
-	"947" //The Quackenbirdt.
+	"947" //The Quackenbirdt
 	{
 		"mult decloak rate" ".1" //10x decloak speed
 		"mult cloak rate" "-.9" //10x cloak speed
 	}
-	"880" //Memory Maker
+	"880" //Stock Melee Reskin, Memory Maker
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
 	}
 	"996" //The Loose Cannon
 	{
@@ -1535,7 +1545,7 @@
 		"fire rate penalty" "1.4" //-40% firing rate
 		"damage penalty" "1" //Remove the old damage penalty
 	}
-	"1013" //The Ham Shank
+	"1013" //Stock Melee Reskin, The Ham Shank
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
 		"SET BONUS: chance of hunger decrease" "11" //1000% Chane of Hunger Decrease
@@ -1543,7 +1553,7 @@
 		"cancel falling damage" "1" //Cancel falling damage
 		"attach particle effect static" "75" //Particle: Chiroptera Venenata
 	}
-	"1071" //The Golden Frying Pan
+	"1071" //Stock Melee Reskin,  Golden Frying Pan
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
 		"crit kill will gib" "1" //Crit kill will gib
@@ -1648,12 +1658,18 @@
 	{
 		"effect bar recharge rate increased" "0.1" //10x Faster recharge speed
 	}
-	"1123" //The Necro Smasher
+	"1123" //Stock Melee Reskin, The Necro Smasher
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
 		"attach particle effect static" "81" //Particle: Bonzo the all gnawing
+	}
+	"1127" //Stock Melee Reskin, Crossing Guard
+	{
+		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
 	}
 	"1141" //Festive Shotgun
 	{
@@ -2090,6 +2106,7 @@
 	"15073" //Wrench Reskin, Nutcracker
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
+		
 	}
 	"15074"	//Wrench Reskin, Autumn
 	{
