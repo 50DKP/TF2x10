@@ -604,46 +604,57 @@
 	"tf_weapon_medigun" //Medi Gun
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"211" //Strange Medi Gun
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"663" //Festive Medi Gun
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"796" //Silver Botkiller Medi Gun Mk.I
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"805" //Gold Botkiller Medi Gun Mk.I
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"885" //Rust Botkiller Medi Gun Mk.I
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"894" //Blood Botkiller Medi Gun Mk.I
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"903" //Carbonado Botkiller Medi Gun Mk.I
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"912" //Diamond Botkiller Medi Gun Mk.I
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"961" //Silver Botkiller Medi Gun Mk.II
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"970" //Gold Botkiller Medi Gun Mk.II
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"tf_weapon_invis" //Invisibility Watch
 	{
@@ -663,6 +674,7 @@
 	"35" //Kritzkrieg
 	{
 		"ubercharge rate bonus" "3.5" //+250% Healing Rate
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"36" //Blutsauger
 	{
@@ -1114,6 +1126,7 @@
 		"heal rate bonus" "5" //+400% Heal Rate
 		"ubercharge rate bonus" "3.5" //+250% Ubercharge rate
 		"overheal penalty" "0.05" //5% overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"412" //Overdose
 	{
@@ -1511,6 +1524,7 @@
 		"medigun blast resist deployed"	"8.5"	//750% Selected uber damage type resist
 		"medigun fire resist passive"	"8.5"	//750% Selected uber damage type resist
 		"medigun fire resist deployed"	"1" //100% selected passive resistance
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"1000" //Festive Axtinguisher
 	{
@@ -1788,6 +1802,7 @@
 	"15008" //Medi Gun Reskin, Masked Mender
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15009" //Stickybomb Launcher Reskin, Sudden Flurry
 	{
@@ -1796,6 +1811,7 @@
 	"15010" //Medi Gun Reskin, Wrapped Reviver
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15011" //Revolver Reskin, Psychedelic Slugger
 	{
@@ -1872,6 +1888,7 @@
 	"15025" //Medi Gun Reskin, Reclaimed Reanimator
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15026" //Minigun Reskin, Antique Annihilator
 	{
@@ -1944,6 +1961,7 @@
 	"15039" //Medi Gun Reskin, Civil Servant
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15040" //Minigun Reskin, Citizen Pain
 	{
@@ -2000,6 +2018,7 @@
 	"15050" //Medi Gun Reskin, Spark Of Life
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15051" //Revolver Reskin, Dead Reckoner
 	{
@@ -2149,6 +2168,7 @@
 	"15078"	//Medi Gun Reskin, Wildwood
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15079"	//Grenade Launcher Reskin, Macabre Web
 	{
@@ -2255,6 +2275,7 @@
 	"15097"	//Medi Gun Reskin, Flower Power
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15098"	//Minigun Reskin, Brain Candy
 	{
@@ -2380,14 +2401,17 @@
 	"15120"	//Medi Gun Reskin, Coffin Nail
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15121"	//Medi Gun Reskin, Dressed To Kill
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15122"	//Medi Gun Reskin, High Roller
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15123"	//Minigun Reskin, Coffin Nail
 	{
@@ -2511,10 +2535,12 @@
 	"15145"	//Medi Gun Reskin, Blitzkrieg
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15146"	//Medi Gun Reskin, Corsair
 	{
 		"overheal decay bonus" "10" //10x longer overheal
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15147"	//Minigun Reskin, Butcher Bird
 	{
