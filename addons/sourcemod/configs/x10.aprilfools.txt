@@ -521,67 +521,67 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"208" //Strange Flame Thrower
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"659" //Festive Flame Thrower
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"798" //Silver Botkiller Flame Thrower Mk.I
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"807" //Gold Botkiller Flame Thrower Mk.I
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"887" //Rust Botkiller Flame Thrower Mk.I
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"896" //Blood Botkiller Flame Thrower Mk.I
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"905" //Carbonado Botkiller Flame Thrower Mk.I
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"914" //Diamond Botkiller Flame Thrower Mk.I
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"963" //Silver Botkiller Flame Thrower Mk.II
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"972" //Gold Botkiller Flame Thrower Mk.II
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"tf_weapon_pistol" //Pistol
 	{
@@ -951,11 +951,17 @@
 		"attach particle effect static" "2" //Flaming bits
 		"single wep holster time increased"	"6"	//500% holster speed penalty
 	}
-	"264" //Frying Pan
+	"264" //Stock Melee Reskin, Frying Pan
 	{
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
 		"attach particle effect static" "77" //Particle: Something Burning This Way Comes
+		"crit mod disabled"	"1"	//No Random Crits
+		"minicrits become crits"	"1"	//Always Crit Pt. 1
+		"crit vs non burning players"	"1"	//Always Crit Pt. 2
+		"crit vs burning players"	"1"	//Always Crit Pt. 3
+		"crit forces victim to laugh"	"1" //Laughing Crits
+		"crit mod disabled hidden" "100" //100% crit chance		
 	}
 	"265" //Sticky Jumper
 	{
@@ -1043,7 +1049,7 @@
 		"kill refills meter"	"1"
 		"heal on kill"	"0"	//Cancel out vanilla attribute
 		"dmg taken increased"	"1"	//Cancel out vanilla attribute
-		"charge time increased" "5" //+5 seconds of charge time
+		"charge time increased" "50" //+5 seconds of charge time
 	}
 	"329" //Jag
 	{
@@ -1160,9 +1166,17 @@
 		"melee range multiplier" "2" //+100% range bonus
 		"fire rate penalty" "3" //200% slower firing speed
 	}
-	"423" //Saxxy
+	"423" //Stock Melee Reskin, Saxxy
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
+		"crit mod disabled"	"1"	//No Random Crits
+		"minicrits become crits"	"1"	//Always Crit Pt. 1
+		"crit vs non burning players"	"1"	//Always Crit Pt. 2
+		"crit vs burning players"	"1"	//Always Crit Pt. 3
+		"crit forces victim to laugh"	"1" //Laughing Crits
+		"crit mod disabled hidden" "100" //100% crit chance		
 	}
 	"424" //Tomislav
 	{
@@ -1246,9 +1260,17 @@
 		"provide on active" "1" //Effects only present while active
 		"SET BONUS: dmg from sentry reduced" "" //Sentry Immunity
 	}
-	"474" //Protest Sign
+	"474" //Stock Melee Reskin, Protest Sign
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
+		"crit mod disabled"	"1"	//No Random Crits
+		"minicrits become crits"	"1"	//Always Crit Pt. 1
+		"crit vs non burning players"	"1"	//Always Crit Pt. 2
+		"crit vs burning players"	"1"	//Always Crit Pt. 3
+		"crit forces victim to laugh"	"1" //Laughing Crits
+		"crit mod disabled hidden" "100" //100% crit chance
 	}
 	"482" //Nessie's Nine Iron
 	{
@@ -1479,27 +1501,51 @@
 	{
 		"maxammo grenades1 increased" "10" //10 Sandviches
 	}
-	"880" //Freedom Staff
+	"880" //Stock Melee Reskin, Freedom Staff
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
+		"crit mod disabled"	"1"	//No Random Crits
+		"minicrits become crits"	"1"	//Always Crit Pt. 1
+		"crit vs non burning players"	"1"	//Always Crit Pt. 2
+		"crit vs burning players"	"1"	//Always Crit Pt. 3
+		"crit forces victim to laugh"	"1" //Laughing Crits
+		"crit mod disabled hidden" "100" //100% crit chance
 	}
 	"933" //The Ap-Sap
 	{
 		"sapper damage penalty hidden" "3.16" //(sqrt10)x Sapper Damage(hidden)
 	}
-	"939" //Bat Outta Hell
+	"939" //Stock Melee Reskin, Bat Outta Hell
 	{
 		"fire rate bonus" "0.9" //+10% Firing Rate
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
 		"damage bonus" "1.1" //+10% Damage
+		"crit mod disabled"	"1"	//No Random Crits
+		"minicrits become crits"	"1"	//Always Crit Pt. 1
+		"crit vs non burning players"	"1"	//Always Crit Pt. 2
+		"crit vs burning players"	"1"	//Always Crit Pt. 3
+		"crit forces victim to laugh"	"1" //Laughing Crits
+		"crit mod disabled hidden" "100" //100% crit chance
 	}
 	"947" //The Quackenbirdt.
 	{
 		"mult decloak rate" ".1" //10x decloak speed
 		"mult cloak rate" "-.9" //10x cloak speed
 	}
-	"880" //Memory Maker
+	"880" //Stock Melee Reskin, Memory Maker
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
+		"crit mod disabled"	"1"	//No Random Crits
+		"minicrits become crits"	"1"	//Always Crit Pt. 1
+		"crit vs non burning players"	"1"	//Always Crit Pt. 2
+		"crit vs burning players"	"1"	//Always Crit Pt. 3
+		"crit forces victim to laugh"	"1" //Laughing Crits
+		"crit mod disabled hidden" "100" //100% crit chance
 	}
 	"996" //The Loose Cannon
 	{
@@ -1564,20 +1610,32 @@
 		"fire rate penalty" "1.4" //-40% firing rate
 		"damage penalty" "1" //Remove the old damage penalty
 	}
-	"1013" //The Ham Shank
+	"1013" //Stock Melee Reskin, The Ham Shank
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
 		"SET BONUS: chance of hunger decrease" "11" //1000% Chane of Hunger Decrease
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
 		"attach particle effect static" "75" //Particle: Chiroptera Venenata
+		"crit mod disabled"	"1"	//No Random Crits
+		"minicrits become crits"	"1"	//Always Crit Pt. 1
+		"crit vs non burning players"	"1"	//Always Crit Pt. 2
+		"crit vs burning players"	"1"	//Always Crit Pt. 3
+		"crit forces victim to laugh"	"1" //Laughing Crits
+		"crit mod disabled hidden" "100" //100% crit chance
 	}
-	"1071" //The Golden Frying Pan
+	"1071" //Stock Melee Reskin, The Golden Frying Pan
 	{
 		"fire rate bonus" "0.8" //20% faster firing speed
 		"crit kill will gib" "1" //Crit kill will gib
 		"cancel falling damage" "1" //Cancel falling damage
 		"attach particle effect static" "17" //Particle: Sunbeams
+		"crit mod disabled"	"1"	//No Random Crits
+		"minicrits become crits"	"1"	//Always Crit Pt. 1
+		"crit vs non burning players"	"1"	//Always Crit Pt. 2
+		"crit vs burning players"	"1"	//Always Crit Pt. 3
+		"crit forces victim to laugh"	"1" //Laughing Crits
+		"crit mod disabled hidden" "100" //100% crit chance
 	}
 	"1078" //Festive Force-a-Nature FaN
 	{
@@ -1685,6 +1743,18 @@
 		"cancel falling damage" "1" //Cancel falling damage
 		"attach particle effect static" "81" //Particle: Bonzo the all gnawing
 	}
+		"1127" //Stock Melee Reskin, Crossing Guard
+	{
+		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage
+		"crit mod disabled"	"1"	//No Random Crits
+		"minicrits become crits"	"1"	//Always Crit Pt. 1
+		"crit vs non burning players"	"1"	//Always Crit Pt. 2
+		"crit vs burning players"	"1"	//Always Crit Pt. 3
+		"crit forces victim to laugh"	"1" //Laughing Crits
+		"crit mod disabled hidden" "100" //100% crit chance
+	}
 	"1141" //Festive Shotgun
 	{
 		"Reload time decreased" "0.9" //-10% reload speed
@@ -1748,7 +1818,7 @@
 		"Reload time decreased"	"0.1"
 		"clip size penalty HIDDEN"	"6.67"
 		"maxammo secondary increased"	"1.5"
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 		"single wep deploy time decreased"	"-4"
 		"bullets per shot bonus"	"0.5"
 	}
@@ -1786,7 +1856,7 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15006" //Rocket Launcher Reskin, Woodland Warrior
 	{
@@ -1847,7 +1917,7 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15018" //Pistol Reskin, Homemade Heater
 	{
@@ -1912,7 +1982,7 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15031" //Minigun Reskin, War Room
 	{
@@ -1936,7 +2006,7 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15035" //Pistol Reskin, Hickory Hole Puncher
 	{
@@ -2013,7 +2083,7 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15050" //Medi Gun Reskin, Spark Of Life
 	{
@@ -2038,7 +2108,7 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15055" //Minigun Reskin, Brick House
 	{
@@ -2098,19 +2168,19 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15067"	//Flame Thrower Reskin, Pumpkin Patch
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15068"	//Flame Thrower Reskin, Nutcracker
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15069"	//Scattergun Reskin, Nutcracker
 	{
@@ -2227,13 +2297,13 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15090"	//Flame Thrower Reskin, Rainbow
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15091"	//Grenade Launcher Reskin, Rainbow
 	{
@@ -2364,7 +2434,7 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15116"	//Grenade Launcher Reskin, Coffin Nail
 	{
@@ -2509,7 +2579,7 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
+		"ammo regen"	"1"
 	}
 	"15142"	//Grenade Launcher Reskin, War Hawk
 	{
@@ -2545,6 +2615,7 @@
 	"15147"	//Minigun Reskin, Butcher Bird
 	{
 		"aiming movespeed increased" "1.5" //+50% movement speed while revved
+		"enables aoe heal"	"1" //Amputator Taunt Heal + Medigun Uber Share
 	}
 	"15148"	//Pistol Reskin, Blitzkrieg
 	{
@@ -2613,8 +2684,7 @@
 	{
 		"airblast cost decreased" ".1" //1/10th airblast cost
 		"mult airblast refire time" ".1" //10x airblast rate
-		"ammo regen"	"10"
-		
+		"ammo regen"	"1"		
 	}
 	"30665" //The Shooting Star
 	{
