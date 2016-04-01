@@ -4,13 +4,13 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.7.0"
-			"Previous"	"1.6.2"
+			"Latest"	"1.7.1"
+			"Previous"	"1.7.0"
 		}
 
-		"Notes"			"Tough Break x10!"
-		"Notes"			"Allowed configs to specify a classname instead of an index to more easily match reskins"
-		"Notes"			"Made Cow Mangler disable buildings for 40 seconds"
+		"Notes"			"April Fool's 2016!"
+		"Notes"			"Fixed harmless error"
+		"Notes"			"Added command to toggle April Fool's state"
 	}
 
 	"Files"

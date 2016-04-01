@@ -30,7 +30,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.7.0"
+#define PLUGIN_VERSION		"1.7.1"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -164,6 +164,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_tf2x10_getmod", Command_GetMod, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_tf2x10_recache", Command_Recache, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_tf2x10_setmod", Command_SetMod, ADMFLAG_CHEATS);
+	RegAdminCmd("sm_tf2x10_april_fools", Command_AprilFools, ADMFLAG_CHEATS);
 	RegConsoleCmd("sm_x10group", Command_Group);
 
 	HookEvent("arena_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
@@ -585,6 +586,21 @@ public Action Command_SetMod(int client, int args)
 	return Plugin_Continue;
 }
 
+public Action Command_AprilFools(int client, int args)
+{
+	if(aprilFools)
+	{
+		aprilFools = false;
+		ReplyToCommand(client, "[TF2x10] April Fool's mode has been disabled!");
+	}
+	else
+	{
+		aprilFools = true;
+		ReplyToCommand(client, "[TF2x10] April Fool's mode has been enabled!");
+	}
+	return Plugin_Continue;
+}
+
 /******************************************************************
 
 SourceMod Map/Library Events
@@ -810,6 +826,7 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 	int client = GetClientOfUserId(userid);
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || !TF2_IsPlayerInCondition(client, TFCond_Taunting))
 	{
+		dalokohsTimer[client] = null;
 		return Plugin_Stop;
 	}
 
@@ -886,9 +903,12 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 public Action Timer_DalokohsEnd(Handle timer, any userid)
 {
 	int client = GetClientOfUserId(userid);
-	dalokohs[client] = 0;
-	dalokohsTimer[client] = null;
-	SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+	if(IsValidClient(client))
+	{
+		dalokohs[client] = 0;
+		dalokohsTimer[client] = null;
+		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+	}
 	return Plugin_Continue;
 }
 
@@ -1575,17 +1595,11 @@ public Action OnPlayerShieldBlocked(UserMsg msg_id, Handle bf, const players[], 
 	if(razorbacks[victim] > 1)
 	{
 		razorbacks[victim]--;
-
-		int loopBreak = 0;
-		int slotEntity = -1;
-
-		while((slotEntity = GetPlayerWeaponSlot_Wearable(victim, TFWeaponSlot_Secondary)) != -1 && loopBreak < 20)
+		int entity;
+		while((entity = GetPlayerWeaponSlot_Wearable(victim, TFWeaponSlot_Secondary)) != -1)
 		{
-			RemoveEdict(slotEntity);
-			loopBreak++;
+			TF2_RemoveWearable(victim, entity);
 		}
-
-		RemovePlayerBack(victim);
 
 		Handle weapon = TF2Items_CreateItem(OVERRIDE_CLASSNAME | OVERRIDE_ITEM_DEF | OVERRIDE_ITEM_LEVEL | OVERRIDE_ITEM_QUALITY | OVERRIDE_ATTRIBUTES);
 		TF2Items_SetClassname(weapon, "tf_wearable");
@@ -1596,7 +1610,7 @@ public Action OnPlayerShieldBlocked(UserMsg msg_id, Handle bf, const players[], 
 		TF2Items_SetAttribute(weapon, 1, 292, 5.0);  //...kill eater score type?
 		TF2Items_SetNumAttributes(weapon, 2);
 
-		int entity = TF2Items_GiveNamedItem(victim, weapon);
+		entity = TF2Items_GiveNamedItem(victim, weapon);
 		weapon.Close();
 		SDKCall(equipWearable, victim, entity);
 	}
@@ -1982,24 +1996,6 @@ stock int FindEntityByClassname2(int startEnt, const char[] classname)
 		startEnt--;
 	}
 	return FindEntityByClassname(startEnt, classname);
-}
-
-stock int RemovePlayerBack(int client)
-{
-	int edict = MaxClients + 1;
-	while((edict = FindEntityByClassname2(edict, "tf_wearable")) != -1)
-	{
-		char netclass[32];
-		if(GetEntityNetClass(edict, netclass, sizeof(netclass)) && StrEqual(netclass, "CTFWearable"))
-		{
-			int idx = GetEntProp(edict, Prop_Send, "m_iItemDefinitionIndex");
-			if((idx == 57 || idx == 133 || idx == 231 || idx == 444 || idx == 642)
-				&& GetEntPropEnt(edict, Prop_Send, "m_hOwnerEntity") == client && !GetEntProp(edict, Prop_Send, "m_bDisguiseWearable"))
-			{
-				AcceptEntityInput(edict, "Kill");
-			}
-		}
-	}
 }
 
 //I have this in case TF2Attrib_GetByName acts up
