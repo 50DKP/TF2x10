@@ -1761,8 +1761,10 @@
 	}
 	"1100" //The Bread Bite
 	{
-		"move speed bonus" "4" //+300% Walk Speed
+		"move speed bonus" "40" //+300% Walk Speed
 		"damage penalty" "0" //-100% Damage
+		"parachute attribute"	"1"	//You're a parachute, Harry
+		"mod soldier buff type"	"4" //You're a parachute, Harry	
 	}
 	"1102" //The Snack Attack
 	{
