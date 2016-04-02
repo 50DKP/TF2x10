@@ -4,13 +4,12 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.7.1"
-			"Previous"	"1.7.0"
+			"Latest"	"1.7.2"
+			"Previous"	"1.7.1"
 		}
 
-		"Notes"			"April Fool's 2016!"
-		"Notes"			"Fixed harmless error"
-		"Notes"			"Added command to toggle April Fool's state"
+		"Notes"			"April Fool's: Added GRU stats to Bread Bite"
+		"Notes"			"April Fool's: Prevented April Fool's status being overriden if set via command"
 	}
 
 	"Files"

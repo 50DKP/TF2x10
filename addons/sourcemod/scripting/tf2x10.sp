@@ -30,7 +30,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.7.1"
+#define PLUGIN_VERSION		"1.7.2"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -63,6 +63,7 @@ int revengeCrits[MAXPLAYERS + 1];
 int amputatorHealing[MAXPLAYERS + 1];
 
 bool aprilFools;
+bool aprilFoolsOverride;
 bool ff2Running;
 bool hiddenRunning;
 bool vshRunning;
@@ -598,6 +599,7 @@ public Action Command_AprilFools(int client, int args)
 		aprilFools = true;
 		ReplyToCommand(client, "[TF2x10] April Fool's mode has been enabled!");
 	}
+	aprilFoolsOverride = true;
 	return Plugin_Continue;
 }
 
@@ -1249,9 +1251,9 @@ public Action OnPickupMVMCurrency(Handle event, const char[] name, bool dontBroa
 
 public Action TF2_OnIsHolidayActive(TFHoliday holiday, bool &result)
 {
-	if(holiday == TFHoliday_AprilFools && result)
+	if(holiday == TFHoliday_AprilFools && !aprilFoolsOverride)
 	{
-		aprilFools=true;
+		aprilFools = result;
 	}
 	return Plugin_Continue;
 }
