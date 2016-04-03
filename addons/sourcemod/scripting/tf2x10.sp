@@ -30,7 +30,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.7.2"
+#define PLUGIN_VERSION		"1.7.3"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
