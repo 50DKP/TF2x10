@@ -4,12 +4,11 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.7.2"
-			"Previous"	"1.7.1"
+			"Latest"	"1.7.3"
+			"Previous"	"1.7.2"
 		}
 
-		"Notes"			"April Fool's: Added GRU stats to Bread Bite"
-		"Notes"			"April Fool's: Prevented April Fool's status being overriden if set via command"
+		"Notes"			"Fixed config parsing failing when a weapon had no attributes associated with it"
 	}
 
 	"Files"

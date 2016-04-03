@@ -30,7 +30,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.7.2"
+#define PLUGIN_VERSION		"1.7.3"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -364,67 +364,69 @@ public void OnAdminMenuReady(Handle topmenu)
 
 int LoadFileIntoTrie(const char[] rawname, const char[] basename = "")
 {
-	char strBuffer[64];
-	char strBuffer2[64];
-	char strBuffer3[64];
-	BuildPath(Path_SM, strBuffer, sizeof(strBuffer), "configs/x10.%s.txt", rawname);
+	char config[64];
+	char weapon[64];
+	char attribute[64];
+	char value[64];
+	BuildPath(Path_SM, config, sizeof(config), "configs/x10.%s.txt", rawname);
 	char tmpID[64];
 	char finalbasename[32];
 	int i;
 
 	strcopy(finalbasename, sizeof(finalbasename), StrEqual(basename, "") ? rawname : basename);
 
-	KeyValues hKeyValues = CreateKeyValues(finalbasename);
-	if(hKeyValues.ImportFromFile(strBuffer))
+	KeyValues kv = CreateKeyValues(finalbasename);
+	if(kv.ImportFromFile(config))
 	{
-		hKeyValues.GetSectionName(strBuffer, sizeof(strBuffer));
-		if(StrEqual(strBuffer, finalbasename))
+		kv.GetSectionName(config, sizeof(config));
+		if(StrEqual(config, finalbasename))
 		{
-			if(hKeyValues.GotoFirstSubKey())
+			if(kv.GotoFirstSubKey())
 			{
 				do
 				{
 					i = 0;
 
-					hKeyValues.GetSectionName(strBuffer, sizeof(strBuffer));
-					hKeyValues.GotoFirstSubKey(false);
-
-					do
+					kv.GetSectionName(weapon, sizeof(weapon));
+					if(kv.GotoFirstSubKey(false))
 					{
-						hKeyValues.GetSectionName(strBuffer2, sizeof(strBuffer2));
-						Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", rawname, strBuffer, i);
-						itemInfoTrie.SetString(tmpID, strBuffer2);
+						do
+						{
+							kv.GetSectionName(attribute, sizeof(attribute));
+							Format(tmpID, sizeof(tmpID), "%s__%s_%i_name", rawname, weapon, i);
+							itemInfoTrie.SetString(tmpID, attribute);
 
-						hKeyValues.GetString(NULL_STRING, strBuffer3, sizeof(strBuffer3));
-						Format(tmpID, sizeof(tmpID), "%s__%s_%i_val", rawname, strBuffer, i);
-						itemInfoTrie.SetString(tmpID, strBuffer3);
+							kv.GetString(NULL_STRING, value, sizeof(value));
+							Format(tmpID, sizeof(tmpID), "%s__%s_%i_val", rawname, weapon, i);
+							itemInfoTrie.SetString(tmpID, value);
 
-						i++;
+							i++;
+						}
+						while(kv.GotoNextKey(false));
+						kv.GoBack();
 					}
-					while(hKeyValues.GotoNextKey(false));
-					hKeyValues.GoBack();
 
-					Format(tmpID, sizeof(tmpID), "%s__%s_size", rawname, strBuffer);
+					Format(tmpID, sizeof(tmpID), "%s__%s_size", rawname, weapon);
 					itemInfoTrie.SetValue(tmpID, i);
 				}
-				while(hKeyValues.GotoNextKey());
-				hKeyValues.GoBack();
+				while(kv.GotoNextKey());
+				kv.GoBack();
 
-				itemInfoTrie.SetValue(strBuffer, 1);
+				itemInfoTrie.SetValue(weapon, 1);
 			}
 		}
 		else
 		{
-			hKeyValues.Close();
+			kv.Close();
 			return -2;
 		}
 	}
 	else
 	{
-		hKeyValues.Close();
+		kv.Close();
 		return -1;
 	}
-	hKeyValues.Close();
+	kv.Close();
 	return 1;
 }
 
