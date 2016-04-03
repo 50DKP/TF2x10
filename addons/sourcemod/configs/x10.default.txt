@@ -784,7 +784,6 @@
 	}
 	"140" //The Wrangler
 	{
-		"crit kill will gib" "1" //Crit kill will gib
 	}
 	"141" //Frontier Justice
 	{
@@ -1614,7 +1613,6 @@
 	}
 	"1086" //Festive Wrangler
 	{
-	"crit kill will gib" "1" //Crit kill will gib
 	}
 	"1092" //The Fortified Compound
 	{
@@ -2593,8 +2591,7 @@
 		"fire rate bonus" "0.9" //+10% Firing Rate
 		"damage bonus" "1.1" //+10% Damage
 	}
-	"30668" //The Giger Counter	
+	"30668" //The Giger Counter
 	{
-	"crit kill will gib" "1" //Crit kill will gib
 	}
 }
