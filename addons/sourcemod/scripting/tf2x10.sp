@@ -57,6 +57,7 @@ int buildingsDestroyed[MAXPLAYERS + 1];
 int cabers[MAXPLAYERS + 1];
 int dalokohsSeconds[MAXPLAYERS + 1];
 int dalokohs[MAXPLAYERS + 1];
+float dalokohsTimer[MAXPLAYERS + 1];
 //int headsTaken[MAXPLAYERS + 1];
 int razorbacks[MAXPLAYERS + 1];
 int revengeCrits[MAXPLAYERS + 1];
@@ -80,8 +81,6 @@ Handle hudText;
 Handle equipWearable;
 StringMap itemInfoTrie;
 TopMenu globalTopMenu;
-
-Handle dalokohsTimer[MAXPLAYERS + 1];
 
 char selectedMod[16] = "default";
 
@@ -830,7 +829,7 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 	int client = GetClientOfUserId(userid);
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || !TF2_IsPlayerInCondition(client, TFCond_Taunting))
 	{
-		dalokohsTimer[client] = null;
+		dalokohsTimer[client] = 0.0;
 		return Plugin_Stop;
 	}
 
@@ -873,13 +872,7 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 			dalokohs[client] = maxHealth;
 			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		}
-
-		if(dalokohsTimer[client] != null)
-		{
-			KillTimer(dalokohsTimer[client]);
-			dalokohsTimer[client] = null;
-		}
-		dalokohsTimer[client] = CreateTimer(30.0, Timer_DalokohsEnd, userid, TIMER_FLAG_NO_MAPCHANGE);
+		dalokohsTimer[client] = GetEngineTime() + 30.0;
 		//TF2Attrib_SetByName(secondary, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH - 300));  //Disabled due to Invasion crashes
 	}
 	else if(dalokohsSeconds[client] == 4)
@@ -900,18 +893,6 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 			newHealth = maxHealth;
 		}
 		TF2_SetHealth(client, newHealth);
-	}
-	return Plugin_Continue;
-}
-
-public Action Timer_DalokohsEnd(Handle timer, any userid)
-{
-	int client = GetClientOfUserId(userid);
-	if(IsValidClient(client))
-	{
-		dalokohs[client] = 0;
-		dalokohsTimer[client] = null;
-		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	}
 	return Plugin_Continue;
 }
@@ -1333,10 +1314,9 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 	if(dalokohs[client])
 	{
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
-		if(dalokohsTimer[client] != null)
+		if(dalokohsTimer[client])
 		{
-			KillTimer(dalokohsTimer[client]);
-			dalokohsTimer[client] = null;
+			dalokohsTimer[client] = 0.0;
 		}
 	}
 
@@ -1414,6 +1394,13 @@ public void OnPreThink(int client)
 		{
 			SetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage", GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage") * 10);
 		}
+	}
+	
+	if(dalokohsTimer[client] && GetEngineTime() >= dalokohsTimer[client])
+	{
+		dalokohs[client] = 0;
+		dalokohsTimer[client] = 0.0;
+		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	}
 }
 
