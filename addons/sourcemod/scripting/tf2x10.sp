@@ -872,7 +872,7 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 			dalokohs[client] = maxHealth;
 			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		}
-		dalokohsTimer[client] = GetEngineTime() + 30.0;	// Alternatively, set it GetEngineTime() and check GetEngineTime-30.0 > dalokohsTimer
+		dalokohsTimer[client] = GetEngineTime() + 30.0;
 		//TF2Attrib_SetByName(secondary, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH - 300));  //Disabled due to Invasion crashes
 	}
 	else if(dalokohsSeconds[client] == 4)
