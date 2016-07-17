@@ -1151,11 +1151,24 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
 	return Plugin_Continue;
 }
 
+/**
+ * Event parameters:
+ * @param userid	Client userid
+ * @param object	See TFObjectType
+ * @param index		Entity index of the object built
+ */
 public Action OnObjectBuilt(Handle event, const char[] name, bool dontBroadcast)
 {
 	if(cvarEnabled.BoolValue)
 	{
 		SDKHook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+
+		int client = GetClientOfUserId(GetEventInt(event, "userid"));
+		if(view_as<TFObjectType>(GetEventInt(event, "object")) == TFObject_Teleporter
+		&& GetEntProp(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee), Prop_Send, "m_iItemDefinitionIndex") == 589) // Eureka Effect
+		{
+			SetEntProp(client, Prop_Data, "m_iAmmo", 200, 4, 3); // Building teleporters gives you max metal again!
+		}
 	}
 	return Plugin_Continue;
 }
@@ -1205,7 +1218,7 @@ public Action OnObjectRemoved(Handle event, const char[] name, bool dontBroadcas
 		return Plugin_Continue;
 	}
 
-	if(WeaponHasAttribute(client, weapon, "mod sentry killed revenge") && GetEventInt(event, "objecttype") == 2)  //Sentry gun
+	if(WeaponHasAttribute(client, weapon, "mod sentry killed revenge") && view_as<TFObjectType>(GetEventInt(event, "objecttype")) == TFObject_Sentry)
 	{
 		int crits = GetEntProp(client, Prop_Send, "m_iRevengeCrits") + buildingsDestroyed[client];
 		SetEntProp(client, Prop_Send, "m_iRevengeCrits", crits);
@@ -1395,7 +1408,7 @@ public void OnPreThink(int client)
 			SetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage", GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage") * 10);
 		}
 	}
-	
+
 	if(dalokohsTimer[client] && GetEngineTime() >= dalokohsTimer[client])
 	{
 		dalokohs[client] = 0;
