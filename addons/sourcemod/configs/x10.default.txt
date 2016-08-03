@@ -864,9 +864,8 @@
 	{
 		"reload time increased hidden" "1" //Old Reload speed
 		"max health additive bonus" "250" //+250 Health
-		"damage force increase hidden"	"5"	//Big damage force increase
-		"airblast vulnerability multiplier hidden"	"5"	//Big airblast vulnerability increase
-		"healing received bonus"	"3"	//Super healing bonus while active
+		"damage force increase hidden"	"3"	//Big damage force increase
+		"airblast vulnerability multiplier hidden"	"3"	//Big airblast vulnerability increase
 		"SET BONUS: calling card on kill"	"1"	//Special Delivery Calling Card
 	}
 	"222" //Mad Milk
@@ -901,6 +900,7 @@
 	{
 		"jarate duration" "80" //80 Seconds of Jarate on full charge hit
 		"sniper charge per sec" "3.5" //+250% Charge rate
+		"Blast radius increased"	"11"	//10x Jarate Headshot Radius
 	}
 	"231" //Darwin's Danger Shield
 	{
@@ -992,6 +992,7 @@
 	"311" //Buffalo Steak Sandvich
 	{
 		"move speed bonus" "1.35" //35% Steak Speed Bonus is passive
+		"energy buff dmg taken multiplier"	"3.5"	//250% Dmg taken
 	}
 	"312" //Brass Beast
 	{
@@ -1047,6 +1048,7 @@
 		"crit mod disabled" "0" //No Random Critical Hits
 		"damage penalty" "1" //Remove the old damage penalty
 		"dmg bonus vs buildings" "0.1" //-90% damage vs buildings
+		"dmg taken from fire reduced on active"	"0"	//-100% dmg from fire while deployed
 	}
 	"351" //Detonator
 	{
@@ -1100,13 +1102,13 @@
 	"411" //Quick-Fix
 	{
 		"heal rate bonus" "5" //+400% Heal Rate
-		"ubercharge rate bonus" "3.5" //+250% Ubercharge rate
+		"ubercharge rate bonus" "2.5" //+150% Ubercharge rate
 		"overheal penalty" "0.05" //5% overheal
 	}
 	"412" //Overdose
 	{
-		"move speed bonus" "2" //10% speed bonus
-		"damage penalty" "0" //-20% damage
+		"move speed bonus" "3" //200% speed bonus
+		"damage penalty" "-0.5" //-150% damage
 		"provide on active" "1" //Effects only present while active
 	}
 	"413" //Solemn Vow
@@ -1165,6 +1167,10 @@
 	{
 		"weapon burn dmg increased" "3" //Crit Afterburn damage
 	}
+	"442" //The Righteous Bison
+	{
+		"weapon burn dmg increased" "3" //Crit Afterburn damage
+	}
 	"444" //Mantreads
 	{
 		"damage force reduction" "0" //-100% pushback
@@ -1208,6 +1214,7 @@
 	{
 		"fire rate penalty" "3" //-200% Firing Rate
 		"damage bonus while disguised" "3" //+200% Damage while disguised
+		"dmg pierces resists absorbs"	"1"	//??
 	}
 	"461" //Big Earner
 	{
@@ -1256,6 +1263,7 @@
 	{
 		"mod ammo per shot" "3" //30 Ammo Per Shot (15)
 		"add onhit addammo" "100" //Add a maximum of 100 ammo on hit (75)
+		"damage bonus vs sentry target"	"2"	//100% Dmg Bonus Vs Sentry Target
 	}
 	"528" //Short Circuit
 	{
@@ -1285,7 +1293,8 @@
 	"589" //Eureka Effect
 	{
 		"Construction rate decreased" "0.3"	//70% Decreased Construction Rate
-		"metal_pickup_decreased"	"0.3"	//70% Decreased Metal from Pickups and Dispensers
+		"metal_pickup_decreased"	"0.5"	//70% Decreased Metal from Pickups and Dispensers
+		"mod teleporter cost"	"-6"	//Build Teleporter, Get metal?
 	}
 	"593" //Third Degree
 	{
@@ -1300,7 +1309,6 @@
 	"595" //Manmelter
 	{
 		"energy weapon no deflect" "1" //Can't be deflected
-		"fire rate penalty HIDDEN" "1" //No Fire Rate Penalty
 		"Projectile speed increased" "2" //Increased projectile speed
 	}
 	"608" //Bootlegger
@@ -1416,10 +1424,12 @@
 	{
 		"sapper degenerates buildings" "0.9" //Building Degen
 	}
-	"811" //Huo Long Heatmaker
+	"811" //Huo Long Heater
 	{
-		"uses ammo while aiming" "60" //60 Ammo for fire
+		"uses ammo while aiming" "40" //40 Ammo for fire
 		"weapon burn dmg increased" "10" //10x Afterburn damage
+		"damage bonus vs burning"	"3.5"	//250% Dmg Bonus Vs. Flaming Target
+		"ring of fire while aiming"	"120"	//120 Pts of Dmg per pulse on ring of fire
 	}
 	"812" //Flying Guillotine
 	{
@@ -1434,10 +1444,12 @@
 	{
 		"sapper degenerates buildings" "0.9" //Building Degen
 	}
-	"832" //Huo Long Heatmaker
+	"832" //Huo Long Heater
 	{
-		"uses ammo while aiming" "60" //60 Ammo for fire
+		"uses ammo while aiming" "40" //40 Ammo for fire
 		"weapon burn dmg increased" "10" //10x Afterburn damage
+		"damage bonus vs burning"	"3.5"	//250% Dmg Bonus Vs. Flaming Target
+		"ring of fire while aiming"	"120"	//120 Pts of Dmg per pulse on ring of fire
 	}
 	"833" //Flying Guillotine
 	{
@@ -1719,10 +1731,10 @@
 	"1150" //The Quickiebomb Launcher
 	{
 		"sticky arm time bonus" "-0.8" // instant sticky arm
-		"stickybomb_charge_damage_increase"	"1.75"	//Damage increase
+		"stickybomb_charge_damage_increase"	"4.5"	//Damage increase
 		"stickybomb charge rate" "0.01" // Instant sticky charge?
-		"stickybomb fizzle time"	"40" //Stickies fizzle after 20 seconds
 		"clip size penalty"	"0.1" // -99% clip penalty
+		"damage penalty"	"-0.5"	//-150% base dmg
 	}
 	"1151" //The Iron Bomber
 	{
@@ -2593,5 +2605,12 @@
 	}
 	"30668" //The Giger Counter
 	{
+	}
+	"30758" //Stock Melee Reskin, Prinny Machete
+	{
+		"fire rate bonus" "0.8" //20% faster firing speed
+		"crit kill will gib" "1" //Crit kill will gib
+		"cancel falling damage" "1" //Cancel falling damage	
+		"attach particle effect static" "98" //Particle: Ancient Codex		
 	}
 }
