@@ -1,6 +1,5 @@
-# Use Trusty
-sudo: required
-dist: trusty
+# Use the new container-based infrastructure
+sudo: false
 
 # Install some apt packages needed for spcomp
 addons:
@@ -9,7 +8,9 @@ addons:
 
 # Set the build environment
 env:
-    - SMVERSION=1.8
+    - SMVERSION=1.7 # Legacy
+    - SMVERSION=1.8 # Stable
+    - SMVERSION=1.9 # Unstable
 
 # And compile!
 install:
