@@ -4,11 +4,13 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.7.3"
-			"Previous"	"1.7.2"
+			"Latest"	"1.7.4"
+			"Previous"	"1.7.3"
 		}
 
-		"Notes"			"Fixed config parsing failing when a weapon had no attributes associated with it"
+		"Notes"			"Meet Your Match x10"
+		"Notes"			"Allowed Dalokohs Bar to be eaten repeatedly"
+		"Notes"			"Fixed soldier rage meter not getting reset after switching buffs"
 	}
 
 	"Files"
