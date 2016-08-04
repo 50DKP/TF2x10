@@ -1773,17 +1773,18 @@ public Action Timer_FixClips(Handle hTimer, any userid)
 		return Plugin_Continue;
 	}
 
+	int weapon;
 	for(int slot; slot < 2; slot++)
 	{
-		int wepEntity = GetPlayerWeaponSlot(client, slot);
+		weapon = GetPlayerWeaponSlot(client, slot);
 
-		if(IsValidEntity(wepEntity))
+		if(IsValidEntity(weapon))
 		{
-			CheckClips(wepEntity);
+			CheckClips(weapon);
 
 			if(FindConVar("tf2items_rnd_enabled") && FindConVar("tf2items_rnd_enabled").BoolValue)
 			{
-				Randomizer_CheckAmmo(client, wepEntity);
+				Randomizer_CheckAmmo(client, weapon);
 			}
 		}
 	}
@@ -1796,6 +1797,13 @@ public Action Timer_FixClips(Handle hTimer, any userid)
 
 	UpdateVariables(client);
 	TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01); //recalc speed - thx sarge
+
+	// Apparently the rage meter isn't resetting after switching buffs, so reset it forcefully
+	weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+	if(IsValidEntity(weapon) && WeaponHasAttribute(client, weapon, "mod soldier buff type"))
+	{
+		SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 0.0);
+	}
 
 	return Plugin_Continue;
 }
