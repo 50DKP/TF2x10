@@ -30,7 +30,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.7.3"
+#define PLUGIN_VERSION		"1.7.4"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -57,6 +57,7 @@ int buildingsDestroyed[MAXPLAYERS + 1];
 int cabers[MAXPLAYERS + 1];
 int dalokohsSeconds[MAXPLAYERS + 1];
 int dalokohs[MAXPLAYERS + 1];
+float dalokohsTimer[MAXPLAYERS + 1];
 //int headsTaken[MAXPLAYERS + 1];
 int razorbacks[MAXPLAYERS + 1];
 int revengeCrits[MAXPLAYERS + 1];
@@ -80,8 +81,6 @@ Handle hudText;
 Handle equipWearable;
 StringMap itemInfoTrie;
 TopMenu globalTopMenu;
-
-Handle dalokohsTimer[MAXPLAYERS + 1];
 
 char selectedMod[16] = "default";
 
@@ -830,7 +829,7 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 	int client = GetClientOfUserId(userid);
 	if(!IsValidClient(client) || !IsPlayerAlive(client) || !TF2_IsPlayerInCondition(client, TFCond_Taunting))
 	{
-		dalokohsTimer[client] = null;
+		dalokohsTimer[client] = 0.0;
 		return Plugin_Stop;
 	}
 
@@ -873,13 +872,7 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 			dalokohs[client] = maxHealth;
 			SDKHook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 		}
-
-		if(dalokohsTimer[client] != null)
-		{
-			KillTimer(dalokohsTimer[client]);
-			dalokohsTimer[client] = null;
-		}
-		dalokohsTimer[client] = CreateTimer(30.0, Timer_DalokohsEnd, userid, TIMER_FLAG_NO_MAPCHANGE);
+		dalokohsTimer[client] = GetEngineTime() + 30.0;
 		//TF2Attrib_SetByName(secondary, "hidden maxhealth non buffed", float(DALOKOH_MAXHEALTH - 300));  //Disabled due to Invasion crashes
 	}
 	else if(dalokohsSeconds[client] == 4)
@@ -900,18 +893,6 @@ public Action Timer_DalokohX10(Handle timer, any userid)
 			newHealth = maxHealth;
 		}
 		TF2_SetHealth(client, newHealth);
-	}
-	return Plugin_Continue;
-}
-
-public Action Timer_DalokohsEnd(Handle timer, any userid)
-{
-	int client = GetClientOfUserId(userid);
-	if(IsValidClient(client))
-	{
-		dalokohs[client] = 0;
-		dalokohsTimer[client] = null;
-		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	}
 	return Plugin_Continue;
 }
@@ -1170,11 +1151,24 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
 	return Plugin_Continue;
 }
 
+/**
+ * Event parameters:
+ * @param userid	Client userid
+ * @param object	See TFObjectType
+ * @param index		Entity index of the object built
+ */
 public Action OnObjectBuilt(Handle event, const char[] name, bool dontBroadcast)
 {
 	if(cvarEnabled.BoolValue)
 	{
 		SDKHook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+
+		int client = GetClientOfUserId(GetEventInt(event, "userid"));
+		if(view_as<TFObjectType>(GetEventInt(event, "object")) == TFObject_Teleporter
+		&& GetEntProp(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee), Prop_Send, "m_iItemDefinitionIndex") == 589) // Eureka Effect
+		{
+			SetEntProp(client, Prop_Data, "m_iAmmo", 200, 4, 3); // Building teleporters gives you max metal again!
+		}
 	}
 	return Plugin_Continue;
 }
@@ -1224,7 +1218,7 @@ public Action OnObjectRemoved(Handle event, const char[] name, bool dontBroadcas
 		return Plugin_Continue;
 	}
 
-	if(WeaponHasAttribute(client, weapon, "mod sentry killed revenge") && GetEventInt(event, "objecttype") == 2)  //Sentry gun
+	if(WeaponHasAttribute(client, weapon, "mod sentry killed revenge") && view_as<TFObjectType>(GetEventInt(event, "objecttype")) == TFObject_Sentry)
 	{
 		int crits = GetEntProp(client, Prop_Send, "m_iRevengeCrits") + buildingsDestroyed[client];
 		SetEntProp(client, Prop_Send, "m_iRevengeCrits", crits);
@@ -1333,10 +1327,9 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 	if(dalokohs[client])
 	{
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
-		if(dalokohsTimer[client] != null)
+		if(dalokohsTimer[client])
 		{
-			KillTimer(dalokohsTimer[client]);
-			dalokohsTimer[client] = null;
+			dalokohsTimer[client] = 0.0;
 		}
 	}
 
@@ -1414,6 +1407,13 @@ public void OnPreThink(int client)
 		{
 			SetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage", GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage") * 10);
 		}
+	}
+
+	if(dalokohsTimer[client] && GetEngineTime() >= dalokohsTimer[client])
+	{
+		dalokohs[client] = 0;
+		dalokohsTimer[client] = 0.0;
+		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
 	}
 }
 
@@ -1773,17 +1773,18 @@ public Action Timer_FixClips(Handle hTimer, any userid)
 		return Plugin_Continue;
 	}
 
+	int weapon;
 	for(int slot; slot < 2; slot++)
 	{
-		int wepEntity = GetPlayerWeaponSlot(client, slot);
+		weapon = GetPlayerWeaponSlot(client, slot);
 
-		if(IsValidEntity(wepEntity))
+		if(IsValidEntity(weapon))
 		{
-			CheckClips(wepEntity);
+			CheckClips(weapon);
 
 			if(FindConVar("tf2items_rnd_enabled") && FindConVar("tf2items_rnd_enabled").BoolValue)
 			{
-				Randomizer_CheckAmmo(client, wepEntity);
+				Randomizer_CheckAmmo(client, weapon);
 			}
 		}
 	}
@@ -1796,6 +1797,13 @@ public Action Timer_FixClips(Handle hTimer, any userid)
 
 	UpdateVariables(client);
 	TF2_AddCondition(client, TFCond_SpeedBuffAlly, 0.01); //recalc speed - thx sarge
+
+	// Apparently the rage meter isn't resetting after switching buffs, so reset it forcefully
+	weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+	if(IsValidEntity(weapon) && WeaponHasAttribute(client, weapon, "mod soldier buff type"))
+	{
+		SetEntPropFloat(client, Prop_Send, "m_flRageMeter", 0.0);
+	}
 
 	return Plugin_Continue;
 }

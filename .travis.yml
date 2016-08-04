@@ -1,17 +1,18 @@
-#Use Trusty
-sudo: required
-dist: trusty
+# Use the new container-based infrastructure
+sudo: false
 
-#Install some apt packages needed for spcomp
+# Install some apt packages needed for spcomp
 addons:
     apt_packages:
         - lib32stdc++6
 
-#Set the build environment
+# Set the build environment
 env:
-    - SMVERSION=1.8
+    - SMVERSION=1.7 # Legacy
+    - SMVERSION=1.8 # Stable
+    - SMVERSION=1.9 # Unstable
 
-#And compile!
+# And compile!
 install:
     - wget --input-file=http://sourcemod.net/smdrop/$SMVERSION/sourcemod-latest-linux
     - tar -xzf $(cat sourcemod-latest-linux)
@@ -27,7 +28,7 @@ before_script:
     - chmod +x spcomp
 script: ./compile.sh tf2x10.sp
 
-#Github Releases
+# Github Releases
 deploy:
     provider: releases
     api_key:
