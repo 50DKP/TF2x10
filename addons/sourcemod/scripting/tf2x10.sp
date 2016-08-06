@@ -523,21 +523,60 @@ public Action Command_Recache(int client, int args)
 {
 	if(cvarEnabled.BoolValue)
 	{
-		switch(LoadFileIntoTrie("default", "tf2x10_base_items"))
+		if(aprilFools)
 		{
-			case -1:
+			switch(LoadFileIntoTrie("aprilfools", "aprilfools")) 
 			{
-				ReplyToCommand(client, "[TF2x10] Could not find configs/x10.default.txt. Please check and try again.");
-			}
-			case -2:
-			{
-				ReplyToCommand(client, "[TF2x10] Your configs/x10.default.txt seems to be corrupt. Please check and try again.");
-			}
-			default:
-			{
-				ReplyToCommand(client, "[TF2x10] Weapons recached.");
+				case -1:
+				{
+					ReplyToCommand(client, "[TF2x10] Could not find the file configs/x10.aprilfools.txt. Please check and try again.");
+				}
+				case -2:
+				{
+					ReplyToCommand(client, "[TF2x10] Your configs/x10.aprilfools.txt seems to be corrupt. Please check and try again.");
+				}
+				default:
+				{
+					ReplyToCommand(client, "[TF2x10] Weapons recached.");
+				}
 			}
 		}
+		else if(ff2Running || vshRunning)
+		{
+			switch(LoadFileIntoTrie("vshff2", "vshff2")) 
+			{
+				case -1:
+				{
+					ReplyToCommand(client, "[TF2x10] Could not find the file configs/x10.vshff2.txt. Please check and try again.");
+				}
+				case -2:
+				{
+					ReplyToCommand(client, "[TF2x10] Your configs/x10.vshff2.txt seems to be corrupt. Please check and try again.");
+				}
+				default:
+				{
+					ReplyToCommand(client, "[TF2x10] Weapons recached.");
+				}
+			}
+		}
+	        else
+	        {
+	            switch(LoadFileIntoTrie("default", "tf2x10_base_items"))
+	            {
+	                case -1:
+	                {
+	                    ReplyToCommand(client, "[TF2x10] Could not find configs/x10.default.txt. Please check and try again.");
+	                }
+	                case -2:
+	                {
+	                    ReplyToCommand(client, "[TF2x10] Your configs/x10.default.txt seems to be corrupt. Please check and try again.");
+	                }
+	                default:
+	                {
+	                    ReplyToCommand(client, "[TF2x10] Weapons recached.");
+	                }
+	            }
+	        }
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
