@@ -7,7 +7,6 @@ Config updates: Mr. Blue and Ultimario
 
 Alliedmodders thread: https://forums.alliedmods.net/showthread.php?p=2338136
 Github: https://github.com/50DKP/TF2x10
-Bitbucket: https://bitbucket.org/umario/tf2x10/src
 */
 
 #pragma semicolon 1
@@ -41,6 +40,10 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 #define DALOKOH_HEALTHPERSEC	150
 #define DALOKOH_LASTHEALTH		50
 #define MAX_CURRENCY			30000
+#define DUMPTRUCK_MODEL			"models/props_hydro/dumptruck.mdl"
+#define DUMPTRUCK_EMPTY_MODEL	"models/props_hydro/dumptruck_empty.mdl"
+#define TRUCK_RED_MODEL			"models/props_vehicles/pickup03.mdl"
+#define TRUCK_BLU_MODEL			"models/props_vehicles/train_engine.mdl"
 
 static const float g_fBazaarRates[] =
 {
@@ -175,6 +178,7 @@ public void OnPluginStart()
 	HookEvent("player_extinguished", OnPlayerExtinguished, EventHookMode_Post);
 	HookEvent("player_death", OnPlayerDeath, EventHookMode_Post);
 	HookEvent("post_inventory_application", OnPostInventoryApplication, EventHookMode_Post);
+	HookEvent("teamplay_broadcast_audio", OnBroadcastAudio, EventHookMode_Pre);
 	HookEvent("teamplay_restart_round", OnRoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("teamplay_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("round_end", OnRoundEnd, EventHookMode_PostNoCopy);
@@ -459,7 +463,6 @@ public void AdminMenu_Recache(Handle topmenu, TopMenuAction action, TopMenuObjec
 			{
 				Format(buffer, maxlength, "TF2x10 Recache Weapons");
 			}
-
 			case TopMenuAction_SelectOption:
 			{
 				Command_Recache(param, 0);
@@ -501,9 +504,8 @@ public Action Command_GetMod(int client, int args)
 	if(cvarEnabled.BoolValue)
 	{
 		ReplyToCommand(client, "[TF2x10] This mod is loading primarily from configs/x10.%s.txt.", selectedMod);
-		return Plugin_Handled;
 	}
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 public Action Command_Group(int client, int args)
@@ -538,9 +540,8 @@ public Action Command_Recache(int client, int args)
 				ReplyToCommand(client, "[TF2x10] Weapons recached.");
 			}
 		}
-		return Plugin_Handled;
 	}
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 public Action Command_SetMod(int client, int args)
@@ -583,9 +584,8 @@ public Action Command_SetMod(int client, int args)
 		{
 			ReplyToCommand(client, "[TF2x10] Now loading from configs/x10.default.txt.");
 		}
-		return Plugin_Handled;
 	}
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 public Action Command_AprilFools(int client, int args)
@@ -593,15 +593,23 @@ public Action Command_AprilFools(int client, int args)
 	if(aprilFools)
 	{
 		aprilFools = false;
+		selectedMod = "default";
+		LoadFileIntoTrie(selectedMod, "tf2x10_base_items");
 		ReplyToCommand(client, "[TF2x10] April Fool's mode has been disabled!");
 	}
 	else
 	{
 		aprilFools = true;
+		PrecacheModel(DUMPTRUCK_MODEL);
+		PrecacheModel(DUMPTRUCK_EMPTY_MODEL);
+		PrecacheModel(TRUCK_RED_MODEL);
+		PrecacheModel(TRUCK_BLU_MODEL);
+		selectedMod = "aprilfools";
+		LoadFileIntoTrie(selectedMod);
 		ReplyToCommand(client, "[TF2x10] April Fool's mode has been enabled!");
 	}
 	aprilFoolsOverride = true;
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 /******************************************************************
@@ -687,6 +695,13 @@ public void OnMapStart()
 	if(cvarEnabled.BoolValue)
 	{
 		SetGameDescription();
+		if(aprilFools)
+		{
+			PrecacheModel(DUMPTRUCK_MODEL);
+			PrecacheModel(DUMPTRUCK_EMPTY_MODEL);
+			PrecacheModel(TRUCK_RED_MODEL);
+			PrecacheModel(TRUCK_BLU_MODEL);
+		}
 	}
 }
 
@@ -769,12 +784,29 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 	{
 		CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
+
+	if(aprilFools && condition == TFCond_Charging && index == 327) // April Fools 2017: DEMOTRUCK TIME (Claidheamohmor)
+	{
+		// DEMOTRUCK
+		TFTeam team = TF2_GetClientTeam(client);
+		SetVariantString(team == TFTeam_Red ? TRUCK_RED_MODEL : TRUCK_BLU_MODEL);
+		AcceptEntityInput(client, "SetCustomModel");
+		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
+		if(team == TFTeam_Blue)
+		{
+			// The train model used for BLU is rather huge, so rescale it
+			SetEntPropFloat(client, Prop_Send, "m_flModelScale", 0.75);
+		}
+	}
 }
 
 public void TF2_OnConditionRemoved(int client, TFCond condition)
 {
 	if(cvarEnabled.BoolValue)
 	{
+		int weapon = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
+		int index = IsValidEntity(weapon) ? GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") : -1;
+
 		if(condition == TFCond_Zoomed && chargeBegin[client])
 		{
 			chargeBegin[client] = 0.0;
@@ -783,6 +815,13 @@ public void TF2_OnConditionRemoved(int client, TFCond condition)
 		if(condition == TFCond_Taunting && dalokohsSeconds[client])
 		{
 			dalokohsSeconds[client] = 0;
+		}
+
+		if(aprilFools && condition == TFCond_Charging && index == 327) // Claidheamohmor
+		{
+			// Reset model
+			SetVariantString("");
+			AcceptEntityInput(client, "SetCustomModel");
 		}
 	}
 }
@@ -1245,11 +1284,30 @@ public Action OnPickupMVMCurrency(Handle event, const char[] name, bool dontBroa
 	return Plugin_Continue;
 }
 
+public Action OnBroadcastAudio(Handle event, const char[] name, bool dontBroadcast)
+{
+	char sound[PLATFORM_MAX_PATH];
+	GetEventString(event, "sound", sound, sizeof(sound));
+	if(aprilFools && StrContains(sound, "DemoCharge.HitFlesh"))
+	{
+		PrintToChatAll("Hi!");
+		/*return Plugin_Handled;*/
+	}
+	return Plugin_Continue;
+}
+
 public Action TF2_OnIsHolidayActive(TFHoliday holiday, bool &result)
 {
 	if(holiday == TFHoliday_AprilFools && !aprilFoolsOverride)
 	{
 		aprilFools = result;
+		if(result)
+		{
+			PrecacheModel(DUMPTRUCK_MODEL);
+			PrecacheModel(DUMPTRUCK_EMPTY_MODEL);
+			PrecacheModel(TRUCK_RED_MODEL);
+			PrecacheModel(TRUCK_BLU_MODEL);
+		}
 	}
 	return Plugin_Continue;
 }
