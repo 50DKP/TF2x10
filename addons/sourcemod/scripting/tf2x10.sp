@@ -44,6 +44,7 @@ Github: https://github.com/50DKP/TF2x10
 #define DUMPTRUCK_EMPTY_MODEL	"models/props_hydro/dumptruck_empty.mdl"
 #define TRUCK_RED_MODEL			"models/props_vehicles/pickup03.mdl"
 #define TRUCK_BLU_MODEL			"models/props_vehicles/train_engine.mdl"
+#define DUCK_MODEL				"models/workshop/player/items/pyro/eotl_ducky/eotl_bonus_duck.mdl"
 
 static const float g_fBazaarRates[] =
 {
@@ -604,6 +605,14 @@ public Action Command_AprilFools(int client, int args)
 		PrecacheModel(DUMPTRUCK_EMPTY_MODEL);
 		PrecacheModel(TRUCK_RED_MODEL);
 		PrecacheModel(TRUCK_BLU_MODEL);
+		PrecacheModel(DUCK_MODEL);
+		PrecacheSound("ambient/bumper_car_quack1.wav");
+		PrecacheSound("ambient/bumper_car_quack2.wav");
+		PrecacheSound("ambient/bumper_car_quack3.wav");
+		PrecacheSound("ambient/bumper_car_quack4.wav");
+		PrecacheSound("ambient/bumper_car_quack5.wav");
+		PrecacheSound("ambient/bumper_car_quack9.wav");
+		PrecacheSound("ambient/bumper_car_quack11.wav");
 		selectedMod = "aprilfools";
 		LoadFileIntoTrie(selectedMod);
 		ReplyToCommand(client, "[TF2x10] April Fool's mode has been enabled!");
@@ -701,6 +710,14 @@ public void OnMapStart()
 			PrecacheModel(DUMPTRUCK_EMPTY_MODEL);
 			PrecacheModel(TRUCK_RED_MODEL);
 			PrecacheModel(TRUCK_BLU_MODEL);
+			PrecacheModel(DUCK_MODEL);
+			PrecacheSound("ambient/bumper_car_quack1.wav");
+			PrecacheSound("ambient/bumper_car_quack2.wav");
+			PrecacheSound("ambient/bumper_car_quack3.wav");
+			PrecacheSound("ambient/bumper_car_quack4.wav");
+			PrecacheSound("ambient/bumper_car_quack5.wav");
+			PrecacheSound("ambient/bumper_car_quack9.wav");
+			PrecacheSound("ambient/bumper_car_quack11.wav");
 		}
 	}
 }
@@ -1307,6 +1324,14 @@ public Action TF2_OnIsHolidayActive(TFHoliday holiday, bool &result)
 			PrecacheModel(DUMPTRUCK_EMPTY_MODEL);
 			PrecacheModel(TRUCK_RED_MODEL);
 			PrecacheModel(TRUCK_BLU_MODEL);
+			PrecacheModel(DUCK_MODEL);
+			PrecacheSound("ambient/bumper_car_quack1.wav");
+			PrecacheSound("ambient/bumper_car_quack2.wav");
+			PrecacheSound("ambient/bumper_car_quack3.wav");
+			PrecacheSound("ambient/bumper_car_quack4.wav");
+			PrecacheSound("ambient/bumper_car_quack5.wav");
+			PrecacheSound("ambient/bumper_car_quack9.wav");
+			PrecacheSound("ambient/bumper_car_quack11.wav");
 		}
 	}
 	return Plugin_Continue;
@@ -1394,6 +1419,157 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 	if(takesHeads[client])
 	{
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+	}
+
+	if(aprilFools)
+	{
+		for(int i; i < GetRandomInt(10, 20); i++)
+		{
+			// Thanks to 404UserNotFound for portions of the following code
+			// https://github.com/404UserNotFound/SpawnBonusDucks/blob/master/scripting/tf2_duckspawn.sp
+			float position[3];
+			GetClientAbsOrigin(client, position);
+			position[0] += GetRandomFloat(-5.0, 5.0);
+			position[1] += GetRandomFloat(-5.0, 5.0);
+			position[2] += GetRandomFloat(-5.0, 5.0);
+
+			float velocity[3];
+			velocity[0] = GetRandomFloat(-50.0, 50.0);
+			velocity[1] = GetRandomFloat(-50.0, 50.0);
+			velocity[2] = GetRandomFloat(-50.0, 50.0);
+
+			int duck = CreateEntityByName("tf_bonus_duck_pickup");
+			SetEntityModel(duck, DUCK_MODEL);
+			if(!GetRandomInt(0, 10)) // Quackston?
+			{
+				SetEntProp(duck, Prop_Send, "m_bSpecial", 1);
+				SetEntProp(duck, Prop_Send, "m_nSkin", 21);
+			}
+			else
+			{
+				TFClassType class = TF2_GetPlayerClass(client);
+				TFTeam team = TF2_GetClientTeam(client);
+				switch(class)
+				{
+					case TFClass_Scout:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 3);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 12);
+						}
+					}
+					case TFClass_Sniper:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 4);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 13);
+						}
+					}
+					case TFClass_Soldier:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 5);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 14);
+						}
+					}
+					case TFClass_DemoMan:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 6);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 15);
+						}
+					}
+					case TFClass_Medic:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 7);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 16);
+						}
+					}
+					case TFClass_Heavy:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 8);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 17);
+						}
+					}
+					case TFClass_Pyro:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 9);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 18);
+						}
+					}
+					case TFClass_Spy:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 10);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 19);
+						}
+					}
+					case TFClass_Engineer:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 11);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 20);
+						}
+					}
+				}
+			}
+			DispatchKeyValue(duck, "OnPlayerTouch", "!self,Kill,,0,-1");
+			DispatchSpawn(duck);
+			TeleportEntity(duck, position, NULL_VECTOR, velocity);
+
+			int random = GetRandomInt(1, 7);
+			if(random == 6)
+			{
+				random = 9;
+			}
+			else if(random == 7)
+			{
+				random = 11;
+			}
+
+			char sound[PLATFORM_MAX_PATH];
+			Format(sound, sizeof(sound), "ambient/bumper_car_quack%i.wav", random);
+			EmitSoundToAll(sound, duck, _, _, _, _, _, _, position, _, true);
+		}
 	}
 
 	ResetVariables(client);
@@ -1537,6 +1713,156 @@ public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &dam
 	{
 		damage *= 10;
 		return Plugin_Changed;
+	}
+
+	if(aprilFools)
+	{
+		for(int i; i < GetRandomInt(0, 3); i++)
+		{
+			// Thanks to 404UserNotFound for portions of the following code
+			// https://github.com/404UserNotFound/SpawnBonusDucks/blob/master/scripting/tf2_duckspawn.sp
+			float position[3];
+			position[0] = damagePosition[0] + GetRandomFloat(-5.0, 5.0);
+			position[1] = damagePosition[1] + GetRandomFloat(-5.0, 5.0);
+			position[2] = damagePosition[2] + GetRandomFloat(-5.0, 5.0);
+
+			float velocity[3];
+			velocity[0] = GetRandomFloat(-50.0, 50.0);
+			velocity[1] = GetRandomFloat(-50.0, 50.0);
+			velocity[2] = GetRandomFloat(-50.0, 50.0);
+
+			int duck = CreateEntityByName("tf_bonus_duck_pickup");
+			SetEntityModel(duck, DUCK_MODEL);
+			if(!GetRandomInt(0, 10)) // Quackston?
+			{
+				SetEntProp(duck, Prop_Send, "m_bSpecial", 1);
+				SetEntProp(duck, Prop_Send, "m_nSkin", 21);
+			}
+			else
+			{
+				TFClassType class = TF2_GetPlayerClass(client);
+				TFTeam team = TF2_GetClientTeam(client);
+				switch(class)
+				{
+					case TFClass_Scout:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 3);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 12);
+						}
+					}
+					case TFClass_Sniper:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 4);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 13);
+						}
+					}
+					case TFClass_Soldier:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 5);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 14);
+						}
+					}
+					case TFClass_DemoMan:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 6);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 15);
+						}
+					}
+					case TFClass_Medic:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 7);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 16);
+						}
+					}
+					case TFClass_Heavy:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 8);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 17);
+						}
+					}
+					case TFClass_Pyro:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 9);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 18);
+						}
+					}
+					case TFClass_Spy:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 10);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 19);
+						}
+					}
+					case TFClass_Engineer:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 11);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 20);
+						}
+					}
+				}
+			}
+			DispatchKeyValue(duck, "OnPlayerTouch", "!self,Kill,,0,-1");
+			DispatchSpawn(duck);
+			TeleportEntity(duck, position, NULL_VECTOR, velocity);
+
+			int random = GetRandomInt(1, 7);
+			if(random == 6)
+			{
+				random = 9;
+			}
+			else if(random == 7)
+			{
+				random = 11;
+			}
+
+			char sound[PLATFORM_MAX_PATH];
+			Format(sound, sizeof(sound), "ambient/bumper_car_quack%i.wav", random);
+			EmitSoundToAll(sound, duck, _, _, _, _, _, _, position, _, true);
+		}
 	}
 	return Plugin_Continue;
 }
