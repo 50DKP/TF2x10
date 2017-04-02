@@ -1231,17 +1231,17 @@ public Action OnObjectBuilt(Event event, const char[] name, bool dontBroadcast)
 		{
 			if(building == TFObject_Dispenser)
 			{
-				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.25);
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.1);
 			}
 			else if(building == TFObject_Sentry)
 			{
 				if(GetEntProp(index, Prop_Send, "m_bMiniBuilding"))
 				{
-					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 3.0);
+					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 10.0);
 				}
 				else
 				{
-					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.25);
+					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.1);
 				}
 			}
 		}
