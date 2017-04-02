@@ -1213,17 +1213,37 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
  * @param object	See TFObjectType
  * @param index		Entity index of the object built
  */
-public Action OnObjectBuilt(Handle event, const char[] name, bool dontBroadcast)
+public Action OnObjectBuilt(Event event, const char[] name, bool dontBroadcast)
 {
 	if(cvarEnabled.BoolValue)
 	{
-		SDKHook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+		int index = event.GetInt("index");
+		SDKHook(index, SDKHook_OnTakeDamage, OnTakeDamage_Object);
 
-		int client = GetClientOfUserId(GetEventInt(event, "userid"));
-		if(view_as<TFObjectType>(GetEventInt(event, "object")) == TFObject_Teleporter
-		&& GetEntProp(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee), Prop_Send, "m_iItemDefinitionIndex") == 589) // Eureka Effect
+		int client = GetClientOfUserId(event.GetInt("userid"));
+		TFObjectType building = view_as<TFObjectType>(event.GetInt("object"));
+		if(building == TFObject_Teleporter && GetEntProp(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee), Prop_Send, "m_iItemDefinitionIndex") == 589) // Eureka Effect
 		{
 			SetEntProp(client, Prop_Data, "m_iAmmo", 200, 4, 3); // Building teleporters gives you max metal again!
+		}
+
+		if(aprilFools)
+		{
+			if(building == TFObject_Dispenser)
+			{
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.25);
+			}
+			else if(building == TFObject_Sentry)
+			{
+				if(GetEntProp(index, Prop_Send, "m_bMiniBuilding"))
+				{
+					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 3.0);
+				}
+				else
+				{
+					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.25);
+				}
+			}
 		}
 	}
 	return Plugin_Continue;
