@@ -173,13 +173,14 @@ public void OnPluginStart()
 
 	HookEvent("arena_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("player_builtobject", OnObjectBuilt, EventHookMode_Post);
+	HookEvent("player_carryobject", OnObjectCarry, EventHookMode_Post);
+	HookEvent("player_dropobject", OnObjectDrop, EventHookMode_Post);
 	HookEvent("object_destroyed", OnObjectDestroyed, EventHookMode_Post);
 	HookEvent("object_removed", OnObjectRemoved, EventHookMode_Post);
 	HookEvent("player_healed", OnPlayerHealed, EventHookMode_Post);
 	HookEvent("player_extinguished", OnPlayerExtinguished, EventHookMode_Post);
 	HookEvent("player_death", OnPlayerDeath, EventHookMode_Post);
 	HookEvent("post_inventory_application", OnPostInventoryApplication, EventHookMode_Post);
-	HookEvent("teamplay_broadcast_audio", OnBroadcastAudio, EventHookMode_Pre);
 	HookEvent("teamplay_restart_round", OnRoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("teamplay_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("round_end", OnRoundEnd, EventHookMode_PostNoCopy);
@@ -805,15 +806,13 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 	if(aprilFools && condition == TFCond_Charging && index == 327) // April Fools 2017: DEMOTRUCK TIME (Claidheamohmor)
 	{
 		// DEMOTRUCK
-		TFTeam team = TF2_GetClientTeam(client);
-		SetVariantString(team == TFTeam_Red ? TRUCK_RED_MODEL : TRUCK_BLU_MODEL);
+		SetVariantString(TF2_GetClientTeam(client) == TFTeam_Red ? TRUCK_RED_MODEL : TRUCK_BLU_MODEL);
 		AcceptEntityInput(client, "SetCustomModel");
 		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
-		if(team == TFTeam_Blue)
-		{
-			// The train model used for BLU is rather huge, so rescale it
-			SetEntPropFloat(client, Prop_Send, "m_flModelScale", 0.75);
-		}
+
+		// Third-person view
+		SetVariantInt(1);
+		AcceptEntityInput(client, "SetForcedTauntCam");
 	}
 }
 
@@ -839,6 +838,10 @@ public void TF2_OnConditionRemoved(int client, TFCond condition)
 			// Reset model
 			SetVariantString("");
 			AcceptEntityInput(client, "SetCustomModel");
+
+			// First-person view
+			SetVariantInt(0);
+			AcceptEntityInput(client, "SetForcedTauntCam");
 		}
 	}
 }
@@ -1231,18 +1234,70 @@ public Action OnObjectBuilt(Event event, const char[] name, bool dontBroadcast)
 		{
 			if(building == TFObject_Dispenser)
 			{
-				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.1);
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.316);
 			}
 			else if(building == TFObject_Sentry)
 			{
 				if(GetEntProp(index, Prop_Send, "m_bMiniBuilding"))
 				{
-					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 10.0);
+					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 3.16);
 				}
 				else
 				{
-					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.1);
+					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.316);
 				}
+			}
+		}
+	}
+	return Plugin_Continue;
+}
+
+public Action OnObjectCarry(Event event, const char[] name, bool dontBroadcast)
+{
+	if(cvarEnabled.BoolValue && aprilFools)
+	{
+		int index = event.GetInt("index");
+		int client = GetClientOfUserId(event.GetInt("userid"));
+		TFObjectType building = view_as<TFObjectType>(event.GetInt("object"));
+		if(building == TFObject_Dispenser)
+		{
+			SetEntPropFloat(index, Prop_Send, "m_flModelScale", 1.0);
+		}
+		else if(building == TFObject_Sentry)
+		{
+			if(GetEntProp(index, Prop_Send, "m_bMiniBuilding"))
+			{
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 1.0);
+			}
+			else
+			{
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 1.0);
+			}
+		}
+	}
+	return Plugin_Continue;
+}
+
+public Action OnObjectDrop(Event event, const char[] name, bool dontBroadcast)
+{
+	if(cvarEnabled.BoolValue && aprilFools)
+	{
+		int index = event.GetInt("index");
+		int client = GetClientOfUserId(event.GetInt("userid"));
+		TFObjectType building = view_as<TFObjectType>(event.GetInt("object"));
+		if(building == TFObject_Dispenser)
+		{
+			SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.316);
+		}
+		else if(building == TFObject_Sentry)
+		{
+			if(GetEntProp(index, Prop_Send, "m_bMiniBuilding"))
+			{
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 3.16);
+			}
+			else
+			{
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.316);
 			}
 		}
 	}
@@ -1318,18 +1373,6 @@ public Action OnPickupMVMCurrency(Handle event, const char[] name, bool dontBroa
 
 	SetEventInt(event, "currency", newDollahs);
 
-	return Plugin_Continue;
-}
-
-public Action OnBroadcastAudio(Handle event, const char[] name, bool dontBroadcast)
-{
-	char sound[PLATFORM_MAX_PATH];
-	GetEventString(event, "sound", sound, sizeof(sound));
-	if(aprilFools && StrContains(sound, "DemoCharge.HitFlesh"))
-	{
-		PrintToChatAll("Hi!");
-		/*return Plugin_Handled;*/
-	}
 	return Plugin_Continue;
 }
 
