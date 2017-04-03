@@ -1257,7 +1257,6 @@ public Action OnObjectCarry(Event event, const char[] name, bool dontBroadcast)
 	if(cvarEnabled.BoolValue && aprilFools)
 	{
 		int index = event.GetInt("index");
-		int client = GetClientOfUserId(event.GetInt("userid"));
 		TFObjectType building = view_as<TFObjectType>(event.GetInt("object"));
 		if(building == TFObject_Dispenser)
 		{
@@ -1283,7 +1282,6 @@ public Action OnObjectDrop(Event event, const char[] name, bool dontBroadcast)
 	if(cvarEnabled.BoolValue && aprilFools)
 	{
 		int index = event.GetInt("index");
-		int client = GetClientOfUserId(event.GetInt("userid"));
 		TFObjectType building = view_as<TFObjectType>(event.GetInt("object"));
 		if(building == TFObject_Dispenser)
 		{
