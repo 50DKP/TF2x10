@@ -1619,6 +1619,7 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 			DispatchKeyValue(duck, "OnPlayerTouch", "!self,Kill,,0,-1");
 			DispatchSpawn(duck);
 			TeleportEntity(duck, position, NULL_VECTOR, velocity);
+			CreateTimer(30.0, Timer_RemoveDuck, duck, TIMER_FLAG_NO_MAPCHANGE);
 
 			int random = GetRandomInt(1, 7);
 			if(random == 6)
@@ -2405,6 +2406,15 @@ void UpdateVariables(int client)
 	cabers[client] = hasCaber[client] ? 10 : 0;
 
 	dalokohs[client] = 0;
+}
+
+public Action Timer_RemoveDuck(Handle timer, any duck)
+{
+	if(cvarEnabled.BoolValue && IsValidEntity(duck))
+	{
+		AcceptEntityInput(duck, "Kill");
+	}
+	return Plugin_Continue;
 }
 
 stock void TF2_SetHealth(int client, int health)
