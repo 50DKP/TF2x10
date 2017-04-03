@@ -810,7 +810,7 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 		AcceptEntityInput(client, "SetCustomModel");
 		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
 
-		// Third-person view
+		// Third-person view (thanks to DarthNinja: https://forums.alliedmods.net/showthread.php?p=1694178)
 		SetVariantInt(1);
 		AcceptEntityInput(client, "SetForcedTauntCam");
 	}
@@ -839,7 +839,7 @@ public void TF2_OnConditionRemoved(int client, TFCond condition)
 			SetVariantString("");
 			AcceptEntityInput(client, "SetCustomModel");
 
-			// First-person view
+			// First-person view (thanks to DarthNinja: https://forums.alliedmods.net/showthread.php?p=1694178)
 			SetVariantInt(0);
 			AcceptEntityInput(client, "SetForcedTauntCam");
 		}
@@ -1232,6 +1232,7 @@ public Action OnObjectBuilt(Event event, const char[] name, bool dontBroadcast)
 
 		if(aprilFools)
 		{
+			// Thanks to Pelipoika: https://forums.alliedmods.net/showthread.php?p=2031493
 			if(building == TFObject_Dispenser)
 			{
 				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.316);
@@ -1254,6 +1255,7 @@ public Action OnObjectBuilt(Event event, const char[] name, bool dontBroadcast)
 
 public Action OnObjectCarry(Event event, const char[] name, bool dontBroadcast)
 {
+	// Thanks to Pelipoika: https://forums.alliedmods.net/showthread.php?p=2031493
 	if(cvarEnabled.BoolValue && aprilFools)
 	{
 		int index = event.GetInt("index");
@@ -1279,6 +1281,7 @@ public Action OnObjectCarry(Event event, const char[] name, bool dontBroadcast)
 
 public Action OnObjectDrop(Event event, const char[] name, bool dontBroadcast)
 {
+	// Thanks to Pelipoika: https://forums.alliedmods.net/showthread.php?p=2031493
 	if(cvarEnabled.BoolValue && aprilFools)
 	{
 		int index = event.GetInt("index");
