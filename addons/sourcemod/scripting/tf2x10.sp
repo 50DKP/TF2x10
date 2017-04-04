@@ -1241,7 +1241,7 @@ public Action OnObjectBuilt(Event event, const char[] name, bool dontBroadcast)
 			{
 				if(GetEntProp(index, Prop_Send, "m_bMiniBuilding"))
 				{
-					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 3.16);
+					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 2.5);
 				}
 				else
 				{
@@ -1294,7 +1294,7 @@ public Action OnObjectDrop(Event event, const char[] name, bool dontBroadcast)
 		{
 			if(GetEntProp(index, Prop_Send, "m_bMiniBuilding"))
 			{
-				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 3.16);
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 2.5);
 			}
 			else
 			{
@@ -1619,7 +1619,7 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 			DispatchKeyValue(duck, "OnPlayerTouch", "!self,Kill,,0,-1");
 			DispatchSpawn(duck);
 			TeleportEntity(duck, position, NULL_VECTOR, velocity);
-			CreateTimer(30.0, Timer_RemoveDuck, duck, TIMER_FLAG_NO_MAPCHANGE);
+			CreateTimer(30.0, Timer_RemoveDuck, EntIndexToEntRef(duck), TIMER_FLAG_NO_MAPCHANGE);
 
 			int random = GetRandomInt(1, 7);
 			if(random == 6)
@@ -1913,6 +1913,7 @@ public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &dam
 			DispatchKeyValue(duck, "OnPlayerTouch", "!self,Kill,,0,-1");
 			DispatchSpawn(duck);
 			TeleportEntity(duck, position, NULL_VECTOR, velocity);
+			CreateTimer(30.0, Timer_RemoveDuck, EntIndexToEntRef(duck), TIMER_FLAG_NO_MAPCHANGE);
 
 			int random = GetRandomInt(1, 7);
 			if(random == 6)
@@ -2408,9 +2409,10 @@ void UpdateVariables(int client)
 	dalokohs[client] = 0;
 }
 
-public Action Timer_RemoveDuck(Handle timer, any duck)
+public Action Timer_RemoveDuck(Handle timer, any duckRef)
 {
-	if(cvarEnabled.BoolValue && IsValidEntity(duck))
+	int duck = EntRefToEntIndex(duckRef);
+	if(cvarEnabled.BoolValue && IsValidEntity(duck) && duck > MaxClients)
 	{
 		AcceptEntityInput(duck, "Kill");
 	}
