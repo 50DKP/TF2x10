@@ -285,6 +285,13 @@
 		"add uber charge on hit" "0.1"
 		"damage bonus" "1.2"
 	}
+	"1079" //Festive Crusader's Crossbow
+	{
+		"crit kill will gib"	"1"	//Just putting a dummy stat in here to keep the crossbow's place until a better fix is devised.
+		"Reload time decreased" "0.5" //+50% reload speed
+		"override projectile type" "23" //Fire Candy Canes
+		"damage bonus" "1.2"
+	}
 	"354"
 	{
 		"increase buff duration HIDDEN" "2" //10x duration = impossible for hale to kill
