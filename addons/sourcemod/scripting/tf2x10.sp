@@ -2065,7 +2065,7 @@ public Action Timer_RegenRazorback(Handle timer, any userid)
 	TF2Items_SetAttribute(weapon, 1, 292, 5.0);  //...kill eater score type?
 	TF2Items_SetNumAttributes(weapon, 2);
 
-	entity = TF2Items_GiveNamedItem(client, weapon);
+	int entity = TF2Items_GiveNamedItem(client, weapon);
 	weapon.Close();
 	SDKCall(equipWearable, client, entity);
 	return Plugin_Continue;
