@@ -63,7 +63,6 @@ int dalokohsSeconds[MAXPLAYERS + 1];
 int dalokohs[MAXPLAYERS + 1];
 float dalokohsTimer[MAXPLAYERS + 1];
 //int headsTaken[MAXPLAYERS + 1];
-int razorbacks[MAXPLAYERS + 1];
 int revengeCrits[MAXPLAYERS + 1];
 int amputatorHealing[MAXPLAYERS + 1];
 
@@ -1047,12 +1046,6 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		{
 			buttons &= ~IN_ATTACK;
 		}
-	}
-
-	if(razorbacks[client] > 1)
-	{
-		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
-		ShowSyncHudText(client, hudText, "Razorbacks: %i", razorbacks[client]);
 	}
 
 	if(hasManmelter[client])
@@ -2046,29 +2039,35 @@ public Action OnPlayerShieldBlocked(UserMsg msg_id, Handle bf, const players[], 
 	}
 
 	int victim = players[0];
-	if(razorbacks[victim] > 1)
+	int entity;
+	while((entity = GetPlayerWeaponSlot_Wearable(victim, TFWeaponSlot_Secondary)) != -1)
 	{
-		razorbacks[victim]--;
-		int entity;
-		while((entity = GetPlayerWeaponSlot_Wearable(victim, TFWeaponSlot_Secondary)) != -1)
-		{
-			TF2_RemoveWearable(victim, entity);
-		}
+		TF2_RemoveWearable(victim, entity);
+	}
+	CreateTimer(3.0, Timer_RegenRazorback, GetClientUserId(victim), TIMER_FLAG_NO_MAPCHANGE);
+	return Plugin_Continue;
+}
 
-		Handle weapon = TF2Items_CreateItem(OVERRIDE_CLASSNAME | OVERRIDE_ITEM_DEF | OVERRIDE_ITEM_LEVEL | OVERRIDE_ITEM_QUALITY | OVERRIDE_ATTRIBUTES);
-		TF2Items_SetClassname(weapon, "tf_wearable");
-		TF2Items_SetItemIndex(weapon, 57);  //Razorback
-		TF2Items_SetLevel(weapon, 10);
-		TF2Items_SetQuality(weapon, 6);
-		TF2Items_SetAttribute(weapon, 0, 52, 1.0);  //Block one backstab attempt
-		TF2Items_SetAttribute(weapon, 1, 292, 5.0);  //...kill eater score type?
-		TF2Items_SetNumAttributes(weapon, 2);
-
-		entity = TF2Items_GiveNamedItem(victim, weapon);
-		weapon.Close();
-		SDKCall(equipWearable, victim, entity);
+public Action Timer_RegenRazorback(Handle timer, any userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(!IsValidClient(client))
+	{
+		return Plugin_Continue;
 	}
 
+	Handle weapon = TF2Items_CreateItem(OVERRIDE_CLASSNAME | OVERRIDE_ITEM_DEF | OVERRIDE_ITEM_LEVEL | OVERRIDE_ITEM_QUALITY | OVERRIDE_ATTRIBUTES);
+	TF2Items_SetClassname(weapon, "tf_wearable");
+	TF2Items_SetItemIndex(weapon, 57);  //Razorback
+	TF2Items_SetLevel(weapon, 10);
+	TF2Items_SetQuality(weapon, 6);
+	TF2Items_SetAttribute(weapon, 0, 52, 1.0);  //Block one backstab attempt
+	TF2Items_SetAttribute(weapon, 1, 292, 5.0);  //...kill eater score type?
+	TF2Items_SetNumAttributes(weapon, 2);
+
+	entity = TF2Items_GiveNamedItem(client, weapon);
+	weapon.Close();
+	SDKCall(equipWearable, client, entity);
 	return Plugin_Continue;
 }
 
@@ -2345,7 +2344,6 @@ bool IsValidClient(int client)
 
 void ResetVariables(int client)
 {
-	razorbacks[client] = 0;
 	cabers[client] = 0;
 	dalokohsSeconds[client] = 0;
 	dalokohs[client] = 0;
@@ -2381,12 +2379,10 @@ void UpdateVariables(int client)
 
 	if(IsValidEntity(secondary))
 	{
-		razorbacks[client] = WeaponHasAttribute(client, secondary, "backstab shield") ? 10 : 0;
 		hasManmelter[client] = WeaponHasAttribute(client, secondary, "extinguish earns revenge crits");
 	}
 	else
 	{
-		razorbacks[client] = 0;
 		hasManmelter[client] = false;
 	}
 
