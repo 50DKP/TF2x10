@@ -680,6 +680,7 @@
 		"airblast cost increased" "10" //10x Airblas cost (200 Amm)
 		"airblast vertical pushback scale" "10" //10X Airblast vertical pushback
 		"airblast pushback scale" "10" //10X airblast horizontal pushback
+		"flame_speed"	"100"	//Super Range
 	}
 	"41" //Natascha + Ludmila
 	{
@@ -701,7 +702,7 @@
 	"44" //Sandman
 	{
 		"max health additive penalty" "-150" //-150 HP
-		"maxammo grenades1 increased" "10" //10 Balls
+		"maxammo grenades1 increased" "10" //10 Balls ??
 	}
 	"45" //Force-a-Nature FaN
 	{
@@ -715,6 +716,7 @@
 	"46" //Bonk!
 	{
 		"effect bar recharge rate increased" "0.38" //-62% Recharge Rate (Results in 2.2 seconds of cooldown rather than 22)
+		"crit kill will gib" "69" //Dummy attribute, to be replaced later
 	}
 	"56" //Huntsman
 	{
@@ -729,11 +731,13 @@
 	"58" //Jarate
 	{
 		"maxammo grenades1 increased" "10" //10 Jarates
+
 	}
 	"59" //Dead Ringer
 	{
 		"cloak consume rate decreased" "0.9" //Less cloak drain on activatre
 		"mult cloak meter regen rate" "8" //+700% Regen
+
 	}
 	"60" //Cloak and Dagger
 	{
@@ -841,8 +845,9 @@
 	}
 	"173" //Vita-Saw
 	{
-		"preserve ubercharge" "100" //Keep 100% Uber on Death
+		"ubercharge_preserved_on_spawn_max"	"6"
 		"max health additive penalty" "-100" //-100 Health
+		"crit kill will gib" "69" //Dummy attribute, to be replaced later
 	}
 	"214" //Powerjack
 	{
@@ -883,6 +888,7 @@
 		"SET BONUS: quiet unstealth" "10" //Quiet Unstealth
 		"SET BONUS: cloak blink time penalty" "0.5" //Cloak blink time penalty
 		"SET BONUS: custom taunt particle attr"	"1"	//That custom taunt particle?
+		"mult cloak meter consume rate"	"4.33"	//333% cloak consume rate??
 	}
 	"226" //Battalion's Backup
 	{
@@ -904,9 +910,9 @@
 	}
 	"231" //Darwin's Danger Shield
 	{
+		"afterburn immunity"	"1"	//Afterburn Immunity??
+		"dmg taken from fire reduced"	"-4"	//500% fire resistance??
 		"max health additive bonus" "250" //+250 Health
-		"dmg taken from bullets reduced" "0" //-100% damage from bullets
-		"dmg taken from blast increased" "3" //+200% blast damage
 		"SET BONUS: calling card on kill"	"2"		//Croc O Style Calling Card
 	}
 	"232" //Bushwacka
@@ -922,8 +928,8 @@
 	}
 	"239" //Gloves of Running Urgently GRU
 	{
-		"move speed bonus" "4" //+300% Walk Speed
-		"damage penalty" "0" //-100% Damage
+		"mult_player_movespeed_active"	"4" //+300% Walk Speed
+		"mod_maxhealth_drain_rate"		"100.0"	//??
 		"attach particle effect static" "2" //Flaming bits
 		"single wep holster time increased"	"6"	//500% holster speed penalty
 	}
@@ -1018,7 +1024,6 @@
 	"327" //Claidheamh Mor
 	{
 		"kill refills meter"	"1"
-		"heal on kill"	"0"	//Cancel out vanilla attribute
 		"dmg taken increased"	"1"	//Cancel out vanilla attribute
 		"charge time increased" "5" //+5 seconds of charge time
 	}
@@ -1035,11 +1040,14 @@
 		"dmg from ranged reduced" "0" //-100% Damage from ranged sources while active
 		"dmg from melee increased" "11" //+1000% Damage from melee sources while active
 		"single wep holster time increased"	"11"	//1000% holster speed penalty
+		"mult_patient_overheal_penalty_active"		"0" //No overheal while active??
+		"mult_health_fromhealers_penalty_active"	"0"	//No healing while active??
 	}
 	"348" //Sharpened Volcano Fragment
 	{
 		"damage penalty" "0.02" //-98% Damage
 		"weapon burn dmg increased" "10" //10x Afterburn damage
+		"explode_on_ignite"	"1"	//what the hell is this??
 	}
 	"349" //Sun-on-a-stick
 	{
@@ -1157,11 +1165,11 @@
 	}
 	"426" //Eviction Notice
 	{
-		"damage penalty" "0.25" //-80% damage
-		"fire rate bonus" "0.25" //+80% firing rate
+		"damage penalty" "0.25" //-75% damage
+		"fire rate bonus" "0.25" //+75% firing rate
 		"speed_boost_on_hit"	"30"	//30 Second Speed Boost on Hit
 		"move speed bonus"	"2.5"	//150% move speed bonus
-		"dmg taken increased"	"3"	//200% Damage taken increase
+		"mod_maxhealth_drain_rate"	"50"	//Lose 50hp /sec while active. Regen 50hp / sec while holstered??
 	}
 	"441" //Cow Mangler 5000
 	{
@@ -1173,10 +1181,9 @@
 	}
 	"444" //Mantreads
 	{
-		"damage force reduction" "0" //-100% pushback
+		"damage force reduction" "0" //-750% pushback
 		"dmg taken from blast reduced" "0.25" //-75% explosive damage
-		"damage bonus" "10" //+900% Damage
-		"airblast vulnerability multiplier"	"0"
+		"mod_air_control_blast_jump"	"30"	//30x air control while jumpin?
 	}
 	"447" //Disciplinary Action
 	{
@@ -1198,8 +1205,8 @@
 	"450" //Atomizer
 	{
 		"air dash count" "10" //+10 Air Jumps
-		"fire rate penalty" "4" //-300% firing rate
-		"dmg penalty vs players" "0.04" //-96% damage
+		"dmg penalty vs players" "0.05" //-95% damage
+		"single wep deploy time increased"	"6" //500% longer switch to speed??
 	}
 	"452" //Three-Rune Blade
 	{
@@ -1279,6 +1286,7 @@
 		"SET BONUS: quiet unstealth" "10" //Quiet Unstealth
 		"SET BONUS: cloak blink time penalty" "0.5" //Cloak blink time penalty
 		"SET BONUS: custom taunt particle attr"	"1"	//That custom taunt particle?
+		"mult cloak meter consume rate"	"6"	//500% cloak consume rate??
 	}
 	"587" //Apoco Fists
 	{
@@ -1410,9 +1418,10 @@
 	}
 	"773" //Pretty Boy's Pocket Pistol
 	{
-		"fire rate penalty" "3.5" //-250% Firing Rate
-		"heal on hit for rapidfire"	"50"	//30 Health Per Hit
-		"dmg taken increased" "6" //+500% Damage Vulnerability
+		"fire rate bonus" "-1.5" //+150% firing speed
+		"heal on hit for rapidfire"	"70"	//70 Health Per Hit
+		"clip size penalty" "0.1" //90% clip size penalty??
+
 	}
 	"775" //Escape Plan
 	{
@@ -1433,7 +1442,6 @@
 	}
 	"812" //Flying Guillotine
 	{
-		"crit vs stunned players" "65536" //Crit vs Stunned Players
 		"effect bar recharge rate increased" "0.1" //10x Faster recharge speed
 	}
 	"813" //Neon Annihilator
@@ -1453,7 +1461,6 @@
 	}
 	"833" //Flying Guillotine
 	{
-		"crit vs stunned players" "65536" //Crit vs Stunned Players
 		"effect bar recharge rate increased" "0.1" //10x Faster recharge speed
 	}
 	"834" //Neon Annihilator
@@ -1506,7 +1513,7 @@
 	"997" //The Rescue Ranger
 	{
 		"engineer building teleporting pickup" "13" //Teleport Buildings
-		"arrow heals buildings" "237"  //Building healing arrows
+		"arrow heals buildings" "237"  //Building healing arrows ??
 		"maxammo primary reduced" "0.75" //Reduce ammo
 		"mod max primary clip override" "2" //Override the clip size to 2
 	}
@@ -1521,6 +1528,7 @@
 		"medigun blast resist deployed"	"8.5"	//750% Selected uber damage type resist
 		"medigun fire resist passive"	"8.5"	//750% Selected uber damage type resist
 		"medigun fire resist deployed"	"1" //100% selected passive resistance
+
 	}
 	"1000" //Festive Axtinguisher
 	{
@@ -1611,9 +1619,9 @@
 	}
 	"1084" //Festive Gloves of Running Urgently GRU
 	{
-		"move speed bonus" "4" //+300% Walk Speed
-		"damage penalty" "0" //-100% Damage
+		"mult_player_movespeed_active"	"4" //+300% Walk Speed
 		"attach particle effect static" "2" //Flaming bits
+		"mod_maxhealth_drain_rate"		"100.0"	//??
 		"single wep holster time increased"	"6"	//500% holster speed penalty
 	}
 	"1085" //Festive Black Box
@@ -1719,6 +1727,7 @@
 		"airblast cost increased" "10" //10x Airblas cost (200 Amm)
 		"airblast vertical pushback scale" "10" //10X Airblast vertical pushback
 		"airblast pushback scale" "10" //10X airblast horizontal pushback
+		"flame_speed"	"100"	//Super Range
 	}
 	"1149" //Festive SMG
 	{
@@ -1742,16 +1751,43 @@
 		"fire rate bonus" "0" //Instant Fire entire clip
 		"projectile spread angle penalty" "1" //1 Degrees of random deviation
 	}
+	"1152" //GRAPPLING HOOK
+	{
+
+	}
 	"1153" //The Panic Attack
 	{
-		"panic_attack_negative"	"25"
-		"fire rate bonus with reduced health"	"0.05"
-		"fire rate bonus HIDDEN"	"0.01"
-		"Reload time decreased"	"0.1"
-		"clip size penalty HIDDEN"	"6.67"
-		"maxammo secondary increased"	"1.5"
-		"single wep deploy time decreased"	"-4"
-		"bullets per shot bonus"	"0.5"
+		"single wep deploy time decreased"	"-4"	//500% Faster switch speed?
+		"bullets per shot bonus"	"6"	//500% more pellets?
+		"damage penalty"	"0.1"	//90% Dmg Penalty?
+	}
+	"1178" //The Dragon's Fury
+	{
+		"item_meter_charge_rate"	"0.4"	//Faster fire rate. Cant do full x10, too op.
+	}	
+	"1179" //The Thermal Thruster
+	{
+		"item_meter_charge_rate"	"3"	//10X Charge Rate??
+		"damage bonus"	"11"	//fall damage buff?
+	}		
+	"1180" //The Gas Passer
+	{
+		"item_meter_charge_rate"            "6" //10x charge rate?
+	}		
+	"1181" //The Hot Hand
+	{
+		"damage penalty"					"0.1"	
+		"speed_boost_on_hit"			"100"
+		"fire rate bonus" "0.25" //+75% firing rate
+		"hand scale"	"3"	//Giga Bitch Slap
+		"provide on active"	"1"	//Giga Bitch Slap
+	}		
+	"1190" //The Second Banana
+	{
+		"charge recharge rate increased"	"4" //500% increased recharge rate?
+		"item_meter_charge_rate"	"0.5"
+		"gesture speed increase"	"4"	//500% increased eat speed?
+		"lunchbox healing decreased"	"0.8"	//80% decreased heal rate?
 	}
 	"15000" //Sniper Rifle Reskin, Night Owl
 	{
