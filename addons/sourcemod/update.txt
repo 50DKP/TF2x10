@@ -4,13 +4,11 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.7.4"
-			"Previous"	"1.7.3"
+			"Latest"	"1.7.5"
+			"Previous"	"1.7.4"
 		}
 
-		"Notes"			"Meet Your Match x10"
-		"Notes"			"Allowed Dalokohs Bar to be eaten repeatedly"
-		"Notes"			"Fixed soldier rage meter not getting reset after switching buffs"
+		"Notes"			"Jungle Inferno x10"
 	}
 
 	"Files"

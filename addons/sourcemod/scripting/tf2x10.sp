@@ -7,7 +7,6 @@ Config updates: Mr. Blue and Ultimario
 
 Alliedmodders thread: https://forums.alliedmods.net/showthread.php?p=2338136
 Github: https://github.com/50DKP/TF2x10
-Bitbucket: https://bitbucket.org/umario/tf2x10/src
 */
 
 #pragma semicolon 1
@@ -30,7 +29,7 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 
 #define PLUGIN_NAME			"Multiply a Weapon's Stats by 10"
 #define PLUGIN_AUTHOR		"The TF2x10 group"
-#define PLUGIN_VERSION		"1.7.4"
+#define PLUGIN_VERSION		"1.7.5"
 #define PLUGIN_CONTACT		"http://steamcommunity.com/group/tf2x10/"
 #define PLUGIN_DESCRIPTION	"It's in the name! Also known as TF2x10 or TF20."
 
@@ -41,6 +40,11 @@ Bitbucket: https://bitbucket.org/umario/tf2x10/src
 #define DALOKOH_HEALTHPERSEC	150
 #define DALOKOH_LASTHEALTH		50
 #define MAX_CURRENCY			30000
+#define DUMPTRUCK_MODEL			"models/props_hydro/dumptruck.mdl"
+#define DUMPTRUCK_EMPTY_MODEL	"models/props_hydro/dumptruck_empty.mdl"
+#define TRUCK_RED_MODEL			"models/props_vehicles/pickup03.mdl"
+#define TRUCK_BLU_MODEL			"models/props_vehicles/train_engine.mdl"
+#define DUCK_MODEL				"models/workshop/player/items/pyro/eotl_ducky/eotl_bonus_duck.mdl"
 
 static const float g_fBazaarRates[] =
 {
@@ -59,7 +63,6 @@ int dalokohsSeconds[MAXPLAYERS + 1];
 int dalokohs[MAXPLAYERS + 1];
 float dalokohsTimer[MAXPLAYERS + 1];
 //int headsTaken[MAXPLAYERS + 1];
-int razorbacks[MAXPLAYERS + 1];
 int revengeCrits[MAXPLAYERS + 1];
 int amputatorHealing[MAXPLAYERS + 1];
 
@@ -169,6 +172,8 @@ public void OnPluginStart()
 
 	HookEvent("arena_win_panel", OnRoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("player_builtobject", OnObjectBuilt, EventHookMode_Post);
+	HookEvent("player_carryobject", OnObjectCarry, EventHookMode_Post);
+	HookEvent("player_dropobject", OnObjectDrop, EventHookMode_Post);
 	HookEvent("object_destroyed", OnObjectDestroyed, EventHookMode_Post);
 	HookEvent("object_removed", OnObjectRemoved, EventHookMode_Post);
 	HookEvent("player_healed", OnPlayerHealed, EventHookMode_Post);
@@ -459,7 +464,6 @@ public void AdminMenu_Recache(Handle topmenu, TopMenuAction action, TopMenuObjec
 			{
 				Format(buffer, maxlength, "TF2x10 Recache Weapons");
 			}
-
 			case TopMenuAction_SelectOption:
 			{
 				Command_Recache(param, 0);
@@ -501,9 +505,8 @@ public Action Command_GetMod(int client, int args)
 	if(cvarEnabled.BoolValue)
 	{
 		ReplyToCommand(client, "[TF2x10] This mod is loading primarily from configs/x10.%s.txt.", selectedMod);
-		return Plugin_Handled;
 	}
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 public Action Command_Group(int client, int args)
@@ -538,9 +541,8 @@ public Action Command_Recache(int client, int args)
 				ReplyToCommand(client, "[TF2x10] Weapons recached.");
 			}
 		}
-		return Plugin_Handled;
 	}
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 public Action Command_SetMod(int client, int args)
@@ -583,9 +585,8 @@ public Action Command_SetMod(int client, int args)
 		{
 			ReplyToCommand(client, "[TF2x10] Now loading from configs/x10.default.txt.");
 		}
-		return Plugin_Handled;
 	}
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 public Action Command_AprilFools(int client, int args)
@@ -593,15 +594,31 @@ public Action Command_AprilFools(int client, int args)
 	if(aprilFools)
 	{
 		aprilFools = false;
+		selectedMod = "default";
+		LoadFileIntoTrie(selectedMod, "tf2x10_base_items");
 		ReplyToCommand(client, "[TF2x10] April Fool's mode has been disabled!");
 	}
 	else
 	{
 		aprilFools = true;
+		PrecacheModel(DUMPTRUCK_MODEL);
+		PrecacheModel(DUMPTRUCK_EMPTY_MODEL);
+		PrecacheModel(TRUCK_RED_MODEL);
+		PrecacheModel(TRUCK_BLU_MODEL);
+		PrecacheModel(DUCK_MODEL);
+		PrecacheSound("ambient/bumper_car_quack1.wav");
+		PrecacheSound("ambient/bumper_car_quack2.wav");
+		PrecacheSound("ambient/bumper_car_quack3.wav");
+		PrecacheSound("ambient/bumper_car_quack4.wav");
+		PrecacheSound("ambient/bumper_car_quack5.wav");
+		PrecacheSound("ambient/bumper_car_quack9.wav");
+		PrecacheSound("ambient/bumper_car_quack11.wav");
+		selectedMod = "aprilfools";
+		LoadFileIntoTrie(selectedMod);
 		ReplyToCommand(client, "[TF2x10] April Fool's mode has been enabled!");
 	}
 	aprilFoolsOverride = true;
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 /******************************************************************
@@ -687,6 +704,21 @@ public void OnMapStart()
 	if(cvarEnabled.BoolValue)
 	{
 		SetGameDescription();
+		if(aprilFools)
+		{
+			PrecacheModel(DUMPTRUCK_MODEL);
+			PrecacheModel(DUMPTRUCK_EMPTY_MODEL);
+			PrecacheModel(TRUCK_RED_MODEL);
+			PrecacheModel(TRUCK_BLU_MODEL);
+			PrecacheModel(DUCK_MODEL);
+			PrecacheSound("ambient/bumper_car_quack1.wav");
+			PrecacheSound("ambient/bumper_car_quack2.wav");
+			PrecacheSound("ambient/bumper_car_quack3.wav");
+			PrecacheSound("ambient/bumper_car_quack4.wav");
+			PrecacheSound("ambient/bumper_car_quack5.wav");
+			PrecacheSound("ambient/bumper_car_quack9.wav");
+			PrecacheSound("ambient/bumper_car_quack11.wav");
+		}
 	}
 }
 
@@ -769,12 +801,27 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 	{
 		CreateTimer(1.0, Timer_DalokohX10, GetClientUserId(client), TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
+
+	if(aprilFools && condition == TFCond_Charging && index == 327) // April Fools 2017: DEMOTRUCK TIME (Claidheamohmor)
+	{
+		// DEMOTRUCK
+		SetVariantString(TF2_GetClientTeam(client) == TFTeam_Red ? TRUCK_RED_MODEL : TRUCK_BLU_MODEL);
+		AcceptEntityInput(client, "SetCustomModel");
+		SetEntProp(client, Prop_Send, "m_bUseClassAnimations", 1);
+
+		// Third-person view (thanks to DarthNinja: https://forums.alliedmods.net/showthread.php?p=1694178)
+		SetVariantInt(1);
+		AcceptEntityInput(client, "SetForcedTauntCam");
+	}
 }
 
 public void TF2_OnConditionRemoved(int client, TFCond condition)
 {
 	if(cvarEnabled.BoolValue)
 	{
+		int weapon = IsValidClient(client) ? GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon") : -1;
+		int index = IsValidEntity(weapon) ? GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") : -1;
+
 		if(condition == TFCond_Zoomed && chargeBegin[client])
 		{
 			chargeBegin[client] = 0.0;
@@ -783,6 +830,17 @@ public void TF2_OnConditionRemoved(int client, TFCond condition)
 		if(condition == TFCond_Taunting && dalokohsSeconds[client])
 		{
 			dalokohsSeconds[client] = 0;
+		}
+
+		if(aprilFools && condition == TFCond_Charging && index == 327) // Claidheamohmor
+		{
+			// Reset model
+			SetVariantString("");
+			AcceptEntityInput(client, "SetCustomModel");
+
+			// First-person view (thanks to DarthNinja: https://forums.alliedmods.net/showthread.php?p=1694178)
+			SetVariantInt(0);
+			AcceptEntityInput(client, "SetForcedTauntCam");
 		}
 	}
 }
@@ -990,12 +1048,6 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		}
 	}
 
-	if(razorbacks[client] > 1)
-	{
-		SetHudTextParams(0.0, 0.0, 0.5, 255, 255, 255, 255, 0, 0.1, 0.1, 0.2);
-		ShowSyncHudText(client, hudText, "Razorbacks: %i", razorbacks[client]);
-	}
-
 	if(hasManmelter[client])
 	{
 		int crits = GetEntProp(client, Prop_Send, "m_iRevengeCrits");
@@ -1157,17 +1209,90 @@ public Action OnObjectDeflected(Handle event, const char[] name, bool dontBroadc
  * @param object	See TFObjectType
  * @param index		Entity index of the object built
  */
-public Action OnObjectBuilt(Handle event, const char[] name, bool dontBroadcast)
+public Action OnObjectBuilt(Event event, const char[] name, bool dontBroadcast)
 {
 	if(cvarEnabled.BoolValue)
 	{
-		SDKHook(GetEventInt(event, "index"), SDKHook_OnTakeDamage, OnTakeDamage_Object);
+		int index = event.GetInt("index");
+		SDKHook(index, SDKHook_OnTakeDamage, OnTakeDamage_Object);
 
-		int client = GetClientOfUserId(GetEventInt(event, "userid"));
-		if(view_as<TFObjectType>(GetEventInt(event, "object")) == TFObject_Teleporter
-		&& GetEntProp(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee), Prop_Send, "m_iItemDefinitionIndex") == 589) // Eureka Effect
+		int client = GetClientOfUserId(event.GetInt("userid"));
+		TFObjectType building = view_as<TFObjectType>(event.GetInt("object"));
+		if(building == TFObject_Teleporter && GetEntProp(GetPlayerWeaponSlot(client, TFWeaponSlot_Melee), Prop_Send, "m_iItemDefinitionIndex") == 589) // Eureka Effect
 		{
 			SetEntProp(client, Prop_Data, "m_iAmmo", 200, 4, 3); // Building teleporters gives you max metal again!
+		}
+
+		if(aprilFools)
+		{
+			// Thanks to Pelipoika: https://forums.alliedmods.net/showthread.php?p=2031493
+			if(building == TFObject_Dispenser)
+			{
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.316);
+			}
+			else if(building == TFObject_Sentry)
+			{
+				if(GetEntProp(index, Prop_Send, "m_bMiniBuilding"))
+				{
+					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 2.5);
+				}
+				else
+				{
+					SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.316);
+				}
+			}
+		}
+	}
+	return Plugin_Continue;
+}
+
+public Action OnObjectCarry(Event event, const char[] name, bool dontBroadcast)
+{
+	// Thanks to Pelipoika: https://forums.alliedmods.net/showthread.php?p=2031493
+	if(cvarEnabled.BoolValue && aprilFools)
+	{
+		int index = event.GetInt("index");
+		TFObjectType building = view_as<TFObjectType>(event.GetInt("object"));
+		if(building == TFObject_Dispenser)
+		{
+			SetEntPropFloat(index, Prop_Send, "m_flModelScale", 1.0);
+		}
+		else if(building == TFObject_Sentry)
+		{
+			if(GetEntProp(index, Prop_Send, "m_bMiniBuilding"))
+			{
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 1.0);
+			}
+			else
+			{
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 1.0);
+			}
+		}
+	}
+	return Plugin_Continue;
+}
+
+public Action OnObjectDrop(Event event, const char[] name, bool dontBroadcast)
+{
+	// Thanks to Pelipoika: https://forums.alliedmods.net/showthread.php?p=2031493
+	if(cvarEnabled.BoolValue && aprilFools)
+	{
+		int index = event.GetInt("index");
+		TFObjectType building = view_as<TFObjectType>(event.GetInt("object"));
+		if(building == TFObject_Dispenser)
+		{
+			SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.316);
+		}
+		else if(building == TFObject_Sentry)
+		{
+			if(GetEntProp(index, Prop_Send, "m_bMiniBuilding"))
+			{
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 2.5);
+			}
+			else
+			{
+				SetEntPropFloat(index, Prop_Send, "m_flModelScale", 0.316);
+			}
 		}
 	}
 	return Plugin_Continue;
@@ -1250,6 +1375,21 @@ public Action TF2_OnIsHolidayActive(TFHoliday holiday, bool &result)
 	if(holiday == TFHoliday_AprilFools && !aprilFoolsOverride)
 	{
 		aprilFools = result;
+		if(result)
+		{
+			PrecacheModel(DUMPTRUCK_MODEL);
+			PrecacheModel(DUMPTRUCK_EMPTY_MODEL);
+			PrecacheModel(TRUCK_RED_MODEL);
+			PrecacheModel(TRUCK_BLU_MODEL);
+			PrecacheModel(DUCK_MODEL);
+			PrecacheSound("ambient/bumper_car_quack1.wav");
+			PrecacheSound("ambient/bumper_car_quack2.wav");
+			PrecacheSound("ambient/bumper_car_quack3.wav");
+			PrecacheSound("ambient/bumper_car_quack4.wav");
+			PrecacheSound("ambient/bumper_car_quack5.wav");
+			PrecacheSound("ambient/bumper_car_quack9.wav");
+			PrecacheSound("ambient/bumper_car_quack11.wav");
+		}
 	}
 	return Plugin_Continue;
 }
@@ -1336,6 +1476,158 @@ public Action OnPlayerDeath(Handle event, const char[] name, bool dontBroadcast)
 	if(takesHeads[client])
 	{
 		SDKUnhook(client, SDKHook_GetMaxHealth, OnGetMaxHealth);
+	}
+
+	if(aprilFools)
+	{
+		for(int i; i < GetRandomInt(10, 20); i++)
+		{
+			// Thanks to 404UserNotFound for portions of the following code
+			// https://github.com/404UserNotFound/SpawnBonusDucks/blob/master/scripting/tf2_duckspawn.sp
+			float position[3];
+			GetClientAbsOrigin(client, position);
+			position[0] += GetRandomFloat(-5.0, 5.0);
+			position[1] += GetRandomFloat(-5.0, 5.0);
+			position[2] += GetRandomFloat(-5.0, 5.0);
+
+			float velocity[3];
+			velocity[0] = GetRandomFloat(-50.0, 50.0);
+			velocity[1] = GetRandomFloat(-50.0, 50.0);
+			velocity[2] = GetRandomFloat(-50.0, 50.0);
+
+			int duck = CreateEntityByName("tf_bonus_duck_pickup");
+			SetEntityModel(duck, DUCK_MODEL);
+			if(!GetRandomInt(0, 10)) // Quackston?
+			{
+				SetEntProp(duck, Prop_Send, "m_bSpecial", 1);
+				SetEntProp(duck, Prop_Send, "m_nSkin", 21);
+			}
+			else
+			{
+				TFClassType class = TF2_GetPlayerClass(client);
+				TFTeam team = TF2_GetClientTeam(client);
+				switch(class)
+				{
+					case TFClass_Scout:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 3);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 12);
+						}
+					}
+					case TFClass_Sniper:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 4);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 13);
+						}
+					}
+					case TFClass_Soldier:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 5);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 14);
+						}
+					}
+					case TFClass_DemoMan:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 6);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 15);
+						}
+					}
+					case TFClass_Medic:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 7);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 16);
+						}
+					}
+					case TFClass_Heavy:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 8);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 17);
+						}
+					}
+					case TFClass_Pyro:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 9);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 18);
+						}
+					}
+					case TFClass_Spy:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 10);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 19);
+						}
+					}
+					case TFClass_Engineer:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 11);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 20);
+						}
+					}
+				}
+			}
+			DispatchKeyValue(duck, "OnPlayerTouch", "!self,Kill,,0,-1");
+			DispatchSpawn(duck);
+			TeleportEntity(duck, position, NULL_VECTOR, velocity);
+			CreateTimer(30.0, Timer_RemoveDuck, EntIndexToEntRef(duck), TIMER_FLAG_NO_MAPCHANGE);
+
+			int random = GetRandomInt(1, 7);
+			if(random == 6)
+			{
+				random = 9;
+			}
+			else if(random == 7)
+			{
+				random = 11;
+			}
+
+			char sound[PLATFORM_MAX_PATH];
+			Format(sound, sizeof(sound), "ambient/bumper_car_quack%i.wav", random);
+			EmitSoundToAll(sound, duck, _, _, _, _, _, _, position, _, true);
+		}
 	}
 
 	ResetVariables(client);
@@ -1480,6 +1772,157 @@ public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &dam
 		damage *= 10;
 		return Plugin_Changed;
 	}
+
+	if(aprilFools)
+	{
+		for(int i; i < GetRandomInt(0, 3); i++)
+		{
+			// Thanks to 404UserNotFound for portions of the following code
+			// https://github.com/404UserNotFound/SpawnBonusDucks/blob/master/scripting/tf2_duckspawn.sp
+			float position[3];
+			position[0] = damagePosition[0] + GetRandomFloat(-5.0, 5.0);
+			position[1] = damagePosition[1] + GetRandomFloat(-5.0, 5.0);
+			position[2] = damagePosition[2] + GetRandomFloat(-5.0, 5.0);
+
+			float velocity[3];
+			velocity[0] = GetRandomFloat(-50.0, 50.0);
+			velocity[1] = GetRandomFloat(-50.0, 50.0);
+			velocity[2] = GetRandomFloat(-50.0, 50.0);
+
+			int duck = CreateEntityByName("tf_bonus_duck_pickup");
+			SetEntityModel(duck, DUCK_MODEL);
+			if(!GetRandomInt(0, 10)) // Quackston?
+			{
+				SetEntProp(duck, Prop_Send, "m_bSpecial", 1);
+				SetEntProp(duck, Prop_Send, "m_nSkin", 21);
+			}
+			else
+			{
+				TFClassType class = TF2_GetPlayerClass(client);
+				TFTeam team = TF2_GetClientTeam(client);
+				switch(class)
+				{
+					case TFClass_Scout:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 3);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 12);
+						}
+					}
+					case TFClass_Sniper:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 4);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 13);
+						}
+					}
+					case TFClass_Soldier:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 5);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 14);
+						}
+					}
+					case TFClass_DemoMan:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 6);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 15);
+						}
+					}
+					case TFClass_Medic:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 7);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 16);
+						}
+					}
+					case TFClass_Heavy:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 8);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 17);
+						}
+					}
+					case TFClass_Pyro:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 9);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 18);
+						}
+					}
+					case TFClass_Spy:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 10);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 19);
+						}
+					}
+					case TFClass_Engineer:
+					{
+						if(team == TFTeam_Red)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 11);
+						}
+						else if(team == TFTeam_Blue)
+						{
+							SetEntProp(duck, Prop_Send, "m_nSkin", 20);
+						}
+					}
+				}
+			}
+			DispatchKeyValue(duck, "OnPlayerTouch", "!self,Kill,,0,-1");
+			DispatchSpawn(duck);
+			TeleportEntity(duck, position, NULL_VECTOR, velocity);
+			CreateTimer(30.0, Timer_RemoveDuck, EntIndexToEntRef(duck), TIMER_FLAG_NO_MAPCHANGE);
+
+			int random = GetRandomInt(1, 7);
+			if(random == 6)
+			{
+				random = 9;
+			}
+			else if(random == 7)
+			{
+				random = 11;
+			}
+
+			char sound[PLATFORM_MAX_PATH];
+			Format(sound, sizeof(sound), "ambient/bumper_car_quack%i.wav", random);
+			EmitSoundToAll(sound, duck, _, _, _, _, _, _, position, _, true);
+		}
+	}
 	return Plugin_Continue;
 }
 
@@ -1596,29 +2039,35 @@ public Action OnPlayerShieldBlocked(UserMsg msg_id, Handle bf, const players[], 
 	}
 
 	int victim = players[0];
-	if(razorbacks[victim] > 1)
+	int entity;
+	while((entity = GetPlayerWeaponSlot_Wearable(victim, TFWeaponSlot_Secondary)) != -1)
 	{
-		razorbacks[victim]--;
-		int entity;
-		while((entity = GetPlayerWeaponSlot_Wearable(victim, TFWeaponSlot_Secondary)) != -1)
-		{
-			TF2_RemoveWearable(victim, entity);
-		}
+		TF2_RemoveWearable(victim, entity);
+	}
+	CreateTimer(3.0, Timer_RegenRazorback, GetClientUserId(victim), TIMER_FLAG_NO_MAPCHANGE);
+	return Plugin_Continue;
+}
 
-		Handle weapon = TF2Items_CreateItem(OVERRIDE_CLASSNAME | OVERRIDE_ITEM_DEF | OVERRIDE_ITEM_LEVEL | OVERRIDE_ITEM_QUALITY | OVERRIDE_ATTRIBUTES);
-		TF2Items_SetClassname(weapon, "tf_wearable");
-		TF2Items_SetItemIndex(weapon, 57);  //Razorback
-		TF2Items_SetLevel(weapon, 10);
-		TF2Items_SetQuality(weapon, 6);
-		TF2Items_SetAttribute(weapon, 0, 52, 1.0);  //Block one backstab attempt
-		TF2Items_SetAttribute(weapon, 1, 292, 5.0);  //...kill eater score type?
-		TF2Items_SetNumAttributes(weapon, 2);
-
-		entity = TF2Items_GiveNamedItem(victim, weapon);
-		weapon.Close();
-		SDKCall(equipWearable, victim, entity);
+public Action Timer_RegenRazorback(Handle timer, any userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(!IsValidClient(client))
+	{
+		return Plugin_Continue;
 	}
 
+	Handle weapon = TF2Items_CreateItem(OVERRIDE_CLASSNAME | OVERRIDE_ITEM_DEF | OVERRIDE_ITEM_LEVEL | OVERRIDE_ITEM_QUALITY | OVERRIDE_ATTRIBUTES);
+	TF2Items_SetClassname(weapon, "tf_wearable");
+	TF2Items_SetItemIndex(weapon, 57);  //Razorback
+	TF2Items_SetLevel(weapon, 10);
+	TF2Items_SetQuality(weapon, 6);
+	TF2Items_SetAttribute(weapon, 0, 52, 1.0);  //Block one backstab attempt
+	TF2Items_SetAttribute(weapon, 1, 292, 5.0);  //...kill eater score type?
+	TF2Items_SetNumAttributes(weapon, 2);
+
+	int entity = TF2Items_GiveNamedItem(client, weapon);
+	weapon.Close();
+	SDKCall(equipWearable, client, entity);
 	return Plugin_Continue;
 }
 
@@ -1758,6 +2207,22 @@ public Action OnPostInventoryApplication(Handle event, const char[] name, bool d
 		delay = 0.1;
 	}
 
+	// Vita-Saw organ collection * 10
+	int client = GetClientOfUserId(userid);
+	int medigun = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+	if(IsValidEntity(medigun))
+	{
+		float uber = GetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel");
+		if(uber * 10 < 1.0)
+		{
+			SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", uber * 10);
+		}
+		else if(uber < 1.0)
+		{
+			SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", 1.0);
+		}
+	}
+
 	UpdateVariables(GetClientOfUserId(userid));
 	CreateTimer(delay, Timer_FixClips, userid, TIMER_FLAG_NO_MAPCHANGE);
 
@@ -1895,7 +2360,6 @@ bool IsValidClient(int client)
 
 void ResetVariables(int client)
 {
-	razorbacks[client] = 0;
 	cabers[client] = 0;
 	dalokohsSeconds[client] = 0;
 	dalokohs[client] = 0;
@@ -1931,12 +2395,10 @@ void UpdateVariables(int client)
 
 	if(IsValidEntity(secondary))
 	{
-		razorbacks[client] = WeaponHasAttribute(client, secondary, "backstab shield") ? 10 : 0;
 		hasManmelter[client] = WeaponHasAttribute(client, secondary, "extinguish earns revenge crits");
 	}
 	else
 	{
-		razorbacks[client] = 0;
 		hasManmelter[client] = false;
 	}
 
@@ -1957,6 +2419,16 @@ void UpdateVariables(int client)
 	cabers[client] = hasCaber[client] ? 10 : 0;
 
 	dalokohs[client] = 0;
+}
+
+public Action Timer_RemoveDuck(Handle timer, any duckRef)
+{
+	int duck = EntRefToEntIndex(duckRef);
+	if(cvarEnabled.BoolValue && IsValidEntity(duck) && duck > MaxClients)
+	{
+		AcceptEntityInput(duck, "Kill");
+	}
+	return Plugin_Continue;
 }
 
 stock void TF2_SetHealth(int client, int health)
