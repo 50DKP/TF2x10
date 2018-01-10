@@ -2208,18 +2208,21 @@ public Action OnPostInventoryApplication(Handle event, const char[] name, bool d
 	}
 
 	// Vita-Saw organ collection * 10
-	int client = GetClientOfUserId(userid);
-	int medigun = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+	int medigun = GetPlayerWeaponSlot(GetClientOfUserId(userid), TFWeaponSlot_Secondary);
 	if(IsValidEntity(medigun))
 	{
-		float uber = GetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel");
-		if(uber * 10 < 1.0)
+		char classname[64];
+		if(GetEntityClassname(medigun, classname, sizeof(classname)) && StrContains(classname, "tf_weapon_medigun", false) == 0)
 		{
-			SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", uber * 10);
-		}
-		else if(uber < 1.0)
-		{
-			SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", 1.0);
+			float uber = GetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel");
+			if(uber * 10 < 1.0)
+			{
+				SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", uber * 10);
+			}
+			else if(uber < 1.0)
+			{
+				SetEntPropFloat(medigun, Prop_Send, "m_flChargeLevel", 1.0);
+			}
 		}
 	}
 
